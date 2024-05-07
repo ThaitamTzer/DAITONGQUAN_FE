@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+<<<<<<< HEAD
     "baseUrl": ".",
     "rootDir": "src",
     "target": "es6",
@@ -16,10 +17,21 @@
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "node",
+=======
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+>>>>>>> f84caf0 (first commit)
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+<<<<<<< HEAD
     "paths": {
       "apexcharts": [
         "./node_modules/apexcharts-clevision"
@@ -36,4 +48,17 @@
   "exclude": [
     "node_modules"
   ]
+=======
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+>>>>>>> f84caf0 (first commit)
 }
