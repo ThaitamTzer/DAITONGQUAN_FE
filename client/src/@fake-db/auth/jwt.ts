@@ -67,43 +67,27 @@ mock.onPost('/jwt/login').reply(request => {
 
 mock.onPost('/jwt/register').reply(request => {
   if (request.data.length > 0) {
-    const { email, password, username } = JSON.parse(request.data)
-    const isEmailAlreadyInUse = users.find(user => user.email === email)
-    const isUsernameAlreadyInUse = users.find(user => user.username === username)
-    const error = {
-      email: isEmailAlreadyInUse ? 'This email is already in use.' : null,
-      username: isUsernameAlreadyInUse ? 'This username is already in use.' : null
+    const { email, password, fullName, username } = JSON.parse(request.data)
+
+    const user = {
+      id: users.length + 1,
+      role: 'client',
+      email,
+      password,
+      fullName,
+      username
     }
 
-    if (!error.username && !error.email) {
-      const { length } = users
-      let lastIndex = 0
-      if (length) {
-        lastIndex = users[length - 1].id
-      }
-      const userData = {
-        id: lastIndex + 1,
-        email,
-        password,
-        username,
-        avatar: null,
-        fullName: '',
-        role: 'admin'
-      }
+    users.push(user)
 
-      users.push(userData)
+    const accessToken = jwt.sign({ id: user.id }, jwtConfig.secret as string, { expiresIn: jwtConfig.expirationTime })
 
-      const accessToken = jwt.sign({ id: userData.id }, jwtConfig.secret as string)
-
-      const user = { ...userData }
-      delete user.password
-
-      const response = { accessToken }
-
-      return [200, response]
+    const response = {
+      accessToken,
+      userData: { ...user, password: undefined }
     }
 
-    return [200, { error }]
+    return [200, response]
   } else {
     return [401, { error: 'Invalid Data' }]
   }

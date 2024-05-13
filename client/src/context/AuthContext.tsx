@@ -11,7 +11,7 @@ import axios from 'axios'
 import authConfig from 'src/configs/auth'
 
 // ** Types
-import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType } from './types'
+import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType, RegisterParams } from './types'
 
 // ** Defaults
 const defaultProvider: AuthValuesType = {
@@ -20,6 +20,7 @@ const defaultProvider: AuthValuesType = {
   setUser: () => null,
   setLoading: () => Boolean,
   login: () => Promise.resolve(),
+  register: () => Promise.resolve(),
   logout: () => Promise.resolve()
 }
 
@@ -93,6 +94,17 @@ const AuthProvider = ({ children }: Props) => {
       })
   }
 
+  const handleRegister = (params: RegisterParams, errorCallback?: ErrCallbackType) => {
+    axios
+      .post(authConfig.registerEndpoint, params)
+      .then(() => {
+        router.push('/login')
+      })
+      .catch(err => {
+        if (errorCallback) errorCallback(err)
+      })
+  }
+
   const handleLogout = () => {
     setUser(null)
     window.localStorage.removeItem('userData')
@@ -106,7 +118,8 @@ const AuthProvider = ({ children }: Props) => {
     setUser,
     setLoading,
     login: handleLogin,
-    logout: handleLogout
+    logout: handleLogout,
+    register: handleRegister
   }
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>

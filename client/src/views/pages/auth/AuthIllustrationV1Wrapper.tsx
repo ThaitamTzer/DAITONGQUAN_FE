@@ -5,7 +5,7 @@ import Box, { BoxProps } from '@mui/material/Box'
 // ** Styled Components
 const AuthIllustrationV1Wrapper = styled(Box)<BoxProps>(({ theme }) => ({
   width: '100%',
-  maxWidth: 400,
+  maxWidth: 'fit-content',
   position: 'relative',
   [theme.breakpoints.up('md')]: {
     '&:before': {

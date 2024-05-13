@@ -1,13 +1,13 @@
 // ** React Imports
-import { useState, ChangeEvent, ReactNode } from 'react'
+import { useState, ReactNode } from 'react'
 
 // ** Next Import
 import Link from 'next/link'
 
 // ** MUI Components
+import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Divider from '@mui/material/Divider'
 import Checkbox from '@mui/material/Checkbox'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
@@ -29,17 +29,22 @@ import themeConfig from 'src/configs/themeConfig'
 // ** Layout Import
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 
-// ** Demo Imports
-import AuthIllustrationV1Wrapper from 'src/views/pages/auth/AuthIllustrationV1Wrapper'
+// ** Import Third Party
+import { useTranslation } from 'react-i18next'
+import ReactDatePicker from 'react-datepicker'
+import * as yup from 'yup'
+import { useForm, Controller } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
 
 interface State {
   password: string
   showPassword: boolean
+  showComfirmPassword: boolean
 }
 
 // ** Styled Components
 const Card = styled(MuiCard)<CardProps>(({ theme }) => ({
-  [theme.breakpoints.up('sm')]: { width: '25rem' }
+  [theme.breakpoints.up('sm')]: { width: '40rem' }
 }))
 
 const LinkStyled = styled(Link)(({ theme }) => ({
@@ -55,30 +60,93 @@ const FormControlLabel = styled(MuiFormControlLabel)<FormControlLabelProps>(({ t
   }
 }))
 
+// ** Styled Components
+import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
+
+import { useAuth } from 'src/hooks/useAuth'
+
+interface FormData {
+  email: string
+  password: string
+  comfirmPassword: string
+  fullName: string
+  dateOfBirth: Date
+  address: string
+  agree: boolean
+}
+
+const schema = yup.object().shape({
+  email: yup.string().email().required().max(100),
+  password: yup.string().min(5).max(50).required(),
+  comfirmPassword: yup
+    .string()
+    .oneOf([yup.ref('password')], 'Passwords must match')
+    .required(),
+  fullName: yup.string().required().max(50),
+  dateOfBirth: yup.date().required().max(new Date(), 'Date of Birth cannot be in the future'),
+  address: yup.string().required().max(100),
+  agree: yup.boolean().oneOf([true], 'You must agree to the privacy policy & terms')
+})
+
 const RegisterV1 = () => {
   // ** States
   const [values, setValues] = useState<State>({
     password: '',
-    showPassword: false
+    showPassword: false,
+    showComfirmPassword: false
   })
 
   // ** Hook
   const theme = useTheme()
+  const auth = useAuth()
 
-  const handleChange = (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
-    setValues({ ...values, [prop]: event.target.value })
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors }
+  } = useForm<FormData>({
+    mode: 'onBlur',
+    resolver: yupResolver(schema)
+  })
+
+  const onSubmit = async (data: FormData) => {
+    const { email, password, fullName, dateOfBirth, address, agree } = data
+    if (!agree) {
+      setError('agree', { message: 'You must agree to the privacy policy & terms' })
+
+      return
+    }
+    if (dateOfBirth > new Date()) {
+      setError('dateOfBirth', { message: 'Date of Birth cannot be in the future' })
+
+      return
+    }
+    try {
+      await auth.register({ email, password, fullName, dateOfBirth, address }, () => {
+        setError('email', { message: 'Email already exists' })
+      })
+    } catch (error) {
+      setError('email', { message: 'Something went wrong' })
+    }
   }
+
   const handleClickShowPassword = () => {
     setValues({ ...values, showPassword: !values.showPassword })
   }
+  const handleClickShowComfirmPassword = () => {
+    setValues({ ...values, showComfirmPassword: !values.showComfirmPassword })
+  }
+
+  const { t } = useTranslation()
 
   return (
     <Box className='content-center'>
-      <AuthIllustrationV1Wrapper>
+      <>
         <Card>
-          <CardContent sx={{ p: theme => `${theme.spacing(10.5, 8, 8)} !important` }}>
+          <CardContent sx={{ p: theme => `${theme.spacing(10.5, 8, 8)} !important` }} className='hehe'>
             <Box sx={{ mb: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width={34} viewBox='0 0 32 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
+              {/* <svg width={34} viewBox='0 0 32 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
                 <path
                   fillRule='evenodd'
                   clipRule='evenodd'
@@ -105,107 +173,231 @@ const RegisterV1 = () => {
                   fill={theme.palette.primary.main}
                   d='M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z'
                 />
-              </svg>
+              </svg> */}
               <Typography variant='h3' sx={{ ml: 2.5, fontWeight: 700 }}>
                 {themeConfig.templateName}
               </Typography>
             </Box>
             <Box sx={{ mb: 6 }}>
               <Typography variant='h4' sx={{ mb: 1.5 }}>
-                Adventure starts here 🚀
+                {t('Đăng ký tại đây')} 🚀
               </Typography>
-              <Typography sx={{ color: 'text.secondary' }}>Make your app management easy and fun!</Typography>
             </Box>
-            <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()}>
-              <CustomTextField
-                autoFocus
-                fullWidth
-                id='username'
-                sx={{ mb: 4 }}
-                label='Username'
-                placeholder='John.doe'
-              />
-              <CustomTextField fullWidth type='email' label='Email' sx={{ mb: 4 }} placeholder='john.doe@gmail.com' />
-              <CustomTextField
-                fullWidth
-                label='Password'
-                value={values.password}
-                placeholder='············'
-                id='auth-register-password'
-                onChange={handleChange('password')}
-                type={values.showPassword ? 'text' : 'password'}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position='end'>
-                      <IconButton
-                        edge='end'
-                        onClick={handleClickShowPassword}
-                        onMouseDown={e => e.preventDefault()}
-                        aria-label='toggle password visibility'
-                      >
-                        <Icon fontSize='1.25rem' icon={values.showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
-                      </IconButton>
-                    </InputAdornment>
-                  )
-                }}
-              />
-              <FormControlLabel
-                control={<Checkbox />}
-                label={
+            <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
+              <Grid container spacing={2} justifyContent='center' alignItems='center'>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='fullName'
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <CustomTextField
+                        autoFocus
+                        fullWidth
+                        id='fullName'
+                        sx={{ mb: 4 }}
+                        label={t('Họ và tên')}
+                        placeholder='John Doe'
+                        value={value}
+                        onChange={onChange}
+                        onBlur={onBlur}
+                        error={Boolean(errors.fullName)}
+                        {...(errors.fullName && { helperText: errors.fullName.message })}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='email'
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <CustomTextField
+                        fullWidth
+                        type='email'
+                        label='Email'
+                        sx={{ mb: 4 }}
+                        placeholder='john.doe@gmail.com'
+                        value={value}
+                        onChange={onChange}
+                        onBlur={onBlur}
+                        error={Boolean(errors.email)}
+                        {...(errors.email && { helperText: errors.email.message })}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='password'
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <CustomTextField
+                        fullWidth
+                        label={t('Mật khẩu')}
+                        value={value}
+                        placeholder='············'
+                        id='auth-register-password'
+                        onChange={onChange}
+                        onBlur={onBlur}
+                        type={values.showPassword ? 'text' : 'password'}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position='end'>
+                              <IconButton
+                                edge='end'
+                                onClick={handleClickShowPassword}
+                                onMouseDown={e => e.preventDefault()}
+                                aria-label='toggle password visibility'
+                              >
+                                <Icon fontSize='1.25rem' icon={values.showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
+                        error={Boolean(errors.password)}
+                        {...(errors.password && { helperText: errors.password.message })}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='comfirmPassword'
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <CustomTextField
+                        fullWidth
+                        label={t('Xác nhận mật khẩu')}
+                        type={values.showComfirmPassword ? 'text' : 'password'}
+                        value={value}
+                        onChange={onChange}
+                        onBlur={onBlur}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position='end'>
+                              <IconButton
+                                edge='end'
+                                onClick={handleClickShowComfirmPassword}
+                                onMouseDown={e => e.preventDefault()}
+                                aria-label='toggle password visibility'
+                              >
+                                <Icon
+                                  fontSize='1.25rem'
+                                  icon={values.showComfirmPassword ? 'tabler:eye' : 'tabler:eye-off'}
+                                />
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
+                        error={Boolean(errors.comfirmPassword)}
+                        {...(errors.comfirmPassword && { helperText: errors.comfirmPassword.message })}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    control={control}
+                    name='dateOfBirth'
+                    rules={{ required: true }}
+                    render={({ field: { value, onBlur, onChange } }) => (
+                      <DatePickerWrapper>
+                        <ReactDatePicker
+                          selected={value}
+                          onBlur={onBlur}
+                          id='basic-input'
+                          customInput={
+                            <CustomTextField
+                              fullWidth
+                              label='Ngày tháng năm sinh'
+                              error={Boolean(errors.dateOfBirth)}
+                              {...(errors.dateOfBirth && { helperText: errors.dateOfBirth.message })}
+                            />
+                          }
+                          popperPlacement='bottom-start'
+                          onChange={onChange} // Add this line
+                        />
+                      </DatePickerWrapper>
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='address'
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <CustomTextField
+                        value={value}
+                        onChange={onChange}
+                        onBlur={onBlur}
+                        error={Boolean(errors.address)}
+                        {...(errors.address && { helperText: errors.address.message })}
+                        fullWidth
+                        label={t('Địa chỉ')}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Controller
+                    name='agree'
+                    control={control}
+                    defaultValue={false}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={<Checkbox {...field} color={errors.agree ? 'error' : 'primary'} />}
+                        label={
+                          <Box
+                            sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}
+                          >
+                            <Typography sx={{ color: 'text.secondary' }}>I agree to </Typography>
+                            <Typography
+                              component={LinkStyled}
+                              href='/'
+                              onClick={e => e.preventDefault()}
+                              sx={{ ml: 1 }}
+                            >
+                              privacy policy & terms
+                            </Typography>
+                          </Box>
+                        }
+                      />
+                    )}
+                  />
+                  {errors.agree && (
+                    <Typography variant='caption' sx={{ color: 'error.main', mt: 1 }}>
+                      {errors.agree.message}
+                    </Typography>
+                  )}
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Button fullWidth type='submit' variant='contained' sx={{ mb: 4 }}>
+                    Sign up
+                  </Button>
+                </Grid>
+                <Grid item xs={12}>
                   <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <Typography sx={{ color: 'text.secondary' }}>I agree to </Typography>
-                    <Typography component={LinkStyled} href='/' onClick={e => e.preventDefault()} sx={{ ml: 1 }}>
-                      privacy policy & terms
+                    <Typography sx={{ color: 'text.secondary', mr: 2 }}>Already have an account?</Typography>
+                    <Typography
+                      component={LinkStyled}
+                      href='/pages/auth/login-v1'
+                      sx={{ fontSize: theme.typography.body1.fontSize }}
+                    >
+                      Sign in instead
                     </Typography>
                   </Box>
-                }
-              />
-              <Button fullWidth type='submit' variant='contained' sx={{ mb: 4 }}>
-                Sign up
-              </Button>
-              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <Typography sx={{ color: 'text.secondary', mr: 2 }}>Already have an account?</Typography>
-                <Typography
-                  component={LinkStyled}
-                  href='/pages/auth/login-v1'
-                  sx={{ fontSize: theme.typography.body1.fontSize }}
-                >
-                  Sign in instead
-                </Typography>
-              </Box>
-              <Divider
-                sx={{
-                  color: 'text.disabled',
-                  '& .MuiDivider-wrapper': { px: 6 },
-                  fontSize: theme.typography.body2.fontSize,
-                  my: theme => `${theme.spacing(6)} !important`
-                }}
-              >
-                or
-              </Divider>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <IconButton href='/' component={Link} sx={{ color: '#497ce2' }} onClick={e => e.preventDefault()}>
-                  <Icon icon='mdi:facebook' />
-                </IconButton>
-                <IconButton href='/' component={Link} sx={{ color: '#1da1f2' }} onClick={e => e.preventDefault()}>
-                  <Icon icon='mdi:twitter' />
-                </IconButton>
-                <IconButton
-                  href='/'
-                  component={Link}
-                  onClick={e => e.preventDefault()}
-                  sx={{ color: theme => (theme.palette.mode === 'light' ? '#272727' : 'grey.300') }}
-                >
-                  <Icon icon='mdi:github' />
-                </IconButton>
-                <IconButton href='/' component={Link} sx={{ color: '#db4437' }} onClick={e => e.preventDefault()}>
-                  <Icon icon='mdi:google' />
-                </IconButton>
-              </Box>
+                </Grid>
+              </Grid>
             </form>
           </CardContent>
         </Card>
-      </AuthIllustrationV1Wrapper>
+      </>
     </Box>
   )
 }

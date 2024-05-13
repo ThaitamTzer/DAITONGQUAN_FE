@@ -51,7 +51,9 @@ const FormLayoutsAlignment = () => {
   return (
     <Card>
       <CardHeader title='Form Alignment' />
-      <CardContent sx={{ minHeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <CardContent
+        sx={{ width: 'auto', minHeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
         <Form onSubmit={e => e.preventDefault()}>
           <Grid container spacing={5}>
             <Grid item xs={12}>

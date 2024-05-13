@@ -1,5 +1,5 @@
 // ** React Imports
-import { ChangeEvent, ReactNode, useState } from 'react'
+import { ReactNode, useState } from 'react'
 
 // ** Next Import
 import Link from 'next/link'
@@ -23,6 +23,12 @@ import CustomTextField from 'src/@core/components/mui/text-field'
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
 
+// ** Third Party Imports
+import * as yup from 'yup'
+import { useForm, Controller } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { useTranslation } from 'react-i18next'
+
 // ** Configs
 import themeConfig from 'src/configs/themeConfig'
 
@@ -31,11 +37,7 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 // ** Demo Imports
 import AuthIllustrationV1Wrapper from 'src/views/pages/auth/AuthIllustrationV1Wrapper'
-
-interface State {
-  password: string
-  showPassword: boolean
-}
+import { useAuth } from 'src/hooks/useAuth'
 
 // ** Styled Components
 const Card = styled(MuiCard)<CardProps>(({ theme }) => ({
@@ -53,23 +55,53 @@ const FormControlLabel = styled(MuiFormControlLabel)<FormControlLabelProps>(({ t
   }
 }))
 
+const schema = yup.object().shape({
+  email: yup
+    .string()
+    .email('Email không hợp lệ')
+    .max(100, 'Trường email chứa tối đa 100 ký tự')
+    .required('Email không được để trống'),
+  password: yup
+    .string()
+    .min(5, 'Mật khẩu ít nhất có 5 ký tự')
+    .max(100, 'Mật khẩu chứa nhiều nhất 80 ký tự')
+    .required('Mật khẩu không được để trống')
+})
+
+interface FormData {
+  email: string
+  password: string
+}
+
 const LoginV1 = () => {
-  // ** State
-  const [values, setValues] = useState<State>({
-    password: '',
-    showPassword: false
-  })
+  const [rememberMe, setRememberMe] = useState<boolean>(false)
+  const [showPassword, setShowPassword] = useState<boolean>(false)
 
   // ** Hook
+  const auth = useAuth()
   const theme = useTheme()
 
-  const handleChange = (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
-    setValues({ ...values, [prop]: event.target.value })
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors }
+  } = useForm<FormData>({
+    mode: 'onBlur',
+    resolver: yupResolver(schema)
+  })
+
+  const onSubmit = (data: FormData) => {
+    const { email, password } = data
+    auth.login({ email, password, rememberMe }, () => {
+      setError('email', {
+        type: 'manual',
+        message: 'Email or Password is invalid'
+      })
+    })
   }
 
-  const handleClickShowPassword = () => {
-    setValues({ ...values, showPassword: !values.showPassword })
-  }
+  const { t } = useTranslation()
 
   return (
     <Box className='content-center'>
@@ -110,45 +142,64 @@ const LoginV1 = () => {
               </Typography>
             </Box>
             <Box sx={{ mb: 6 }}>
-              <Typography variant='h4' sx={{ mb: 1.5 }}>
-                {`Welcome to ${themeConfig.templateName}! 👋🏻`}
-              </Typography>
-              <Typography sx={{ color: 'text.secondary' }}>
-                Please sign-in to your account and start the adventure
+              <Typography variant='h4' sx={{ mb: 1.5, whiteSpace: 'pre-line' }}>
+                {`${t('Chào mừng đến với')}\n${themeConfig.templateName}! 👋🏻`}
               </Typography>
             </Box>
-            <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()}>
-              <CustomTextField
-                autoFocus
-                fullWidth
-                id='email'
-                label='Email'
-                sx={{ mb: 4 }}
-                placeholder='john.doe@gmail.com'
+            <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
+              <Controller
+                name='email'
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <CustomTextField
+                    autoFocus
+                    fullWidth
+                    id='email'
+                    label='Email'
+                    value={value}
+                    onBlur={onBlur}
+                    onChange={onChange}
+                    sx={{ mb: 4 }}
+                    placeholder='john.doe@gmail.com'
+                    error={Boolean(errors.email)}
+                    {...(errors.email && { helperText: errors.email.message })}
+                  />
+                )}
               />
-              <CustomTextField
-                fullWidth
-                sx={{ mb: 1.5 }}
-                label='Password'
-                value={values.password}
-                id='auth-login-password'
-                placeholder='············'
-                onChange={handleChange('password')}
-                type={values.showPassword ? 'text' : 'password'}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position='end'>
-                      <IconButton
-                        edge='end'
-                        onClick={handleClickShowPassword}
-                        onMouseDown={e => e.preventDefault()}
-                        aria-label='toggle password visibility'
-                      >
-                        <Icon fontSize='1.25rem' icon={values.showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
-                      </IconButton>
-                    </InputAdornment>
-                  )
-                }}
+              <Controller
+                name='password'
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <CustomTextField
+                    fullWidth
+                    id='password'
+                    label={t('Mật khẩu')}
+                    value={value}
+                    onBlur={onBlur}
+                    onChange={onChange}
+                    sx={{ mb: 4 }}
+                    placeholder='············'
+                    type={showPassword ? 'text' : 'password'}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position='end'>
+                          <IconButton
+                            edge='end'
+                            onClick={() => setShowPassword(!showPassword)}
+                            onMouseDown={e => e.preventDefault()}
+                            aria-label='toggle password visibility'
+                          >
+                            <Icon fontSize='1.25rem' icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                    error={Boolean(errors.password)}
+                    {...(errors.password && { helperText: errors.password.message })}
+                  />
+                )}
               />
               <Box
                 sx={{
@@ -159,18 +210,21 @@ const LoginV1 = () => {
                   justifyContent: 'space-between'
                 }}
               >
-                <FormControlLabel control={<Checkbox />} label='Remember Me' />
+                <FormControlLabel
+                  control={<Checkbox checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />}
+                  label='Ghi nhớ tôi'
+                />
                 <Typography component={LinkStyled} href='/pages/auth/forgot-password-v1'>
-                  Forgot Password?
+                  {t('Quên mật khẩu?')}
                 </Typography>
               </Box>
               <Button fullWidth type='submit' variant='contained' sx={{ mb: 4 }}>
-                Login
+                {t('Đăng Nhập')}
               </Button>
               <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <Typography sx={{ color: 'text.secondary', mr: 2 }}>New on our platform?</Typography>
+                <Typography sx={{ color: 'text.secondary', mr: 2 }}>{t('Bạn là người mới?')}</Typography>
                 <Typography component={LinkStyled} href='/pages/auth/register-v1'>
-                  Create an account
+                  {t('Tạo tài khoản mới')}
                 </Typography>
               </Box>
               <Divider
@@ -181,7 +235,7 @@ const LoginV1 = () => {
                   my: theme => `${theme.spacing(6)} !important`
                 }}
               >
-                or
+                {t('hoặc')}
               </Divider>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <IconButton href='/' component={Link} sx={{ color: '#497ce2' }} onClick={e => e.preventDefault()}>
