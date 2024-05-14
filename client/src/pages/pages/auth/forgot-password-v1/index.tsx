@@ -9,7 +9,7 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
-import { styled, useTheme } from '@mui/material/styles'
+import { styled } from '@mui/material/styles'
 import MuiCard, { CardProps } from '@mui/material/Card'
 
 // ** Custom Component Import
@@ -27,6 +27,12 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 // ** Demo Imports
 import AuthIllustrationV1Wrapper from 'src/views/pages/auth/AuthIllustrationV1Wrapper'
 
+// ** Import Third Party
+import { useTranslation } from 'react-i18next'
+import * as yup from 'yup'
+import { Controller, useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+
 // ** Styled Components
 const Card = styled(MuiCard)<CardProps>(({ theme }) => ({
   [theme.breakpoints.up('sm')]: { width: '25rem' }
@@ -41,9 +47,26 @@ const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: theme.typography.body1.fontSize
 }))
 
+const schema = yup.object().shape({
+  email: yup.string().email().required()
+})
+
+interface FormData {
+  email: string
+}
+
 const ForgotPasswordV1 = () => {
   // ** Hook
-  const theme = useTheme()
+  // const theme = useTheme()
+  const { t } = useTranslation()
+
+  const {
+    control,
+    formState: { errors }
+  } = useForm<FormData>({
+    mode: 'onBlur',
+    resolver: yupResolver(schema)
+  })
 
   return (
     <Box className='content-center'>
@@ -51,7 +74,7 @@ const ForgotPasswordV1 = () => {
         <Card>
           <CardContent sx={{ p: theme => `${theme.spacing(10.5, 8, 8)} !important` }}>
             <Box sx={{ mb: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width={34} viewBox='0 0 32 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
+              {/* <svg width={34} viewBox='0 0 32 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
                 <path
                   fillRule='evenodd'
                   clipRule='evenodd'
@@ -78,35 +101,47 @@ const ForgotPasswordV1 = () => {
                   fill={theme.palette.primary.main}
                   d='M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z'
                 />
-              </svg>
+              </svg> */}
               <Typography variant='h3' sx={{ ml: 2.5, fontWeight: 700 }}>
                 {themeConfig.templateName}
               </Typography>
             </Box>
             <Box sx={{ mb: 6 }}>
               <Typography variant='h4' sx={{ mb: 1.5 }}>
-                Forgot Password? 🔒
+                {t('Quên mật khẩu?')} 🔒
               </Typography>
               <Typography sx={{ color: 'text.secondary' }}>
-                Enter your email and we&prime;ll send you instructions to reset your password
+                {t(`Nhập email của bạn và chúng tôi sẽ gửi cho bạn một mã để đặt lại mật khẩu của bạn`)}
               </Typography>
             </Box>
             <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()}>
-              <CustomTextField
-                autoFocus
-                fullWidth
-                type='email'
-                label='Email'
-                sx={{ display: 'flex', mb: 4 }}
-                placeholder='john.doe@gmail.com'
+              <Controller
+                name='email'
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <CustomTextField
+                    autoFocus
+                    value={value}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    fullWidth
+                    id='email'
+                    label='Email'
+                    sx={{ display: 'flex', mb: 4 }}
+                    placeholder='john.doe@gmail.com'
+                    error={Boolean(errors.email)}
+                    {...(errors.email && { helperText: errors.email.message })}
+                  />
+                )}
               />
               <Button fullWidth type='submit' variant='contained' sx={{ mb: 4 }}>
-                Send reset link
+                {t('Gửi mã')}
               </Button>
               <Typography sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', '& svg': { mr: 1 } }}>
-                <LinkStyled href='/pages/auth/login-v1'>
+                <LinkStyled href='/login'>
                   <Icon fontSize='1.25rem' icon='tabler:chevron-left' />
-                  <span>Back to login</span>
+                  <span>{t('Quay lại đăng nhập')}</span>
                 </LinkStyled>
               </Typography>
             </form>

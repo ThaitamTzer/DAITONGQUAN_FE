@@ -214,7 +214,7 @@ const LoginPage = () => {
                   control={<Checkbox checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />}
                   label='Ghi nhớ tôi'
                 />
-                <Typography component={LinkStyled} href='/pages/auth/forgot-password-v1'>
+                <Typography component={LinkStyled} href='/forgot-password'>
                   {t('Quên mật khẩu?')}
                 </Typography>
               </Box>

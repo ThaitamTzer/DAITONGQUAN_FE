@@ -5,7 +5,6 @@ import { useState, ReactNode } from 'react'
 import Link from 'next/link'
 
 // ** MUI Components
-import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
@@ -31,7 +30,6 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 // ** Import Third Party
 import { useTranslation } from 'react-i18next'
-import ReactDatePicker from 'react-datepicker'
 import * as yup from 'yup'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -44,7 +42,7 @@ interface State {
 
 // ** Styled Components
 const Card = styled(MuiCard)<CardProps>(({ theme }) => ({
-  [theme.breakpoints.up('sm')]: { width: '40rem' }
+  [theme.breakpoints.up('sm')]: { width: '30rem' }
 }))
 
 const LinkStyled = styled(Link)(({ theme }) => ({
@@ -60,8 +58,10 @@ const FormControlLabel = styled(MuiFormControlLabel)<FormControlLabelProps>(({ t
   }
 }))
 
-// ** Styled Components
-import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
+// **Styled Components
+const CustomTextFieldStyled = styled(CustomTextField)(({ theme }) => ({
+  marginBottom: theme.spacing(3)
+}))
 
 import { useAuth } from 'src/hooks/useAuth'
 
@@ -69,10 +69,8 @@ interface FormData {
   email: string
   password: string
   comfirmPassword: string
-  fullName: string
-  dateOfBirth: Date
-  address: string
   agree: boolean
+  userName: string
 }
 
 const schema = yup.object().shape({
@@ -82,10 +80,8 @@ const schema = yup.object().shape({
     .string()
     .oneOf([yup.ref('password')], 'Passwords must match')
     .required(),
-  fullName: yup.string().required().max(50),
-  dateOfBirth: yup.date().required().max(new Date(), 'Date of Birth cannot be in the future'),
-  address: yup.string().required().max(100),
-  agree: yup.boolean().oneOf([true], 'You must agree to the privacy policy & terms')
+  agree: yup.boolean().oneOf([true], 'You must agree to the privacy policy & terms'),
+  userName: yup.string().required().max(50)
 })
 
 const Register = () => {
@@ -111,19 +107,14 @@ const Register = () => {
   })
 
   const onSubmit = async (data: FormData) => {
-    const { email, password, fullName, dateOfBirth, address, agree } = data
+    const { email, password, agree, userName } = data
     if (!agree) {
       setError('agree', { message: 'You must agree to the privacy policy & terms' })
 
       return
     }
-    if (dateOfBirth > new Date()) {
-      setError('dateOfBirth', { message: 'Date of Birth cannot be in the future' })
-
-      return
-    }
     try {
-      await auth.register({ email, password, fullName, dateOfBirth, address }, () => {
+      await auth.register({ email, password, userName }, () => {
         setError('email', { message: 'Email already exists' })
       })
     } catch (error) {
@@ -184,212 +175,149 @@ const Register = () => {
               </Typography>
             </Box>
             <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
-              <Grid container spacing={2} justifyContent='center' alignItems='center'>
-                <Grid item xs={12} sm={6}>
-                  <Controller
-                    name='fullName'
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field: { value, onChange, onBlur } }) => (
-                      <CustomTextField
-                        autoFocus
-                        fullWidth
-                        id='fullName'
-                        sx={{ mb: 4 }}
-                        label={t('Họ và tên')}
-                        placeholder='John Doe'
-                        value={value}
-                        onChange={onChange}
-                        onBlur={onBlur}
-                        error={Boolean(errors.fullName)}
-                        {...(errors.fullName && { helperText: errors.fullName.message })}
-                      />
-                    )}
+              <Controller
+                name='userName'
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <CustomTextFieldStyled
+                    autoFocus
+                    fullWidth
+                    id='fullName'
+                    label={t('Tên người dùng')}
+                    placeholder='DavidNguyen222'
+                    value={value}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    error={Boolean(errors.userName)}
+                    {...(errors.userName && { helperText: errors.userName.message })}
                   />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Controller
-                    name='email'
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field: { value, onChange, onBlur } }) => (
-                      <CustomTextField
-                        fullWidth
-                        type='email'
-                        label='Email'
-                        sx={{ mb: 4 }}
-                        placeholder='john.doe@gmail.com'
-                        value={value}
-                        onChange={onChange}
-                        onBlur={onBlur}
-                        error={Boolean(errors.email)}
-                        {...(errors.email && { helperText: errors.email.message })}
-                      />
-                    )}
+                )}
+              />
+              <Controller
+                name='email'
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <CustomTextFieldStyled
+                    fullWidth
+                    type='email'
+                    label='Email'
+                    placeholder='john.doe@gmail.com'
+                    value={value}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    error={Boolean(errors.email)}
+                    {...(errors.email && { helperText: errors.email.message })}
                   />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Controller
-                    name='password'
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field: { value, onChange, onBlur } }) => (
-                      <CustomTextField
-                        fullWidth
-                        label={t('Mật khẩu')}
-                        value={value}
-                        placeholder='············'
-                        id='auth-register-password'
-                        onChange={onChange}
-                        onBlur={onBlur}
-                        type={values.showPassword ? 'text' : 'password'}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position='end'>
-                              <IconButton
-                                edge='end'
-                                onClick={handleClickShowPassword}
-                                onMouseDown={e => e.preventDefault()}
-                                aria-label='toggle password visibility'
-                              >
-                                <Icon fontSize='1.25rem' icon={values.showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
-                              </IconButton>
-                            </InputAdornment>
-                          )
-                        }}
-                        error={Boolean(errors.password)}
-                        {...(errors.password && { helperText: errors.password.message })}
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Controller
-                    name='comfirmPassword'
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field: { value, onChange, onBlur } }) => (
-                      <CustomTextField
-                        fullWidth
-                        label={t('Xác nhận mật khẩu')}
-                        type={values.showComfirmPassword ? 'text' : 'password'}
-                        value={value}
-                        onChange={onChange}
-                        onBlur={onBlur}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position='end'>
-                              <IconButton
-                                edge='end'
-                                onClick={handleClickShowComfirmPassword}
-                                onMouseDown={e => e.preventDefault()}
-                                aria-label='toggle password visibility'
-                              >
-                                <Icon
-                                  fontSize='1.25rem'
-                                  icon={values.showComfirmPassword ? 'tabler:eye' : 'tabler:eye-off'}
-                                />
-                              </IconButton>
-                            </InputAdornment>
-                          )
-                        }}
-                        error={Boolean(errors.comfirmPassword)}
-                        {...(errors.comfirmPassword && { helperText: errors.comfirmPassword.message })}
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Controller
-                    control={control}
-                    name='dateOfBirth'
-                    rules={{ required: true }}
-                    render={({ field: { value, onBlur, onChange } }) => (
-                      <DatePickerWrapper>
-                        <ReactDatePicker
-                          selected={value}
-                          onBlur={onBlur}
-                          id='basic-input'
-                          customInput={
-                            <CustomTextField
-                              fullWidth
-                              label='Ngày tháng năm sinh'
-                              error={Boolean(errors.dateOfBirth)}
-                              {...(errors.dateOfBirth && { helperText: errors.dateOfBirth.message })}
-                            />
-                          }
-                          popperPlacement='bottom-start'
-                          onChange={onChange} // Add this line
-                        />
-                      </DatePickerWrapper>
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Controller
-                    name='address'
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field: { value, onChange, onBlur } }) => (
-                      <CustomTextField
-                        value={value}
-                        onChange={onChange}
-                        onBlur={onBlur}
-                        error={Boolean(errors.address)}
-                        {...(errors.address && { helperText: errors.address.message })}
-                        fullWidth
-                        label={t('Địa chỉ')}
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Controller
-                    name='agree'
-                    control={control}
-                    defaultValue={false}
-                    render={({ field }) => (
-                      <FormControlLabel
-                        control={<Checkbox {...field} color={errors.agree ? 'error' : 'primary'} />}
-                        label={
-                          <Box
-                            sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}
+                )}
+              />
+              <Controller
+                name='password'
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <CustomTextFieldStyled
+                    fullWidth
+                    label={t('Mật khẩu')}
+                    value={value}
+                    placeholder='············'
+                    id='auth-register-password'
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    type={values.showPassword ? 'text' : 'password'}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position='end'>
+                          <IconButton
+                            edge='end'
+                            onClick={handleClickShowPassword}
+                            onMouseDown={e => e.preventDefault()}
+                            aria-label='toggle password visibility'
                           >
-                            <Typography sx={{ color: 'text.secondary' }}>I agree to </Typography>
-                            <Typography
-                              component={LinkStyled}
-                              href='/'
-                              onClick={e => e.preventDefault()}
-                              sx={{ ml: 1 }}
-                            >
-                              privacy policy & terms
-                            </Typography>
-                          </Box>
-                        }
-                      />
-                    )}
+                            <Icon fontSize='1.25rem' icon={values.showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                    error={Boolean(errors.password)}
+                    {...(errors.password && { helperText: errors.password.message })}
                   />
-                  {errors.agree && (
-                    <Typography variant='caption' sx={{ color: 'error.main', mt: 1 }}>
-                      {errors.agree.message}
-                    </Typography>
-                  )}
-                </Grid>
+                )}
+              />
+              <Controller
+                name='comfirmPassword'
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <CustomTextFieldStyled
+                    fullWidth
+                    label={t('Xác nhận mật khẩu')}
+                    type={values.showComfirmPassword ? 'text' : 'password'}
+                    value={value}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position='end'>
+                          <IconButton
+                            edge='end'
+                            onClick={handleClickShowComfirmPassword}
+                            onMouseDown={e => e.preventDefault()}
+                            aria-label='toggle password visibility'
+                          >
+                            <Icon
+                              fontSize='1.25rem'
+                              icon={values.showComfirmPassword ? 'tabler:eye' : 'tabler:eye-off'}
+                            />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                    error={Boolean(errors.comfirmPassword)}
+                    {...(errors.comfirmPassword && { helperText: errors.comfirmPassword.message })}
+                  />
+                )}
+              />
+              <Controller
+                name='agree'
+                control={control}
+                defaultValue={false}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={<Checkbox {...field} color={errors.agree ? 'error' : 'primary'} />}
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+                        <Typography sx={{ color: 'text.secondary' }}>{t('Tôi đồng ý với ')}</Typography>
+                        <Typography component={LinkStyled} href='/' onClick={e => e.preventDefault()} sx={{ ml: 1 }}>
+                          {t('điều khoản và dịch vụ')}
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                )}
+              />
+              {errors.agree && (
+                <Typography variant='caption' sx={{ color: 'error.main', mt: 1 }}>
+                  {errors.agree.message}
+                </Typography>
+              )}
+              {/* </Grid> */}
 
-                <Grid item xs={12}>
-                  <Button fullWidth type='submit' variant='contained' sx={{ mb: 4 }}>
-                    Sign up
-                  </Button>
-                </Grid>
-                <Grid item xs={12}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <Typography sx={{ color: 'text.secondary', mr: 2 }}>Already have an account?</Typography>
-                    <Typography component={LinkStyled} href='/login' sx={{ fontSize: theme.typography.body1.fontSize }}>
-                      Sign in instead
-                    </Typography>
-                  </Box>
-                </Grid>
-              </Grid>
+              {/* <Grid item xs={12}> */}
+              <Button fullWidth type='submit' variant='contained' sx={{ mb: 4 }}>
+                Sign up
+              </Button>
+              {/* </Grid> */}
+              {/* <Grid item xs={12}> */}
+              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <Typography sx={{ color: 'text.secondary', mr: 2 }}>{t('Đã có tài khoản?')}</Typography>
+                <Typography component={LinkStyled} href='/login' sx={{ fontSize: theme.typography.body1.fontSize }}>
+                  {t('Đăng nhập')}
+                </Typography>
+              </Box>
+              {/* </Grid> */}
+              {/* </Grid> */}
             </form>
           </CardContent>
         </Card>

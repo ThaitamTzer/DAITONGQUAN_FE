@@ -9,9 +9,7 @@ export type LoginParams = {
 export type RegisterParams = {
   email: string
   password: string
-  fullName: string
-  dateOfBirth: Date
-  address: string
+  userName: string
 }
 
 export type UserDataType = {
@@ -24,6 +22,10 @@ export type UserDataType = {
   avatar?: string | null
 }
 
+export type ForgotPasParams = {
+  email: string
+}
+
 export type AuthValuesType = {
   loading: boolean
   logout: () => void
@@ -32,4 +34,5 @@ export type AuthValuesType = {
   setUser: (value: UserDataType | null) => void
   login: (params: LoginParams, errorCallback?: ErrCallbackType) => void
   register: (params: RegisterParams, errorCallback?: ErrCallbackType) => void
+  forgotPassword: (params: ForgotPasParams, errorCallback?: ErrCallbackType) => void
 }
