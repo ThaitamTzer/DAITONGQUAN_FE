@@ -56,7 +56,7 @@ const FormControlLabel = styled(MuiFormControlLabel)<FormControlLabelProps>(({ t
 }))
 
 const schema = yup.object().shape({
-  email: yup
+  account: yup
     .string()
     .email('Email không hợp lệ')
     .max(100, 'Trường email chứa tối đa 100 ký tự')
@@ -69,7 +69,7 @@ const schema = yup.object().shape({
 })
 
 interface FormData {
-  email: string
+  account: string
   password: string
 }
 
@@ -92,9 +92,9 @@ const LoginPage = () => {
   })
 
   const onSubmit = (data: FormData) => {
-    const { email, password } = data
-    auth.login({ email, password, rememberMe }, () => {
-      setError('email', {
+    const { account, password } = data
+    auth.login({ account, password, rememberMe }, () => {
+      setError('account', {
         type: 'manual',
         message: 'Email or Password is invalid'
       })
@@ -148,7 +148,7 @@ const LoginPage = () => {
             </Box>
             <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
               <Controller
-                name='email'
+                name='account'
                 control={control}
                 rules={{ required: true }}
                 render={({ field: { value, onChange, onBlur } }) => (
@@ -162,8 +162,8 @@ const LoginPage = () => {
                     onChange={onChange}
                     sx={{ mb: 4 }}
                     placeholder='john.doe@gmail.com'
-                    error={Boolean(errors.email)}
-                    {...(errors.email && { helperText: errors.email.message })}
+                    error={Boolean(errors.account)}
+                    {...(errors.account && { helperText: errors.account.message })}
                   />
                 )}
               />

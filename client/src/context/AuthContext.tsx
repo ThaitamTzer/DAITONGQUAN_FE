@@ -11,7 +11,13 @@ import axios from 'axios'
 import authConfig from 'src/configs/auth'
 
 // ** Types
-import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType, RegisterParams } from './types'
+import { AuthValuesType, LoginParams, RegisterParams, ForgotPassParams, ErrCallbackType, UserDataType } from './types'
+
+// ** Authentication Service
+import authenticateService from 'src/service/authenticate.service'
+
+// ** Import Third Party
+// import { jwtDecode } from 'jwt-decode'
 
 // ** Defaults
 const defaultProvider: AuthValuesType = {
@@ -21,7 +27,9 @@ const defaultProvider: AuthValuesType = {
   setLoading: () => Boolean,
   login: () => Promise.resolve(),
   register: () => Promise.resolve(),
-  logout: () => Promise.resolve()
+  logout: () => Promise.resolve(),
+  forgotPassword: () => Promise.resolve(),
+  resetPassword: () => Promise.resolve()
 }
 
 const AuthContext = createContext(defaultProvider)
@@ -51,12 +59,12 @@ const AuthProvider = ({ children }: Props) => {
           })
           .then(async response => {
             setLoading(false)
-            setUser({ ...response.data.userData })
+            setUser({ ...response.data.data.user })
           })
           .catch(() => {
             localStorage.removeItem('userData')
             localStorage.removeItem('refreshToken')
-            localStorage.removeItem('accessToken')
+            localStorage.removeItem('access_token')
             setUser(null)
             setLoading(false)
             if (authConfig.onTokenExpiration === 'logout' && !router.pathname.includes('login')) {
@@ -72,23 +80,18 @@ const AuthProvider = ({ children }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // create handleLogin
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
-    axios
-      .post(authConfig.loginEndpoint, params)
-      .then(async response => {
-        params.rememberMe
-          ? window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.accessToken)
-          : null
-        const returnUrl = router.query.returnUrl
-
-        setUser({ ...response.data.userData })
-        params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(response.data.userData)) : null
-
-        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
-
-        router.replace(redirectURL as string)
+    authenticateService
+      .login(params)
+      .then(response => {
+        const { access_token, refreshToken, user } = response.data.data
+        window.localStorage.setItem('userData', JSON.stringify(user))
+        window.localStorage.setItem(authConfig.storageTokenKeyName, access_token)
+        window.localStorage.setItem('refreshToken', refreshToken)
+        setUser(user)
+        router.push('/')
       })
-
       .catch(err => {
         if (errorCallback) errorCallback(err)
       })
@@ -97,6 +100,17 @@ const AuthProvider = ({ children }: Props) => {
   const handleRegister = (params: RegisterParams, errorCallback?: ErrCallbackType) => {
     axios
       .post(authConfig.registerEndpoint, params)
+      .then(() => {
+        router.push('/login')
+      })
+      .catch(err => {
+        if (errorCallback) errorCallback(err)
+      })
+  }
+
+  const handleForgotPassword = (params: ForgotPassParams, errorCallback?: ErrCallbackType) => {
+    axios
+      .post(authConfig.forgotPasswordEndpoint, params)
       .then(() => {
         router.push('/login')
       })
@@ -119,7 +133,9 @@ const AuthProvider = ({ children }: Props) => {
     setLoading,
     login: handleLogin,
     logout: handleLogout,
-    register: handleRegister
+    register: handleRegister,
+    forgotPassword: handleForgotPassword,
+    resetPassword: () => Promise.resolve()
   }
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>
