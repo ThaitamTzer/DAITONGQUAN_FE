@@ -179,3 +179,7 @@ const UserProfile = ({ tab, data }: { tab: string; data: UserProfileActiveTab })
 }
 
 export default UserProfile
+UserProfile.acl = {
+  action: 'read',
+  subject: 'acl-page'
+}

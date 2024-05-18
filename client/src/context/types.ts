@@ -9,7 +9,7 @@ export type LoginParams = {
 export type RegisterParams = {
   email: string
   password: string
-  userName: string
+  username: string
 }
 
 // export type UserDataType = {
@@ -38,14 +38,13 @@ export type ForgotPassParams = {
 }
 
 export type ResetPassParams = {
-  code: string
-  password: string
-  confirmPassword: string
+  code: number
+  newPassword: string
 }
 
 export type AuthValuesType = {
   loading: boolean
-  logout: () => void
+  logout: (value: string) => void
   user: UserDataType | null
   setLoading: (value: boolean) => void
   setUser: (value: UserDataType | null) => void

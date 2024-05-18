@@ -24,13 +24,15 @@ import CustomTextField from 'src/@core/components/mui/text-field'
 import Icon from 'src/@core/components/icon'
 
 // ** Third Party Imports
-import * as yup from 'yup'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useTranslation } from 'react-i18next'
 
 // ** Configs
 import themeConfig from 'src/configs/themeConfig'
+
+// ** Validation Schema
+import { getLoginValidationSchema, getValidationMessages } from 'src/configs/validationSchema'
 
 // ** Layout Import
 import BlankLayout from 'src/@core/layouts/BlankLayout'
@@ -55,19 +57,6 @@ const FormControlLabel = styled(MuiFormControlLabel)<FormControlLabelProps>(({ t
   }
 }))
 
-const schema = yup.object().shape({
-  account: yup
-    .string()
-    .email('Email không hợp lệ')
-    .max(100, 'Trường email chứa tối đa 100 ký tự')
-    .required('Email không được để trống'),
-  password: yup
-    .string()
-    .min(5, 'Mật khẩu ít nhất có 5 ký tự')
-    .max(100, 'Mật khẩu chứa nhiều nhất 80 ký tự')
-    .required('Mật khẩu không được để trống')
-})
-
 interface FormData {
   account: string
   password: string
@@ -78,8 +67,11 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false)
 
   // ** Hook
+  const { t } = useTranslation()
   const auth = useAuth()
   const theme = useTheme()
+  const schema = getLoginValidationSchema(t)
+  const messages = getValidationMessages(t)
 
   const {
     control,
@@ -96,12 +88,10 @@ const LoginPage = () => {
     auth.login({ account, password, rememberMe }, () => {
       setError('account', {
         type: 'manual',
-        message: 'Email or Password is invalid'
+        message: messages.invalidCredentials
       })
     })
   }
-
-  const { t } = useTranslation()
 
   return (
     <Box className='content-center'>
@@ -109,7 +99,7 @@ const LoginPage = () => {
         <Card>
           <CardContent sx={{ p: theme => `${theme.spacing(10.5, 8, 8)} !important` }}>
             <Box sx={{ mb: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width={34} viewBox='0 0 32 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
+              {/* <svg width={34} viewBox='0 0 32 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
                 <path
                   fillRule='evenodd'
                   clipRule='evenodd'
@@ -136,7 +126,7 @@ const LoginPage = () => {
                   fill={theme.palette.primary.main}
                   d='M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z'
                 />
-              </svg>
+              </svg> */}
               <Typography variant='h3' sx={{ ml: 2.5, fontWeight: 700 }}>
                 {themeConfig.templateName}
               </Typography>
@@ -155,8 +145,8 @@ const LoginPage = () => {
                   <CustomTextField
                     autoFocus
                     fullWidth
-                    id='email'
-                    label='Email'
+                    id='account'
+                    label={t('Tên người dùng hoặc email')}
                     value={value}
                     onBlur={onBlur}
                     onChange={onChange}

@@ -4,17 +4,22 @@ import { createContext, useEffect, useState, ReactNode } from 'react'
 // ** Next Import
 import { useRouter } from 'next/router'
 
-// ** Axios
-import axios from 'axios'
-
 // ** Config
 import authConfig from 'src/configs/auth'
 
 // ** Types
-import { AuthValuesType, LoginParams, RegisterParams, ForgotPassParams, ErrCallbackType, UserDataType } from './types'
+import {
+  AuthValuesType,
+  LoginParams,
+  RegisterParams,
+  ForgotPassParams,
+  ErrCallbackType,
+  UserDataType,
+  ResetPassParams
+} from './types'
 
 // ** Authentication Service
-import authenticateService from 'src/service/authenticate.service'
+import axiosClient, { axiosAuth } from 'src/lib/axios'
 
 // ** Import Third Party
 // import { jwtDecode } from 'jwt-decode'
@@ -48,59 +53,78 @@ const AuthProvider = ({ children }: Props) => {
 
   useEffect(() => {
     const initAuth = async (): Promise<void> => {
-      const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)!
-      if (storedToken) {
-        setLoading(true)
-        await axios
-          .get(authConfig.meEndpoint, {
-            headers: {
-              Authorization: storedToken
-            }
-          })
-          .then(async response => {
-            setLoading(false)
-            setUser({ ...response.data.data.user })
-          })
-          .catch(() => {
-            localStorage.removeItem('userData')
-            localStorage.removeItem('refreshToken')
-            localStorage.removeItem('access_token')
-            setUser(null)
-            setLoading(false)
-            if (authConfig.onTokenExpiration === 'logout' && !router.pathname.includes('login')) {
-              router.replace('/login')
-            }
-          })
-      } else {
-        setLoading(false)
-      }
+      setLoading(true)
+      axiosClient
+        .get(authConfig.getUserInfoEndpoint)
+        .then(async response => {
+          // console.log('response: ', response)
+          setLoading(false)
+          setUser({ ...response.data })
+          window.localStorage.setItem('userData', JSON.stringify({ ...response.data }))
+        })
+        .catch(() => {
+          localStorage.removeItem('userData')
+          localStorage.removeItem('refreshToken')
+          localStorage.removeItem('accessToken')
+          setUser(null)
+          setLoading(false)
+          router.replace('/login')
+        })
     }
 
     initAuth()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // create handleLogin
+  // create handleLogin have remember me
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
-    authenticateService
-      .login(params)
-      .then(response => {
-        const { access_token, refreshToken, user } = response.data.data
-        window.localStorage.setItem('userData', JSON.stringify(user))
-        window.localStorage.setItem(authConfig.storageTokenKeyName, access_token)
-        window.localStorage.setItem('refreshToken', refreshToken)
-        setUser(user)
-        router.push('/')
+    axiosClient
+      .post(authConfig.loginEndpoint, params)
+      .then(async response => {
+        params.rememberMe && window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.access_token)
+        const returnUrl = router.query.returnUrl
+
+        setUser({ ...response.data.user })
+        window.localStorage.setItem('userData', JSON.stringify({ ...response.data.user }))
+        window.localStorage.setItem('refreshToken', response.data.refreshToken)
+
+        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
+
+        router.replace(redirectURL as string)
       })
+
       .catch(err => {
         if (errorCallback) errorCallback(err)
       })
   }
 
+  const handleLogout = (refreshToken: string, errorCallback?: ErrCallbackType) => {
+    try {
+      refreshToken = refreshToken || window.localStorage.getItem('refreshToken') || ''
+      console.log('refreshToken: ', refreshToken)
+      axiosAuth
+        .delete(authConfig.logoutEndpoint, { data: { refreshToken } })
+        .then(() => {
+          router.push('/login')
+          localStorage.removeItem('userData')
+          localStorage.removeItem('refreshToken')
+          localStorage.removeItem('access_token')
+          setUser(null)
+        })
+        .catch(err => {
+          if (errorCallback) errorCallback(err)
+        })
+    } catch (error) {
+      // console.error(error)
+      throw error
+    }
+  }
+
   const handleRegister = (params: RegisterParams, errorCallback?: ErrCallbackType) => {
-    axios
+    axiosClient
       .post(authConfig.registerEndpoint, params)
       .then(() => {
+        // console.log('response register: ', response)
         router.push('/login')
       })
       .catch(err => {
@@ -109,33 +133,41 @@ const AuthProvider = ({ children }: Props) => {
   }
 
   const handleForgotPassword = (params: ForgotPassParams, errorCallback?: ErrCallbackType) => {
-    axios
+    axiosClient
       .post(authConfig.forgotPasswordEndpoint, params)
       .then(() => {
-        router.push('/login')
+        router.push('/reset-password')
       })
       .catch(err => {
         if (errorCallback) errorCallback(err)
       })
   }
 
-  const handleLogout = () => {
-    setUser(null)
-    window.localStorage.removeItem('userData')
-    window.localStorage.removeItem(authConfig.storageTokenKeyName)
-    router.push('/login')
+  const handleResetPassword = (params: ResetPassParams, errorCallback?: ErrCallbackType) => {
+    try {
+      axiosClient
+        .put(authConfig.resetPasswordEndpoint, params)
+        .then(() => {
+          router.push('/login')
+        })
+        .catch(error => {
+          if (errorCallback) errorCallback(error)
+        })
+    } catch (error) {
+      throw error
+    }
   }
 
-  const values = {
+  const values: AuthValuesType = {
     user,
     loading,
     setUser,
     setLoading,
     login: handleLogin,
-    logout: handleLogout,
+    logout: handleLogout, // Update the type of the logout property
     register: handleRegister,
     forgotPassword: handleForgotPassword,
-    resetPassword: () => Promise.resolve()
+    resetPassword: handleResetPassword
   }
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>

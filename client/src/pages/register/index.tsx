@@ -30,15 +30,13 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 // ** Import Third Party
 import { useTranslation } from 'react-i18next'
-import * as yup from 'yup'
+
+// import * as yup from 'yup'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 
-interface State {
-  password: string
-  showPassword: boolean
-  showComfirmPassword: boolean
-}
+// ** Validation Schema
+import { getRegisterValidationSchema, getValidationMessages } from 'src/configs/validationSchema'
 
 // ** Styled Components
 const Card = styled(MuiCard)<CardProps>(({ theme }) => ({
@@ -64,25 +62,21 @@ const CustomTextFieldStyled = styled(CustomTextField)(({ theme }) => ({
 }))
 
 import { useAuth } from 'src/hooks/useAuth'
+import { FormControl, FormHelperText } from '@mui/material'
+
+interface State {
+  password: string
+  showPassword: boolean
+  showComfirmPassword: boolean
+}
 
 interface FormData {
   email: string
   password: string
   comfirmPassword: string
   agree: boolean
-  userName: string
+  username: string
 }
-
-const schema = yup.object().shape({
-  email: yup.string().email().required().max(100),
-  password: yup.string().min(5).max(50).required(),
-  comfirmPassword: yup
-    .string()
-    .oneOf([yup.ref('password')], 'Passwords must match')
-    .required(),
-  agree: yup.boolean().oneOf([true], 'You must agree to the privacy policy & terms'),
-  userName: yup.string().required().max(50)
-})
 
 const Register = () => {
   // ** States
@@ -95,6 +89,9 @@ const Register = () => {
   // ** Hook
   const theme = useTheme()
   const auth = useAuth()
+  const { t } = useTranslation()
+  const schema = getRegisterValidationSchema(t)
+  const messages = getValidationMessages(t)
 
   const {
     control,
@@ -107,15 +104,15 @@ const Register = () => {
   })
 
   const onSubmit = async (data: FormData) => {
-    const { email, password, agree, userName } = data
+    const { email, password, agree, username } = data
     if (!agree) {
-      setError('agree', { message: 'You must agree to the privacy policy & terms' })
+      setError('agree', { message: messages.agreement.required })
 
       return
     }
     try {
-      await auth.register({ email, password, userName }, () => {
-        setError('email', { message: 'Email already exists' })
+      await auth.register({ email, password, username }, () => {
+        setError('email', { message: messages.email.exists })
       })
     } catch (error) {
       setError('email', { message: 'Something went wrong' })
@@ -128,8 +125,6 @@ const Register = () => {
   const handleClickShowComfirmPassword = () => {
     setValues({ ...values, showComfirmPassword: !values.showComfirmPassword })
   }
-
-  const { t } = useTranslation()
 
   return (
     <Box className='content-center'>
@@ -176,7 +171,7 @@ const Register = () => {
             </Box>
             <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
               <Controller
-                name='userName'
+                name='username'
                 control={control}
                 rules={{ required: true }}
                 render={({ field: { value, onChange, onBlur } }) => (
@@ -189,8 +184,8 @@ const Register = () => {
                     value={value}
                     onChange={onChange}
                     onBlur={onBlur}
-                    error={Boolean(errors.userName)}
-                    {...(errors.userName && { helperText: errors.userName.message })}
+                    error={Boolean(errors.username)}
+                    {...(errors.username && { helperText: errors.username.message })}
                   />
                 )}
               />
@@ -241,6 +236,7 @@ const Register = () => {
                       )
                     }}
                     error={Boolean(errors.password)}
+                    helperText={t('Mật khẩu phải chứa số, chữ in hoa, ký tự đặc biệt')}
                     {...(errors.password && { helperText: errors.password.message })}
                   />
                 )}
@@ -284,29 +280,28 @@ const Register = () => {
                 control={control}
                 defaultValue={false}
                 render={({ field }) => (
-                  <FormControlLabel
-                    control={<Checkbox {...field} color={errors.agree ? 'error' : 'primary'} />}
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-                        <Typography sx={{ color: 'text.secondary' }}>{t('Tôi đồng ý với ')}</Typography>
-                        <Typography component={LinkStyled} href='/' onClick={e => e.preventDefault()} sx={{ ml: 1 }}>
-                          {t('điều khoản và dịch vụ')}
-                        </Typography>
-                      </Box>
-                    }
-                  />
+                  <FormControl error={Boolean(errors.agree)}>
+                    <FormControlLabel
+                      control={<Checkbox {...field} color={errors.agree ? 'error' : 'primary'} />}
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+                          <Typography sx={{ color: 'text.secondary' }}>{t('Tôi đồng ý với ')}</Typography>
+                          <Typography component={LinkStyled} href='/' onClick={e => e.preventDefault()} sx={{ ml: 1 }}>
+                            {t('điều khoản và dịch vụ')}
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                    {errors.agree && <FormHelperText>{errors.agree.message}</FormHelperText>}
+                  </FormControl>
                 )}
               />
-              {errors.agree && (
-                <Typography variant='caption' sx={{ color: 'error.main', mt: 1 }}>
-                  {errors.agree.message}
-                </Typography>
-              )}
+
               {/* </Grid> */}
 
               {/* <Grid item xs={12}> */}
               <Button fullWidth type='submit' variant='contained' sx={{ mb: 4 }}>
-                Sign up
+                {t('Đăng ký')}
               </Button>
               {/* </Grid> */}
               {/* <Grid item xs={12}> */}

@@ -464,9 +464,7 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
-      sectionTitle: 'Forms & Tables',
-      action: 'read',
-      subject: 'acl-page'
+      sectionTitle: 'Forms & Tables'
     },
     {
       title: 'Form Elements',

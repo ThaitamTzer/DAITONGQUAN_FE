@@ -15,11 +15,15 @@ import MuiCard, { CardProps } from '@mui/material/Card'
 // ** Custom Component Import
 import CustomTextField from 'src/@core/components/mui/text-field'
 
+// ** Validation Schema
+import { getForgotPasswordValidationSchema, getValidationMessages } from 'src/configs/validationSchema'
+
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
 
 // ** Configs
 import themeConfig from 'src/configs/themeConfig'
+import { useAuth } from 'src/hooks/useAuth'
 
 // ** Layout Import
 import BlankLayout from 'src/@core/layouts/BlankLayout'
@@ -29,7 +33,6 @@ import AuthIllustrationV1Wrapper from 'src/views/pages/auth/AuthIllustrationV1Wr
 
 // ** Import Third Party
 import { useTranslation } from 'react-i18next'
-import * as yup from 'yup'
 import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 
@@ -47,10 +50,6 @@ const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: theme.typography.body1.fontSize
 }))
 
-const schema = yup.object().shape({
-  email: yup.string().email().required()
-})
-
 interface FormData {
   email: string
 }
@@ -59,14 +58,27 @@ const ForgotPassword = () => {
   // ** Hook
   // const theme = useTheme()
   const { t } = useTranslation()
+  const schema = getForgotPasswordValidationSchema(t)
+  const messages = getValidationMessages(t)
+  const auth = useAuth()
 
   const {
     control,
+    setError,
+    handleSubmit,
     formState: { errors }
   } = useForm<FormData>({
     mode: 'onBlur',
     resolver: yupResolver(schema)
   })
+
+  const onSubmit = (data: FormData) => {
+    const { email } = data
+    auth.forgotPassword({ email }, () => {
+      setError('email', { type: 'manual', message: messages.email.notfound })
+    })
+    sessionStorage.setItem('emailForReset', email)
+  }
 
   return (
     <Box className='content-center'>
@@ -114,7 +126,7 @@ const ForgotPassword = () => {
                 {t(`Nhập email của bạn và chúng tôi sẽ gửi cho bạn một mã để đặt lại mật khẩu của bạn`)}
               </Typography>
             </Box>
-            <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()}>
+            <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
               <Controller
                 name='email'
                 control={control}

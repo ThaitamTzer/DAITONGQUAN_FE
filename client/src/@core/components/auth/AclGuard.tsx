@@ -38,7 +38,6 @@ const AclGuard = (props: AclGuardProps) => {
   // ** Hooks
   const auth = useAuth()
   const router = useRouter()
-  console.log('user role ' + auth.user?.role)
 
   // ** Vars
   let ability: AppAbility
