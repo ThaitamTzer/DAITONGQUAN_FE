@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, SyntheticEvent, Fragment } from 'react'
+import { useState, SyntheticEvent, Fragment, useContext } from 'react'
 
 // ** Next Import
 import { useRouter } from 'next/router'
@@ -22,6 +22,9 @@ import { useAuth } from 'src/hooks/useAuth'
 
 // ** Type Imports
 import { Settings } from 'src/@core/context/settingsContext'
+
+// ** Import Context
+import { AbilityContext } from 'src/layouts/components/acl/Can'
 
 interface Props {
   settings: Settings
@@ -52,9 +55,13 @@ const UserDropdown = (props: Props) => {
   // ** Hooks
   const router = useRouter()
   const { logout } = useAuth()
+  const auth = useAuth()
 
   // ** Vars
   const { direction } = settings
+
+  //** Context
+  const ability = useContext(AbilityContext)
 
   const handleDropdownOpen = (event: SyntheticEvent) => {
     setAnchorEl(event.currentTarget)
@@ -65,6 +72,16 @@ const UserDropdown = (props: Props) => {
       router.push(url)
     }
     setAnchorEl(null)
+  }
+
+  const handleGetRole = () => {
+    if (typeof auth.user?.role === 'string') {
+      return auth.user.role
+    } else if (auth.user?.role && Array.isArray(auth.user.role)) {
+      return auth.user.role.map(roleObj => roleObj.name).join(', ') // Return a comma-separated string of role names
+    } else {
+      return 'Unknown'
+    }
   }
 
   const styles = {
@@ -100,8 +117,11 @@ const UserDropdown = (props: Props) => {
         }}
       >
         <Avatar
-          alt='John Doe'
-          src='/images/avatars/1.png'
+          alt='Avatar'
+          src={
+            auth.user?.avatar ||
+            'https://thumbs.dreamstime.com/b/default-profile-picture-avatar-photo-placeholder-vector-illustration-default-profile-picture-avatar-photo-placeholder-vector-189495158.jpg'
+          }
           onClick={handleDropdownOpen}
           sx={{ width: 38, height: 38 }}
         />
@@ -124,21 +144,32 @@ const UserDropdown = (props: Props) => {
                 horizontal: 'right'
               }}
             >
-              <Avatar alt='John Doe' src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
+              <Avatar
+                alt='Avatar'
+                src={
+                  auth.user?.avatar ||
+                  'https://thumbs.dreamstime.com/b/default-profile-picture-avatar-photo-placeholder-vector-illustration-default-profile-picture-avatar-photo-placeholder-vector-189495158.jpg'
+                }
+                sx={{ width: '2.5rem', height: '2.5rem' }}
+              />
             </Badge>
             <Box sx={{ display: 'flex', ml: 2.5, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 500 }}>John Doe</Typography>
-              <Typography variant='body2'>Admin</Typography>
+              <Typography sx={{ fontWeight: 500 }}>
+                {auth.user?.firstname} {auth.user?.lastname}
+              </Typography>
+              <Typography variant='body2'>{handleGetRole()}</Typography>
             </Box>
           </Box>
         </Box>
         <Divider sx={{ my: theme => `${theme.spacing(2)} !important` }} />
-        <MenuItemStyled sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/user-profile/profile')}>
-          <Box sx={styles}>
-            <Icon icon='tabler:user-check' />
-            My Profile
-          </Box>
-        </MenuItemStyled>
+        {ability.cannot('manage', 'all') && (
+          <MenuItemStyled sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/user-profile/profile')}>
+            <Box sx={styles}>
+              <Icon icon='tabler:user-check' />
+              My Profile
+            </Box>
+          </MenuItemStyled>
+        )}
         <MenuItemStyled sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/account-settings/account')}>
           <Box sx={styles}>
             <Icon icon='tabler:settings' />

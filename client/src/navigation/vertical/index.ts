@@ -69,7 +69,9 @@ const navigation = (): VerticalNavItemsType => {
       children: [
         {
           title: 'List',
-          path: '/apps/user/list'
+          path: '/apps/user/list',
+          subject: 'user',
+          action: 'read'
         },
         {
           title: 'View',
@@ -573,7 +575,7 @@ const navigation = (): VerticalNavItemsType => {
     {
       path: '/acl',
       action: 'read',
-      subject: 'acl-page',
+      subject: 'member-page',
       icon: 'tabler:shield',
       title: 'Access Control'
     },

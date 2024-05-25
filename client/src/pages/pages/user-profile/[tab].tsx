@@ -37,5 +37,8 @@ export const getStaticProps: GetStaticProps = async ({ params }: GetStaticPropsC
     }
   }
 }
-
+UserProfileTab.acl = {
+  action: 'read',
+  subject: 'member-page'
+}
 export default UserProfileTab

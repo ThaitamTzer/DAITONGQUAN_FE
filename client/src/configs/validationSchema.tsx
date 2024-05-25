@@ -4,7 +4,15 @@ const MAX_EMAIL_LENGTH = 100
 const MAX_PASSWORD_LENGTH = 50
 const MAX_USERNAME_LENGTH = 50
 const MIN_PASSWORD_LENGTH = 5
+const MIN_FIRSTNAME_LENGTH = 2 // Họ và tên đệm
+const MAX_FIRSTNAME_LENGTH = 20
+const MIN_LASTNAME_LENGTH = 1 // Tên
+const MAX_ADDRESS_LENGTH = 100
+const MIN_ADDRESS_LENGTH = 5
+const MAX_NICKNAME_LENGTH = 10
+const MAX_PHONE_LENGTH = 11
 const CODE_LENGTH = 6
+const MAX_DESCRIPTINO_LENGTH = 100
 
 export const getValidationMessages = (t: (arg0: string) => any) => ({
   email: {
@@ -25,8 +33,36 @@ export const getValidationMessages = (t: (arg0: string) => any) => ({
     number: t('Mật khẩu phải chứa ít nhất một số')
   },
   username: {
-    required: t('Tên người dùng không được để trống'),
-    max: t(`Tên người dùng không được quá ${MAX_USERNAME_LENGTH} ký tự`)
+    required: t('Tên tài khoản không được để trống'),
+    max: t(`Tên tài khoản không được quá ${MAX_USERNAME_LENGTH} ký tự`)
+  },
+  firstname: {
+    required: t('Họ không được để trống'),
+    min: t(`Họ phải có ít nhất ${MIN_FIRSTNAME_LENGTH} ký tự`),
+    max: t(`Họ không được quá ${MAX_FIRSTNAME_LENGTH} ký tự`)
+  },
+  lastname: {
+    required: t('Tên không được để trống'),
+    max: t(`Tên không được quá ${MAX_FIRSTNAME_LENGTH} ký tự`),
+    min: t(`Tên phải có ít nhất ${MIN_LASTNAME_LENGTH} ký tự`)
+  },
+  dateOfBirth: {
+    required: t('Ngày sinh không được để trống')
+  },
+  gender: {
+    required: t('Giới tính không được để trống')
+  },
+  address: {
+    max: t(`Địa chỉ không được quá ${MAX_ADDRESS_LENGTH} ký tự`),
+    min: t(`Địa chỉ phải có ít nhất ${MIN_ADDRESS_LENGTH} ký tự`)
+  },
+  nickname: {
+    max: t(`Biệt danh không được quá ${MAX_NICKNAME_LENGTH} ký tự`)
+  },
+  phone: {
+    max: t(`Số điện thoại không được quá ${MAX_PHONE_LENGTH} ký tự`),
+    min: t(`Số điện thoại phải có ít nhất 10 ký tự`),
+    number: t('Số điện thoại không hợp lệ')
   },
   agreement: {
     required: t('*Bạn phải đồng ý với điều khoản và dịch vụ')
@@ -44,6 +80,15 @@ export const getValidationMessages = (t: (arg0: string) => any) => ({
     max: t('Mã đặt lại không quá 6 số'),
     min: t('Mã đặt lại phải có ít nhất 6 số'),
     required: t('Cần phải nhập vào Mã đặt lại')
+  },
+  province: {
+    required: t('Tỉnh/Thành phố không được để trống')
+  },
+  district: {
+    required: t('Quận/Huyện không được để trống')
+  },
+  ward: {
+    required: t('Phường/Xã không được để trống')
   }
 })
 
@@ -68,6 +113,16 @@ export const getRegisterValidationSchema = (t: (arg0: string) => any) => {
   const messages = getValidationMessages(t)
 
   return yup.object().shape({
+    firstname: yup
+      .string()
+      .required(messages.firstname.required)
+      .min(MIN_FIRSTNAME_LENGTH, messages.firstname.min)
+      .max(MAX_FIRSTNAME_LENGTH, messages.firstname.max),
+    lastname: yup
+      .string()
+      .required(messages.lastname.required)
+      .max(MAX_FIRSTNAME_LENGTH, messages.lastname.max)
+      .min(MIN_LASTNAME_LENGTH, messages.lastname.min),
     email: yup
       .string()
       .email(messages.email.email)
@@ -133,5 +188,37 @@ export const getResetPasswordValidationSchema = (t: (arg0: string) => any) => {
       .max(CODE_LENGTH, messages.code.max)
       .min(CODE_LENGTH, messages.code.min)
       .required(messages.code.required)
+  })
+}
+
+export const getProfileValidationSchema = (t: (arg0: string) => any) => {
+  const messages = getValidationMessages(t)
+
+  return yup.object().shape({
+    firstname: yup
+      .string()
+      .required(messages.firstname.required)
+      .min(MIN_FIRSTNAME_LENGTH, messages.firstname.min)
+      .max(MAX_FIRSTNAME_LENGTH, messages.firstname.max),
+    lastname: yup
+      .string()
+      .required(messages.lastname.required)
+      .max(MAX_FIRSTNAME_LENGTH, messages.lastname.max)
+      .min(MIN_LASTNAME_LENGTH, messages.lastname.min),
+    email: yup
+      .string()
+      .email(messages.email.email)
+      .required(messages.email.required)
+      .max(MAX_EMAIL_LENGTH, messages.email.max)
+      .matches(/^\S*$/, messages.noWhitespace),
+    dateOfBirth: yup.string().required(messages.dateOfBirth.required),
+    streetName: yup.string().max(MAX_ADDRESS_LENGTH, messages.address.max),
+    phone: yup
+      .string()
+      .max(MAX_PHONE_LENGTH, messages.phone.max)
+      .matches(/^[0-9]*$/, messages.phone.number),
+    nickname: yup.string().max(MAX_NICKNAME_LENGTH, messages.nickname.max),
+    gender: yup.string().required(messages.gender.required),
+    desciption: yup.string().max(MAX_DESCRIPTINO_LENGTH)
   })
 }

@@ -22,7 +22,7 @@ const PickersMinMax = ({ popperPlacement }: { popperPlacement: ReactDatePickerPr
 
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap' }} className='demo-space-x'>
-      <div>
+      <div> 
         <DatePicker
           id='min-date'
           selected={minDate}

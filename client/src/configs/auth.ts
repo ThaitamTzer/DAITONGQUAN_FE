@@ -8,5 +8,6 @@ export default {
   refreshTokenEndpoint: '/auth/refresh-token',
   getUserInfoEndpoint: '/users/view-profile',
   storageTokenKeyName: 'access_token',
-  onTokenExpiration: 'refreshToken' // logout | refreshToken
+  onTokenExpiration: 'refreshToken', // logout | refreshToken
+  secretKey: process.env.NEXT_PUBLIC_SECRET_KEY
 }

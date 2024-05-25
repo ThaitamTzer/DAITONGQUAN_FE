@@ -10,13 +10,15 @@ export type RegisterParams = {
   email: string
   password: string
   username: string
+  lastname: string
+  firstname: string
 }
 
 // export type UserDataType = {
 //   _id: string
 //   role: string
 //   email: string
-//   fullName: string
+//   fullname: string
 //   username: string
 //   password: string
 //   avatar?: string | null
@@ -25,10 +27,25 @@ export type RegisterParams = {
 
 export type UserDataType = {
   username: string
+  firstname: string
+  lastname: string
+  name: string
   email: string
+  nickname: string | null
+  status: string
+  gender: string | null
+  phone: string
+  description: string
+  rank: string
   avatar: string
+  dateOfBirth: Date | undefined
   address?: string | null
-  role: string
+  role:
+    | string
+    | {
+        name: string
+      } // Assuming it's a string here
+  permissionIDs: number[]
   createdAt: string
   _id: string
 }

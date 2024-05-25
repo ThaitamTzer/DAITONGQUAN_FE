@@ -41,7 +41,7 @@ axiosClient.interceptors.response.use(
         )
         if (response.status === 201) {
           localStorage.setItem(authConfig.onTokenExpiration, response.data.refreshToken)
-          localStorage.setItem(authConfig.storageTokenKeyName, response.data.accessToken)
+          localStorage.setItem(authConfig.storageTokenKeyName, response.data.access_token)
 
           return axios(prevRequest)
         }

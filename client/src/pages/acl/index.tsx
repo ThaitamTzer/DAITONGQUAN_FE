@@ -26,7 +26,7 @@ const ACLPage = () => {
           </CardContent>
         </Card>
       </Grid>
-      {ability?.can('read', 'analytics') ? (
+      {ability?.can('read', 'user') ? (
         <Grid item md={6} xs={12}>
           <Card>
             <CardHeader title='Analytics' />
@@ -43,7 +43,7 @@ const ACLPage = () => {
 
 ACLPage.acl = {
   action: 'read',
-  subject: 'acl-page'
+  subject: 'member-page'
 }
 
 export default ACLPage

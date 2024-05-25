@@ -9,14 +9,20 @@ import CardContent from '@mui/material/CardContent'
 import Icon from 'src/@core/components/icon'
 
 // ** Types
-import { ProfileTeamsType, ProfileTabCommonType } from 'src/@fake-db/types'
+import { ProfileTabCommonType } from 'src/types/apps/profileType'
 
-interface Props {
-  teams: ProfileTeamsType[]
-  about: ProfileTabCommonType[]
-  contacts: ProfileTabCommonType[]
-  overview: ProfileTabCommonType[]
-}
+import { getProfileData } from 'src/metadata/profileData'
+import useSWR from 'swr'
+
+// ** Import hooks
+import { useAuth } from 'src/hooks/useAuth'
+import userProfileService from 'src/service/userProfileService.service'
+
+// interface Props {
+//   about: ProfileTabCommonType[]
+//   contacts: ProfileTabCommonType[]
+//   overview: ProfileTabCommonType[]
+// }
 
 const renderList = (arr: ProfileTabCommonType[]) => {
   if (arr && arr.length) {
@@ -38,9 +44,7 @@ const renderList = (arr: ProfileTabCommonType[]) => {
             <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>
               {`${item.property.charAt(0).toUpperCase() + item.property.slice(1)}:`}
             </Typography>
-            <Typography sx={{ color: 'text.secondary' }}>
-              {item.value.charAt(0).toUpperCase() + item.value.slice(1)}
-            </Typography>
+            <Typography sx={{ color: 'text.secondary' }}>{item.value}</Typography>
           </Box>
         </Box>
       )
@@ -50,37 +54,44 @@ const renderList = (arr: ProfileTabCommonType[]) => {
   }
 }
 
-const renderTeams = (arr: ProfileTeamsType[]) => {
-  if (arr && arr.length) {
-    return arr.map((item, index) => {
-      return (
-        <Box
-          key={index}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            '&:not(:last-of-type)': { mb: 3 },
-            '& svg': { color: `${item.color}.main` }
-          }}
-        >
-          <Icon fontSize='1.25rem' icon={item.icon} />
+// const renderTeams = (arr: ProfileTeamsType[]) => {
+//   if (arr && arr.length) {
+//     return arr.map((item, index) => {
+//       return (
+//         <Box
+//           key={index}
+//           sx={{
+//             display: 'flex',
+//             alignItems: 'center',
+//             '&:not(:last-of-type)': { mb: 3 },
+//             '& svg': { color: `${item.color}.main` }
+//           }}
+//         >
+//           <Icon fontSize='1.25rem' icon={item.icon} />
 
-          <Typography sx={{ mx: 2, fontWeight: 500, color: 'text.secondary' }}>
-            {item.property.charAt(0).toUpperCase() + item.property.slice(1)}
-          </Typography>
-          <Typography sx={{ color: 'text.secondary' }}>
-            {item.value.charAt(0).toUpperCase() + item.value.slice(1)}
-          </Typography>
-        </Box>
-      )
-    })
-  } else {
-    return null
+//           <Typography sx={{ mx: 2, fontWeight: 500, color: 'text.secondary' }}>
+//             {item.property.charAt(0).toUpperCase() + item.property.slice(1)}
+//           </Typography>
+//           <Typography sx={{ color: 'text.secondary' }}>
+//             {item.value.charAt(0).toUpperCase() + item.value.slice(1)}
+//           </Typography>
+//         </Box>
+//       )
+//     })
+//   } else {
+//     return null
+//   }
+// }
+
+const AboutOverivew = () => {
+  // lấy dữ liệu từ data lưu vào auth.user
+  const { user, setUser } = useAuth()
+  const { data } = useSWR('GET_PROFILE_DATA', userProfileService.getUserProfile)
+
+  if (data && data.data) {
+    setUser(data.data)
   }
-}
-
-const AboutOverivew = (props: Props) => {
-  const { teams, about, contacts, overview } = props
+  const { about, contacts, overview } = getProfileData.profile(user)
 
   return (
     <Grid container spacing={6}>
@@ -99,12 +110,6 @@ const AboutOverivew = (props: Props) => {
               </Typography>
               {renderList(contacts)}
             </Box>
-            <div>
-              <Typography variant='body2' sx={{ mb: 4, color: 'text.disabled', textTransform: 'uppercase' }}>
-                Teams
-              </Typography>
-              {renderTeams(teams)}
-            </div>
           </CardContent>
         </Card>
       </Grid>

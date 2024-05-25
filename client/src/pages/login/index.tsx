@@ -28,9 +28,6 @@ import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useTranslation } from 'react-i18next'
 
-// ** Configs
-import themeConfig from 'src/configs/themeConfig'
-
 // ** Validation Schema
 import { getLoginValidationSchema, getValidationMessages } from 'src/configs/validationSchema'
 
@@ -77,7 +74,7 @@ const LoginPage = () => {
     control,
     handleSubmit,
     setError,
-    formState: { errors }
+    formState: { errors, isValid }
   } = useForm<FormData>({
     mode: 'onBlur',
     resolver: yupResolver(schema)
@@ -128,12 +125,7 @@ const LoginPage = () => {
                 />
               </svg> */}
               <Typography variant='h3' sx={{ ml: 2.5, fontWeight: 700 }}>
-                {themeConfig.templateName}
-              </Typography>
-            </Box>
-            <Box sx={{ mb: 6 }}>
-              <Typography variant='h4' sx={{ mb: 1.5, whiteSpace: 'pre-line' }}>
-                {`${t('Chào mừng đến với')}\n${themeConfig.templateName}! 👋🏻`}
+                {t('Đăng Nhập')}
               </Typography>
             </Box>
             <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
@@ -208,7 +200,7 @@ const LoginPage = () => {
                   {t('Quên mật khẩu?')}
                 </Typography>
               </Box>
-              <Button fullWidth type='submit' variant='contained' sx={{ mb: 4 }}>
+              <Button fullWidth disabled={!isValid} type='submit' variant='contained' sx={{ mb: 4 }}>
                 {t('Đăng Nhập')}
               </Button>
               <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>

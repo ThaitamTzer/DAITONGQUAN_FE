@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography'
 
 // ** Third Party Imports
 import { ReactDatePickerProps } from 'react-datepicker'
+import addDays from 'date-fns/addDays'
 
 // ** Custom Components Imports
 import PageHeader from 'src/@core/components/page-header'

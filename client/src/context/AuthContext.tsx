@@ -20,9 +20,8 @@ import {
 
 // ** Authentication Service
 import axiosClient, { axiosAuth } from 'src/lib/axios'
-
-// ** Import Third Party
-// import { jwtDecode } from 'jwt-decode'
+import { jwtDecode } from 'jwt-decode'
+import { JwtPayload } from 'jsonwebtoken' // Import JwtPayload from 'jsonwebtoken'
 
 // ** Defaults
 const defaultProvider: AuthValuesType = {
@@ -54,22 +53,43 @@ const AuthProvider = ({ children }: Props) => {
   useEffect(() => {
     const initAuth = async (): Promise<void> => {
       setLoading(true)
-      axiosClient
-        .get(authConfig.getUserInfoEndpoint)
-        .then(async response => {
-          // console.log('response: ', response)
-          setLoading(false)
-          setUser({ ...response.data })
-          window.localStorage.setItem('userData', JSON.stringify({ ...response.data }))
-        })
-        .catch(() => {
-          localStorage.removeItem('userData')
-          localStorage.removeItem('refreshToken')
-          localStorage.removeItem('accessToken')
-          setUser(null)
-          setLoading(false)
-          router.replace('/login')
-        })
+
+      try {
+        // Check if the user role is available in local storage
+        const storedUserDataString = window.localStorage.getItem('access_token')
+
+        // console.log('storedUserDataString: ', storedUserDataString)
+
+        if (storedUserDataString) {
+          const decodeStoredUserDataString = jwtDecode(storedUserDataString) as JwtPayload // Add 'as JwtPayload' to cast the decoded data as JwtPayload
+          // console.log('decodeStoredUserDataString: ', decodeStoredUserDataString)
+
+          const storedUserData = decodeStoredUserDataString as UserDataType // Cast storedUserData as UserDataType
+
+          const isRoleArray = Array.isArray(storedUserData.role)
+          if (isRoleArray) {
+            setUser(storedUserData)
+            setLoading(false)
+
+            return // Exit early if admin user info is already in local storage
+          }
+        }
+
+        // If not admin or user info not in storage, fetch user info from API
+        const response = await axiosClient.get(authConfig.getUserInfoEndpoint)
+
+        setLoading(false)
+        setUser({ ...response.data })
+
+        // window.localStorage.setItem('userData', JSON.stringify({ ...response.data }))
+      } catch (error) {
+        localStorage.removeItem('userData')
+        localStorage.removeItem('refreshToken')
+        localStorage.removeItem('access_token')
+        setUser(null)
+        setLoading(false)
+        router.replace('/login')
+      }
     }
 
     initAuth()
@@ -84,15 +104,37 @@ const AuthProvider = ({ children }: Props) => {
         params.rememberMe && window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.access_token)
         const returnUrl = router.query.returnUrl
 
-        setUser({ ...response.data.user })
-        window.localStorage.setItem('userData', JSON.stringify({ ...response.data.user }))
+        const userData = response.data.user
+        const role = userData.role
+
+        if (Array.isArray(role)) {
+          // Role is an array (admin): use storedUserData from useEffect
+          const storedUserDataString = window.localStorage.getItem('access_token')
+          const decodeStoredUserDataString = storedUserDataString
+            ? (jwtDecode(storedUserDataString) as JwtPayload)
+            : null
+          const storedUserData = decodeStoredUserDataString as UserDataType
+          const adminData = storedUserData.fullname
+          console.log('storedUserData: ', adminData)
+
+          window.localStorage.setItem('userData', JSON.stringify(adminData))
+
+          setUser(storedUserData) // Assuming you have storedUserData available
+        } else if (typeof role === 'string') {
+          // Role is a string (regular user): store userData in localStorage
+          setUser(userData)
+          window.localStorage.setItem('userData', JSON.stringify(userData))
+        } else {
+          // Handle unexpected role types (if necessary)
+          console.error('Unexpected role type:', role)
+
+          // You might want to throw an error or handle it gracefully
+        }
+
         window.localStorage.setItem('refreshToken', response.data.refreshToken)
-
         const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
-
         router.replace(redirectURL as string)
       })
-
       .catch(err => {
         if (errorCallback) errorCallback(err)
       })
@@ -101,9 +143,8 @@ const AuthProvider = ({ children }: Props) => {
   const handleLogout = (refreshToken: string, errorCallback?: ErrCallbackType) => {
     try {
       refreshToken = refreshToken || window.localStorage.getItem('refreshToken') || ''
-      console.log('refreshToken: ', refreshToken)
       axiosAuth
-        .delete(authConfig.logoutEndpoint, { data: { refreshToken } })
+        .patch(authConfig.logoutEndpoint, { refreshToken }, {})
         .then(() => {
           router.push('/login')
           localStorage.removeItem('userData')

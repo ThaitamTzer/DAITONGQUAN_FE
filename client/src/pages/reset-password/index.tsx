@@ -82,7 +82,7 @@ const ResetPassword = () => {
     control,
     handleSubmit,
     setError,
-    formState: { errors }
+    formState: { errors, isValid }
   } = useForm<FormData>({
     mode: 'onBlur',
     resolver: yupResolver(schema)
@@ -243,7 +243,7 @@ const ResetPassword = () => {
                   />
                 )}
               />
-              <Button fullWidth type='submit' variant='contained' sx={{ mb: 4 }}>
+              <Button fullWidth disabled={!isValid} type='submit' variant='contained' sx={{ mb: 4 }}>
                 {t('Đặt mật khẩu mới')}
               </Button>
               <Typography sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', '& svg': { mr: 1 } }}>

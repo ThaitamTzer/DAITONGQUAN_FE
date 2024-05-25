@@ -9,19 +9,18 @@ import PageHeader from 'src/@core/components/page-header'
 import Table from 'src/views/apps/roles/Table'
 import RoleCards from 'src/views/apps/roles/RoleCards'
 
+// ** Import Third Party
+import { useTranslation } from 'react-i18next'
+
 const RolesComponent = () => {
+  const { t } = useTranslation()
+
   return (
     <Grid container spacing={6}>
       <PageHeader
         title={
           <Typography variant='h4' sx={{ mb: 6 }}>
-            Roles List
-          </Typography>
-        }
-        subtitle={
-          <Typography sx={{ color: 'text.secondary' }}>
-            A role provided access to predefined menus and features so that depending on <br /> assigned role an
-            administrator can have access to what he need
+            {t('Danh sách vai trò')}
           </Typography>
         }
       />

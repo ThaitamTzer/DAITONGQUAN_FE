@@ -10,11 +10,16 @@ import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
+import Grid from '@mui/material/Grid'
 import CardContent from '@mui/material/CardContent'
 import { styled, useTheme } from '@mui/material/styles'
 import MuiCard, { CardProps } from '@mui/material/Card'
 import InputAdornment from '@mui/material/InputAdornment'
 import MuiFormControlLabel, { FormControlLabelProps } from '@mui/material/FormControlLabel'
+import { FormControl, FormHelperText } from '@mui/material'
+
+// ** Hooks
+import { useAuth } from 'src/hooks/useAuth'
 
 // ** Custom Component Import
 import CustomTextField from 'src/@core/components/mui/text-field'
@@ -61,16 +66,14 @@ const CustomTextFieldStyled = styled(CustomTextField)(({ theme }) => ({
   marginBottom: theme.spacing(3)
 }))
 
-import { useAuth } from 'src/hooks/useAuth'
-import { FormControl, FormHelperText } from '@mui/material'
-
 interface State {
-  password: string
   showPassword: boolean
   showComfirmPassword: boolean
 }
 
 interface FormData {
+  firstname: string
+  lastname: string
   email: string
   password: string
   comfirmPassword: string
@@ -81,7 +84,6 @@ interface FormData {
 const Register = () => {
   // ** States
   const [values, setValues] = useState<State>({
-    password: '',
     showPassword: false,
     showComfirmPassword: false
   })
@@ -97,21 +99,21 @@ const Register = () => {
     control,
     handleSubmit,
     setError,
-    formState: { errors }
+    formState: { errors, isValid }
   } = useForm<FormData>({
     mode: 'onBlur',
     resolver: yupResolver(schema)
   })
 
   const onSubmit = async (data: FormData) => {
-    const { email, password, agree, username } = data
+    const { email, password, agree, username, firstname, lastname } = data
     if (!agree) {
       setError('agree', { message: messages.agreement.required })
 
       return
     }
     try {
-      await auth.register({ email, password, username }, () => {
+      await auth.register({ email, password, username, firstname, lastname }, () => {
         setError('email', { message: messages.email.exists })
       })
     } catch (error) {
@@ -170,16 +172,58 @@ const Register = () => {
               </Typography>
             </Box>
             <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
+              <Grid container spacing={3}>
+                <Grid item sm={6} xs={12}>
+                  <Controller
+                    name='firstname'
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <CustomTextFieldStyled
+                        autoFocus
+                        fullWidth
+                        id='firstname'
+                        label={t('Họ')}
+                        placeholder='David Ngô Ngọc'
+                        value={value}
+                        onChange={onChange}
+                        onBlur={onBlur}
+                        error={Boolean(errors.firstname)}
+                        {...(errors.firstname && { helperText: errors.firstname.message })}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item sm={6} xs={12}>
+                  <Controller
+                    name='lastname'
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <CustomTextFieldStyled
+                        fullWidth
+                        id='lastname'
+                        label={t('Tên')}
+                        placeholder='David Ngô Ngọc'
+                        value={value}
+                        onChange={onChange}
+                        onBlur={onBlur}
+                        error={Boolean(errors.lastname)}
+                        {...(errors.lastname && { helperText: errors.lastname.message })}
+                      />
+                    )}
+                  />
+                </Grid>
+              </Grid>
               <Controller
                 name='username'
                 control={control}
                 rules={{ required: true }}
                 render={({ field: { value, onChange, onBlur } }) => (
                   <CustomTextFieldStyled
-                    autoFocus
                     fullWidth
-                    id='fullName'
-                    label={t('Tên người dùng')}
+                    id='username'
+                    label={t('Tên tài khoản')}
                     placeholder='DavidNguyen222'
                     value={value}
                     onChange={onChange}
@@ -300,7 +344,7 @@ const Register = () => {
               {/* </Grid> */}
 
               {/* <Grid item xs={12}> */}
-              <Button fullWidth type='submit' variant='contained' sx={{ mb: 4 }}>
+              <Button fullWidth type='submit' disabled={!isValid} variant='contained' sx={{ mb: 4 }}>
                 {t('Đăng ký')}
               </Button>
               {/* </Grid> */}

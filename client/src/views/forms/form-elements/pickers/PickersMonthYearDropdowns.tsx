@@ -6,6 +6,7 @@ import Box from '@mui/material/Box'
 
 // ** Third Party Imports
 import DatePicker, { ReactDatePickerProps } from 'react-datepicker'
+import addDays from 'date-fns/addDays'
 
 // ** Types
 import { DateType } from 'src/types/forms/reactDatepickerTypes'
@@ -22,6 +23,7 @@ const PickersMonthYearDropdowns = ({
   const [year, setYear] = useState<DateType>(new Date())
   const [month, setMonth] = useState<DateType>(new Date())
   const [monthYear, setMonthYear] = useState<DateType>(new Date())
+  const [maxDate, setMaxDate] = useState<DateType>(new Date())
 
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap' }} className='demo-space-x'>
@@ -51,6 +53,8 @@ const PickersMonthYearDropdowns = ({
         <DatePicker
           showYearDropdown
           showMonthDropdown
+          maxDate={addDays(new Date(), 5)}
+          dropdownMode='select'
           selected={monthYear}
           id='month-year-dropdown'
           placeholderText='MM-DD-YYYY'

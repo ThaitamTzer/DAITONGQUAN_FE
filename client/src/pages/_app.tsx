@@ -6,6 +6,7 @@ import Head from 'next/head'
 import { Router } from 'next/router'
 import type { NextPage } from 'next'
 import type { AppProps } from 'next/app'
+import { NextIntlClientProvider } from 'next-intl'
 
 // ** Store Imports
 import { store } from 'src/store'
@@ -131,24 +132,48 @@ const App = (props: ExtendedAppProps) => {
         </Head>
 
         <AuthProvider>
-          <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
-            <SettingsConsumer>
-              {({ settings }) => {
-                return (
-                  <ThemeComponent settings={settings}>
-                    <Guard authGuard={authGuard} guestGuard={guestGuard}>
-                      <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
-                        {getLayout(<Component {...pageProps} />)}
-                      </AclGuard>
-                    </Guard>
-                    <ReactHotToast>
-                      <Toaster position={settings.toastPosition} toastOptions={{ className: 'react-hot-toast' }} />
-                    </ReactHotToast>
-                  </ThemeComponent>
-                )
-              }}
-            </SettingsConsumer>
-          </SettingsProvider>
+          <NextIntlClientProvider
+            locale='vn-VN'
+            formats={{
+              dateTime: {
+                short: {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric'
+                }
+              },
+              number: {
+                precise: {
+                  maximumFractionDigits: 5
+                }
+              },
+              list: {
+                enumeration: {
+                  style: 'long',
+                  type: 'conjunction'
+                }
+              }
+            }}
+          >
+            <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
+              <SettingsConsumer>
+                {({ settings }) => {
+                  return (
+                    <ThemeComponent settings={settings}>
+                      <Guard authGuard={authGuard} guestGuard={guestGuard}>
+                        <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
+                          {getLayout(<Component {...pageProps} />)}
+                        </AclGuard>
+                      </Guard>
+                      <ReactHotToast>
+                        <Toaster position={settings.toastPosition} toastOptions={{ className: 'react-hot-toast' }} />
+                      </ReactHotToast>
+                    </ThemeComponent>
+                  )
+                }}
+              </SettingsConsumer>
+            </SettingsProvider>
+          </NextIntlClientProvider>
         </AuthProvider>
       </CacheProvider>
     </Provider>
