@@ -1,49 +1,26 @@
-// ** React Imports
 import { Ref, useState, forwardRef, ReactElement } from 'react'
-
-// ** MUI Imports
-import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
 import Dialog from '@mui/material/Dialog'
 import Button from '@mui/material/Button'
 import MenuItem from '@mui/material/MenuItem'
-import Typography from '@mui/material/Typography'
 import Fade, { FadeProps } from '@mui/material/Fade'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import TextField from '@mui/material/TextField'
 import DatePicker from 'react-datepicker'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
-
-// import { SelectChangeEvent } from '@mui/material/Select'
-// import Switch from '@mui/material/Switch'
-// import Chip from '@mui/material/Chip'
-// import FormControlLabel from '@mui/material/FormControlLabel'
-// import FormControl from '@mui/material/FormControl'
-// import Select from '@mui/material/Select'
-// import InputLabel from '@mui/material/InputLabel'
-
-// ** Custom Component Import
-// import CustomTextField from 'src/@core/components/mui/text-field'
-
-// ** Import hooks
 import { useAuth } from 'src/hooks/useAuth'
-
-// ** Import third party
 import { useTranslation } from 'react-i18next'
 import { useFormatter } from 'next-intl'
-
-// import addDays from 'date-fns/addDays'
+import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { getProfileValidationSchema } from 'src/configs/validationSchema'
 import { addDays } from 'date-fns'
-import useSWR from 'swr'
+import useSWR, { mutate } from 'swr'
 import addressService from 'src/service/address.service'
 import userProfileService from 'src/service/userProfileService.service'
-
-// import { useFormatter } from 'next-intl'
 
 const Transition = forwardRef(function Transition(
   props: FadeProps & { children?: ReactElement<any, any> },
@@ -57,7 +34,7 @@ interface FormData {
   lastname: string
   gender: string
   email: string
-  dateOfBirth: Date
+  dateOfBirth: Date | undefined
   address: string
   nickname: string
   description: string
@@ -66,13 +43,10 @@ interface FormData {
   district: string
   ward: string
   streetName: string | ''
-  desciption: string | ''
 }
 
 const UpdateUserProfile = () => {
-  // ** States
   const [show, setShow] = useState<boolean>(false)
-
   const [provinceID, setProvinceID] = useState<number>()
   const [districtID, setDistrictID] = useState<number>()
   const [province, setProvince] = useState<string>('')
@@ -80,12 +54,11 @@ const UpdateUserProfile = () => {
   const [ward, setWard] = useState<string>('')
   const [streetName, setStreetName] = useState<string>('')
   const auth = useAuth()
+  const { setUser } = useAuth()
   const { t } = useTranslation()
   const schema = getProfileValidationSchema(t)
-
   const format = useFormatter()
 
-  // ** Fetch data
   const { data: provinceData } = useSWR('GET_ALL_PROVINCE', addressService.getProvince, {
     revalidateOnFocus: false
   })
@@ -102,23 +75,10 @@ const UpdateUserProfile = () => {
     { revalidateOnFocus: false }
   )
 
-  const ITEM_HEIGHT = 48
-  const ITEM_PADDING_TOP = 8
-  const MenuProps = {
-    PaperProps: {
-      style: {
-        width: 250,
-        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP
-      }
-    }
-  }
-
   const handleDiscard = () => {
     setShow(false)
-
-    // Reset form values to initial state
     reset({
-      firstname: auth.user?.firstname || '', // Reset to user's original data or empty
+      firstname: auth.user?.firstname || '',
       lastname: auth.user?.lastname || '',
       gender: auth.user?.gender || '',
       email: auth.user?.email || '',
@@ -128,8 +88,6 @@ const UpdateUserProfile = () => {
       phone: auth.user?.phone || '',
       dateOfBirth: auth.user?.dateOfBirth ? new Date(auth.user?.dateOfBirth) : undefined
     })
-
-    // Reset other states (province, district, etc.)
     setProvince('')
     setDistrict('')
     setWard('')
@@ -137,98 +95,67 @@ const UpdateUserProfile = () => {
   }
 
   const handleDivideAddress = (address: string) => {
-    return new Promise<void>((resolve, reject) => {
-      try {
-        if (address || '') {
-          const currentAddress = address.split(', ')
-          const reverseAddress = currentAddress.reverse()
-          setProvince(reverseAddress[0])
-          setDistrict(reverseAddress[1])
-          setWard(reverseAddress[2])
-          if (reverseAddress.length > 3) {
-            setStreetName(reverseAddress[3])
-          }
-
-          const foundProvince = provinceData?.find(
-            (item: any) => item.province_name === reverseAddress[0] // Match province name
-          )
-
-          if (foundProvince) {
-            setProvinceID(foundProvince.province_id)
-            console.log('Province ID:', foundProvince.province_id)
-          } else {
-            console.log('Province not found')
-          }
-
-          // Wait for provinceID to be available, then find the district
-          if (foundProvince) {
-            setTimeout(() => {
-              const foundDistrict = districtData?.find(
-                (item: any) => item.district_name === reverseAddress[1] // Match district name
-              )
-              if (foundDistrict) {
-                setDistrictID(foundDistrict.district_id)
-                console.log('District ID:', foundDistrict.district_id)
-              }
-              resolve()
-            }, 0)
-          } else {
-            resolve()
-          }
-
-          setShow(true)
-        } else {
-          resolve()
-        }
-      } catch (error) {
-        reject(error)
+    if (address || '') {
+      const currentAddress = address.split(', ')
+      const reverseAddress = currentAddress.reverse()
+      setProvince(reverseAddress[0])
+      setDistrict(reverseAddress[1])
+      setWard(reverseAddress[2])
+      if (reverseAddress.length > 3) {
+        setStreetName(reverseAddress[3])
       }
-    })
-  }
-
-  const handleAddress = (province: string, district: string, ward: string, streetName: string) => {
-    const capitalizeWords = (str: string) =>
-      str
-        .toLowerCase()
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ')
-
-    const formattedProvince = capitalizeWords(province)
-    const formattedDistrict = capitalizeWords(district)
-    const formattedWard = capitalizeWords(ward)
-    const formattedStreetName = streetName ? capitalizeWords(streetName) : ''
-
-    if (formattedStreetName) {
-      return `${formattedStreetName}, ${formattedWard}, ${formattedDistrict}, ${formattedProvince}`
-    } else {
-      return `${formattedWard}, ${formattedDistrict}, ${formattedProvince}`
+      const foundProvince = provinceData?.find((item: any) => item.province_name === reverseAddress[0])
+      if (foundProvince) {
+        setProvinceID(foundProvince.province_id)
+        setTimeout(() => {
+          const foundDistrict = districtData?.find((item: any) => item.district_name === reverseAddress[1])
+          setTimeout(() => {
+            if (foundDistrict) {
+              setDistrictID(foundDistrict.district_id)
+            }
+          }, 500)
+        }, 800)
+      }
+      setShow(true)
     }
+    setShow(true)
   }
 
   const {
     control,
     handleSubmit,
-    setError,
     reset,
-    formState: { errors }
+    formState: { errors, isValid }
   } = useForm<FormData>({
     mode: 'onBlur',
     resolver: yupResolver(schema)
   })
 
   const onSubmit = async (data: FormData) => {
-    const { firstname, lastname, email, gender, address, nickname, desciption, dateOfBirth } = data
-    userProfileService.updateUserProfile({
-      firstname,
-      lastname,
-      email,
-      description,
-      address, // Combine address
-      nickname,
-      
-    })
+    console.log('Form Data:', data)
+    try {
+      const updatedProfile = {
+        ...data,
+        address: `${data.streetName}, ${data.ward}, ${data.district}, ${data.province}`
+      }
+      await userProfileService.updateUserProfile(updatedProfile)
 
+      // Updating the user context
+      setUser({
+        ...auth.user,
+        ...updatedProfile
+      })
+
+      // Optionally, you can use mutate if you're using SWR to revalidate the data
+      mutate('GET_USER_PROFILE')
+
+      setShow(false)
+      toast.success('Profile updated successfully!')
+    } catch (error) {
+      console.error('Update profile error:', error)
+      toast.error('Failed to update profile.')
+    }
+  }
 
   return (
     <Card>
@@ -251,365 +178,314 @@ const UpdateUserProfile = () => {
             pt: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
           }}
         >
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Typography variant='h3' sx={{ mb: 3 }}>
-              {t('Thay đổi thông tin cá nhân')}
-            </Typography>
-          </Box>
-          <Grid container spacing={6}>
-            <Grid item sm={4} xs={12}>
-              <Controller
-                control={control}
-                name='firstname'
-                defaultValue={auth.user?.firstname || ''}
-                rules={{ required: true }}
-                render={({ field: { value, onChange, onBlur } }) => (
-                  <TextField
-                    id='firtname'
-                    size='small'
-                    fullWidth
-                    value={value}
-                    onBlur={onBlur}
-                    onChange={onChange}
-                    label={t('Họ')}
-                    error={Boolean(errors.firstname)}
-                    {...(errors.firstname && { helperText: errors.firstname.message })}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item sm={4} xs={12}>
-              <Controller
-                control={control}
-                name='lastname'
-                rules={{ required: true }}
-                defaultValue={auth.user?.lastname}
-                render={({ field: { value, onChange, onBlur } }) => (
-                  <TextField
-                    id='lastname'
-                    size='small'
-                    fullWidth
-                    onBlur={onBlur}
-                    onChange={onChange}
-                    value={value}
-                    label={t('Tên')}
-                    error={Boolean(errors.lastname)}
-                    {...(errors.lastname && { helperText: errors.lastname.message })}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item sm={4} xs={12}>
-              <Controller
-                control={control}
-                name='gender'
-                rules={{ required: true }}
-                defaultValue={auth.user?.gender || ''}
-                render={({ field: { value, onChange, onBlur } }) => (
-                  <TextField
-                    id='gender'
-                    select
-                    placeholder=''
-                    value={value}
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    size='small'
-                    fullWidth
-                    label={t('Giới tính')}
-                    error={Boolean(errors.gender)}
-                    {...(errors.gender && { helperText: errors.gender.message })}
-                  >
-                    <MenuItem value=''>{t('Trống')}</MenuItem>
-                    <MenuItem value='male'>{t('Nam')}</MenuItem>
-                    <MenuItem value='demale'>{t('Nữ')}</MenuItem>
-                    <MenuItem value='other'>{t('Khác')}</MenuItem>
-                    <MenuItem value='email'>Email</MenuItem>
-                  </TextField>
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Controller
-                name='email'
-                control={control}
-                rules={{ required: true }}
-                defaultValue={auth.user?.email}
-                render={({ field: { value, onChange, onBlur } }) => (
-                  <TextField
-                    id='email'
-                    fullWidth
-                    size='small'
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    value={value}
-                    label='Email'
-                    error={Boolean(errors.email)}
-                    {...(errors.email && { helperText: errors.email.message })}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item sm={6} xs={12}>
-              <Controller
-                name='phone'
-                control={control}
-                rules={{ required: true }}
-                defaultValue={auth.user?.phone}
-                render={({ field: { value, onChange, onBlur } }) => (
-                  <TextField
-                    id='phone'
-                    fullWidth
-                    size='small'
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    value={value}
-                    label={t('Số điện thoại')}
-                    inputProps={{ inputMode: 'numeric' }}
-                    error={Boolean(errors.phone)}
-                    {...(errors.phone && { helperText: errors.phone.message })}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item sm={6} xs={12}>
-              {/* <DatePickerWrapper>
+          <form onSubmit={handleSubmit(onSubmit)} autoComplete='off' noValidate>
+            <Grid container direction='row' justifyContent='center' alignItems='baseline' spacing={6}>
+              <Grid item sm={4} xs={12}>
                 <Controller
-                  name='dateOfBirth'
                   control={control}
-                  defaultValue={handleDateOfBirth(auth.user?.dateOfBirth || new Date())}
+                  name='firstname'
+                  defaultValue={auth.user?.firstname || ''}
                   rules={{ required: true }}
                   render={({ field: { value, onChange, onBlur } }) => (
-                    <DatePicker
-                      showYearDropdown
-                      showMonthDropdown
-                      dropdownMode='select'
-                      dateFormat={'dd/MM/yyyy'}
-                      selected={value} // Use the Date object for the 'selected' prop
-                      // onChange={(date: Date | null) => {
-                      //   // Handle onChange
-                      //   if (date) {
-                      //     // Make sure the date is not null
-                      //     setMonthYear(date)
-                      //     onChange(date)
-                      //   }
-                      // }}
+                    <TextField
+                      id='firstname'
+                      size='small'
+                      fullWidth
+                      value={value}
                       onBlur={onBlur}
                       onChange={onChange}
-                      placeholderText='10/12/2003'
-                      popperPlacement={'bottom-start'}
-                      customInput={<TextField fullWidth size='small' label='Ngày sinh' />}
+                      label={t('Họ')}
+                      error={Boolean(errors.firstname)}
+                      {...(errors.firstname && { helperText: errors.firstname.message })}
                     />
                   )}
                 />
-              </DatePickerWrapper> */}
-              <DatePickerWrapper>
+              </Grid>
+              <Grid item sm={4} xs={12}>
+                <Controller
+                  control={control}
+                  name='lastname'
+                  defaultValue={auth.user?.lastname || ''}
+                  rules={{ required: true }}
+                  render={({ field: { value, onChange, onBlur } }) => (
+                    <TextField
+                      id='lastname'
+                      size='small'
+                      fullWidth
+                      value={value}
+                      onBlur={onBlur}
+                      onChange={onChange}
+                      label={t('Tên')}
+                      error={Boolean(errors.lastname)}
+                      {...(errors.lastname && { helperText: errors.lastname.message })}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item sm={4} xs={12}>
+                <Controller
+                  control={control}
+                  name='gender'
+                  defaultValue={auth.user?.gender || ''}
+                  rules={{ required: true }}
+                  render={({ field: { value, onChange, onBlur } }) => (
+                    <TextField
+                      select
+                      id='gender'
+                      label={t('Giới tính')}
+                      value={value}
+                      onBlur={onBlur}
+                      onChange={onChange}
+                      error={Boolean(errors.gender)}
+                      helperText={errors.gender ? errors.gender.message : ''}
+                      size='small'
+                      fullWidth
+                    >
+                      <MenuItem value='male'>{t('Nam')}</MenuItem>
+                      <MenuItem value='female'>{t('Nữ')}</MenuItem>
+                      <MenuItem value='other'>{t('Khác')}</MenuItem>
+                    </TextField>
+                  )}
+                />
+              </Grid>
+              <Grid item sm={6} xs={12}>
+                <Controller
+                  control={control}
+                  name='email'
+                  defaultValue={auth.user?.email || ''}
+                  rules={{ required: true }}
+                  render={({ field: { value, onChange, onBlur } }) => (
+                    <TextField
+                      type='email'
+                      size='small'
+                      fullWidth
+                      value={value}
+                      onBlur={onBlur}
+                      onChange={onChange}
+                      error={Boolean(errors.email)}
+                      label={t('Email')}
+                      {...(errors.email && { helperText: errors.email.message })}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item sm={6} xs={12}>
+                <Controller
+                  control={control}
+                  name='phone'
+                  defaultValue={auth.user?.phone || ''}
+                  rules={{ required: true }}
+                  render={({ field: { value, onChange, onBlur } }) => (
+                    <TextField
+                      size='small'
+                      fullWidth
+                      value={value}
+                      onBlur={onBlur}
+                      onChange={onChange}
+                      error={Boolean(errors.phone)}
+                      label={t('Số điện thoại')}
+                      {...(errors.phone && { helperText: errors.phone.message })}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item sm={6} xs={12}>
                 <Controller
                   name='dateOfBirth'
                   control={control}
-                  rules={{ required: true }}
                   defaultValue={auth.user?.dateOfBirth ? new Date(auth.user?.dateOfBirth) : undefined}
-                  render={({ field: { onChange, value } }) => (
-                    <DatePicker
-                      showYearDropdown
-                      showMonthDropdown
-                      id='date-picker'
-                      selected={value}
+                  render={({ field: { value, onChange, onBlur } }) => (
+                    <DatePickerWrapper>
+                      <DatePicker
+                        id='date-picker'
+                        showYearDropdown
+                        showMonthDropdown
+                        selected={value}
+                        placeholderText='YYYY-MM-DD'
+                        dropdownMode='select'
+                        customInput={
+                          <TextField
+                            size='small'
+                            label={t('Ngày sinh')}
+                            fullWidth
+                            value={value ? format.dateTime(value, { dateStyle: 'medium' }) : ''}
+                            onBlur={onBlur}
+                            error={Boolean(errors.dateOfBirth)}
+                            {...(errors.dateOfBirth && { helperText: errors.dateOfBirth.message })}
+                          />
+                        }
+                        onChange={date => onChange(date)}
+                        onBlur={onBlur}
+                        dateFormat='yyyy-MM-dd'
+                        maxDate={addDays(new Date(), 0)}
+                      />
+                    </DatePickerWrapper>
+                  )}
+                />
+              </Grid>
+              <Grid item sm={6} xs={12}>
+                <Controller
+                  name='nickname'
+                  control={control}
+                  defaultValue={auth.user?.nickname || ''}
+                  render={({ field: { value, onChange, onBlur } }) => (
+                    <TextField
+                      size='small'
+                      fullWidth
+                      value={value}
+                      onBlur={onBlur}
                       onChange={onChange}
-                      dateFormat='dd/MM/yyyy'
-                      maxDate={addDays(new Date(), 5)}
-                      dropdownMode='select'
-                      popperPlacement='bottom-start'
-                      customInput={
-                        <TextField
-                          id='date-picker'
-                          label={t('Ngày tháng năm sinh')}
-                          fullWidth
-                          size='small'
-                          value={
-                            value
-                              ? format.dateTime(value, {
-                                  year: 'numeric',
-                                  month: '2-digit',
-                                  day: '2-digit',
-                                  timeZone: 'UTC'
-                                })
-                              : ''
-                          }
-                          error={Boolean(errors.dateOfBirth)}
-                          {...(errors.dateOfBirth && { helperText: errors.dateOfBirth.message })}
-                        />
-                      }
+                      error={Boolean(errors.nickname)}
+                      label={t('Biệt danh')}
+                      {...(errors.nickname && { helperText: errors.nickname.message })}
                     />
                   )}
                 />
-              </DatePickerWrapper>
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+                  control={control}
+                  name='description'
+                  defaultValue={auth.user?.description || ''}
+                  render={({ field: { value, onChange, onBlur } }) => (
+                    <TextField
+                      rows={4}
+                      multiline
+                      fullWidth
+                      value={value}
+                      onBlur={onBlur}
+                      onChange={onChange}
+                      label={t('Mô tả')}
+                      size='small'
+                      error={Boolean(errors.description)}
+                      {...(errors.description && { helperText: errors.description.message })}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item sm={6} xs={12}>
+                <Controller
+                  name='province'
+                  control={control}
+                  defaultValue={province}
+                  render={({ field: { value, onChange, onBlur } }) => (
+                    <TextField
+                      select
+                      id='province'
+                      label={t('Tỉnh/Thành phố')}
+                      value={value}
+                      onBlur={onBlur}
+                      onChange={e => {
+                        onChange(e)
+                        const provinceID = provinceData?.find(
+                          (item: any) => item.province_name === e.target.value
+                        ).province_id
+                        setProvinceID(provinceID)
+                      }}
+                      size='small'
+                      fullWidth
+                      error={Boolean(errors.province)}
+                      helperText={errors.province ? errors.province.message : ''}
+                    >
+                      {provinceData?.map((province: any) => (
+                        <MenuItem key={province.province_id} value={province.province_name}>
+                          {province.province_name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              </Grid>
+              <Grid item sm={6} xs={12}>
+                <Controller
+                  name='district'
+                  control={control}
+                  defaultValue={district}
+                  render={({ field: { value, onChange, onBlur } }) => (
+                    <TextField
+                      select
+                      id='district'
+                      label={t('Quận/Huyện')}
+                      value={value}
+                      onBlur={onBlur}
+                      onChange={e => {
+                        onChange(e)
+                        const districtID = districtData?.find(
+                          (item: any) => item.district_name === e.target.value
+                        ).district_id
+                        setDistrictID(districtID)
+                      }}
+                      size='small'
+                      fullWidth
+                      error={Boolean(errors.district)}
+                      helperText={errors.district ? errors.district.message : ''}
+                    >
+                      {districtData?.map((district: any) => (
+                        <MenuItem key={district.district_id} value={district.district_name}>
+                          {district.district_name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              </Grid>
+              <Grid item sm={6} xs={12}>
+                <Controller
+                  name='ward'
+                  control={control}
+                  defaultValue={ward}
+                  render={({ field: { value, onChange, onBlur } }) => (
+                    <TextField
+                      select
+                      id='ward'
+                      label={t('Phường/Xã')}
+                      value={value}
+                      onBlur={onBlur}
+                      onChange={onChange}
+                      size='small'
+                      fullWidth
+                      error={Boolean(errors.ward)}
+                      helperText={errors.ward ? errors.ward.message : ''}
+                    >
+                      {wardData?.map((ward: any) => (
+                        <MenuItem key={ward.ward_id} value={ward.ward_name}>
+                          {ward.ward_name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              </Grid>
+              <Grid item sm={6} xs={12}>
+                <Controller
+                  name='streetName'
+                  control={control}
+                  defaultValue={streetName}
+                  render={({ field: { value, onChange, onBlur } }) => (
+                    <TextField
+                      size='small'
+                      fullWidth
+                      value={value}
+                      onBlur={onBlur}
+                      onChange={onChange}
+                      error={Boolean(errors.streetName)}
+                      label={t('Tên đường')}
+                      {...(errors.streetName && { helperText: errors.streetName.message })}
+                    />
+                  )}
+                />
+              </Grid>
+              <DialogActions sx={{ justifyContent: 'center', marginTop: '12px' }}>
+                <Button type='submit' disabled={!isValid} variant='contained' sx={{ mr: 1 }}>
+                  {t('Cập nhật')}
+                </Button>
+                <Button variant='outlined' color='secondary' onClick={handleDiscard}>
+                  {t('Hủy bỏ')}
+                </Button>
+              </DialogActions>
             </Grid>
-            <Grid item sm={4} xs={12}>
-              <Controller
-                name='province'
-                control={control}
-                defaultValue={province}
-                rules={{ required: true }}
-                render={({ field: { value, onBlur } }) => (
-                  <TextField
-                    id='province'
-                    select
-                    multiline
-                    fullWidth
-                    size='small'
-                    value={value}
-                    onBlur={onBlur}
-                    label={t('Tỉnh/Thành Phố')}
-                    SelectProps={{ MenuProps }}
-                    onChange={e => {
-                      const selectedProvince = e.target.value
-
-                      // Tìm ID của tỉnh/thành phố được chọn
-                      const selectedProvinceData = provinceData?.find(
-                        (item: any) => item.province_name === selectedProvince
-                      )
-                      if (selectedProvinceData) {
-                        setProvinceID(selectedProvinceData.province_id) // Cập nhật provinceID để kích hoạt lại useSWR của district
-                        setProvince(selectedProvinceData.province_name)
-                      } else {
-                        setProvinceID(undefined) // Reset provinceID nếu không tìm thấy
-                      }
-                    }}
-                  >
-                    {provinceData?.map((item: any) => (
-                      <MenuItem key={item.province_id} value={item.province_name}>
-                        {item.province_name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </Grid>
-            <Grid item sm={4} xs={12}>
-              <Controller
-                name='district'
-                control={control}
-                defaultValue={district}
-                rules={{ required: true }}
-                render={({ field: { value, onBlur } }) => (
-                  <TextField
-                    id='district'
-                    select
-                    fullWidth
-                    onBlur={onBlur}
-                    size='small'
-                    label={t('Quận/Huyện')}
-                    value={value}
-                    SelectProps={{ MenuProps }}
-                    onChange={e => {
-                      const selectedDistrict = e.target.value as string
-                      const selectedDistrictData = districtData?.find(
-                        (item: any) => item.district_name === selectedDistrict
-                      )
-
-                      if (selectedDistrictData) {
-                        setDistrictID(selectedDistrictData.district_id)
-                        setDistrict(selectedDistrictData.district_name)
-                      } else {
-                        setDistrictID(undefined)
-                      }
-                    }}
-                  >
-                    {districtData?.map((item: any) => (
-                      <MenuItem key={item.district_id} value={item.district_name}>
-                        {item.district_name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </Grid>
-            <Grid item sm={4} xs={12}>
-              <Controller
-                name='ward'
-                control={control}
-                defaultValue={ward}
-                rules={{ required: true }}
-                render={({ field: { value, onBlur } }) => (
-                  <TextField
-                    id='ward'
-                    select
-                    value={value}
-                    fullWidth
-                    onBlur={onBlur}
-                    size='small'
-                    label={t('Phường/Xã')}
-                    SelectProps={{ MenuProps }}
-                    onChange={e => {
-                      setWard(e.target.value as string)
-                    }}
-                  >
-                    {wardData?.map((item: any) => (
-                      <MenuItem key={item.ward_id} value={item.ward_name}>
-                        {item.ward_name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </Grid>
-            <Grid item sm={6} xs={12}>
-              <Controller
-                name='streetName'
-                control={control}
-                defaultValue={streetName}
-                rules={{ required: true }}
-                render={({ field: { value, onChange, onBlur } }) => (
-                  <TextField
-                    id='street_name'
-                    fullWidth
-                    size='small'
-                    label={t('Số nhà tên đường')}
-                    value={value}
-                    onBlur={onBlur}
-                    onChange={onChange}
-                    error={Boolean(errors.streetName)}
-                    {...(errors.streetName && { helperText: errors.streetName.message })}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item sm={6} xs={12}>
-              <TextField
-                id='nickname'
-                fullWidth
-                size='small'
-                defaultValue={auth.user?.nickname}
-                label={t('Biệt danh (Tùy chọn)')}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                id='decription'
-                multiline
-                maxRows={4}
-                defaultValue={auth.user?.description}
-                fullWidth
-                size='small'
-                label={t('Mô tả (Tùy chọn)')}
-              />
-            </Grid>
-          </Grid>
+          </form>
         </DialogContent>
-        <DialogActions
-          sx={{
-            justifyContent: 'center',
-            px: theme => [`${theme.spacing(5)} !important`, `${theme.spacing(15)} !important`],
-            pb: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
-          }}
-        >
-          <Button variant='contained' sx={{ mr: 1 }} onClick={() => setShow(false)}>
-            Submit
-          </Button>
-          <Button variant='tonal' color='secondary' onClick={() => handleDiscard()}>
-            Discard
-          </Button>
-        </DialogActions>
       </Dialog>
     </Card>
   )

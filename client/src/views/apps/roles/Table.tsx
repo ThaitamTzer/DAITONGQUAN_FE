@@ -55,7 +55,8 @@ const userRoleObj: UserRoleType = {
   author: { icon: 'tabler:user', color: 'warning' },
   admin: { icon: 'tabler:device-laptop', color: 'error' },
   maintainer: { icon: 'tabler:chart-pie-2', color: 'success' },
-  subscriber: { icon: 'tabler:circle-check', color: 'primary' }
+  subscriber: { icon: 'tabler:circle-check', color: 'primary' },
+  userManagement: { icon: 'tabler:users', color: 'secondary' }
 }
 
 const userStatusObj: UserStatusType = {
@@ -86,7 +87,7 @@ const columns: GridColDef[] = [
     flex: 0.25,
     minWidth: 280,
     field: 'fullName',
-    headerName: 'User',
+    headerName: 'Admin',
     renderCell: ({ row }: CellType) => {
       const { fullName, email } = row
 

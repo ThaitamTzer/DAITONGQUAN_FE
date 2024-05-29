@@ -115,7 +115,6 @@ const AuthProvider = ({ children }: Props) => {
             : null
           const storedUserData = decodeStoredUserDataString as UserDataType
           const adminData = storedUserData.fullname
-          console.log('storedUserData: ', adminData)
 
           window.localStorage.setItem('userData', JSON.stringify(adminData))
 

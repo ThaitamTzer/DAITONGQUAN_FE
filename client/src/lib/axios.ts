@@ -54,7 +54,24 @@ axiosClient.interceptors.response.use(
   }
 )
 export default axiosClient
+
 export const axiosAuth = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' }
 })
+export const axiosUpload = axios.create({
+  baseURL: BASE_URL,
+  headers: { 'Content-Type': 'multipart/form-data' }
+})
+
+axiosUpload.interceptors.request.use(
+  config => {
+    if (!config.headers['Authorization']) {
+      const access_token: string = localStorage.getItem(authConfig.storageTokenKeyName) || ''
+      config.headers['Authorization'] = `${authConfig.TOKEN_TYPE} ${access_token}`
+    }
+
+    return config
+  },
+  error => Promise.reject(error)
+)

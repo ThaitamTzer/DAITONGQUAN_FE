@@ -1,26 +1,26 @@
 import { ProfileTabType } from 'src/types/apps/profileType'
 
 interface DataType {
-  profile: (user: any) => ProfileTabType // Update the type of the profile property
+  profile: (data: any) => ProfileTabType // Update the type of the profile property
 }
 
 export const getProfileData: DataType = {
-  profile: (user: any) => ({
+  profile: (data: any) => ({
     about: [
-      { property: 'Full Name', value: (user?.firstname || '') + ' ' + (user?.lastname || ''), icon: 'tabler:user' },
-      { property: 'Nickname', value: user?.nickname || null, icon: 'tabler:at' },
-      { property: 'Username', value: user?.username || null, icon: 'tabler:at' },
-      { property: 'Date of Birth', value: formatDate(user?.dateOfBirth), icon: 'tabler:cake' },
-      { property: 'Gender', value: user?.gender || null, icon: 'tabler:gender-transgender' },
-      { property: 'Role', value: user?.role || null, icon: 'tabler:crown' },
-      { property: 'Address', value: user?.address || null, icon: 'tabler:map-pin' },
-      { property: 'description', value: user.description || null, icon: 'tabler:info-square' }
+      { property: 'Full Name', value: (data?.firstname || '') + ' ' + (data?.lastname || ''), icon: 'tabler:user' },
+      { property: 'Nickname', value: data?.nickname || null, icon: 'tabler:at' },
+      { property: 'Username', value: data?.dataname || null, icon: 'tabler:at' },
+      { property: 'Date of Birth', value: FormatDate(data?.dateOfBirth), icon: 'tabler:cake' },
+      { property: 'Gender', value: data?.gender || null, icon: 'tabler:gender-transgender' },
+      { property: 'Role', value: data?.role || null, icon: 'tabler:crown' },
+      { property: 'Address', value: data?.address || null, icon: 'tabler:map-pin' },
+      { property: 'description', value: data.description || null, icon: 'tabler:info-square' }
     ].filter(item => item.value !== null && item.value !== ''),
     contacts: [
-      { property: 'Email', value: user?.email || null, icon: 'tabler:mail' },
-      { property: 'Phone', value: user.phone, icon: 'tabler:phone' }
+      { property: 'Email', value: data?.email || null, icon: 'tabler:mail' },
+      { property: 'Phone', value: data.phone || null, icon: 'tabler:phone' }
 
-      // { property: 'Social', value: user.hyperlink, icon: 'tabler:brand-facebook' }
+      // { property: 'Social', value: data.hyperlink, icon: 'tabler:brand-facebook' }
     ].filter(item => item.value !== null && item.value !== ''),
     overview: [
       { property: 'Posts', value: '10022', icon: 'iconoir:post' },
@@ -30,18 +30,16 @@ export const getProfileData: DataType = {
   })
 }
 
-function formatDate(dateString: string | null): string | null {
+function FormatDate(dateString: string | null): string | null {
   if (dateString) {
     const dateObj = new Date(dateString) // Parse the ISO 8601 date string
 
-    if (!isNaN(dateObj.getTime())) {
-      // Check if the date is valid
-      const day = String(dateObj.getDate()).padStart(2, '0')
-      const month = String(dateObj.getMonth() + 1).padStart(2, '0') // Month is zero-based
-      const year = dateObj.getFullYear()
+    // Extract day, month, and year components
+    const day = String(dateObj.getDate()).padStart(2, '0') // Ensure two digits
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0') // Months are 0-indexed
+    const year = dateObj.getFullYear()
 
-      return `${day}/${month}/${year}`
-    }
+    return `${day}/${month}/${year}` // Format in d/mm/yyyy
   }
 
   return null

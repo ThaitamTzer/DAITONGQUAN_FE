@@ -64,5 +64,8 @@ const AnalyticsDashboard = () => {
     </ApexChartWrapper>
   )
 }
-
+AnalyticsDashboard.acl = {
+  action: 'read',
+  subject: 'user'
+}
 export default AnalyticsDashboard

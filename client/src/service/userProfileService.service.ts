@@ -1,4 +1,4 @@
-import axiosClient from 'src/lib/axios'
+import axiosClient, { axiosUpload } from 'src/lib/axios'
 import { ProfileAboutType } from 'src/types/apps/profileType'
 
 const userProfileService = {
@@ -7,7 +7,10 @@ const userProfileService = {
 
   // ** Update User Profile
   updateUserProfile: async (data: ProfileAboutType): Promise<ProfileAboutType> =>
-    axiosClient.post(`/users/update-profile`, data)
+    axiosClient.put(`/users/update-profile`, data),
+
+  // ** Upload Profile Avatar with multipath Form Data
+  uploadProfileAvatar: async (data: FormData): Promise<string> => axiosUpload.patch(`/users/update-avatar`, data)
 }
 
 export default userProfileService

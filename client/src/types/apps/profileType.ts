@@ -21,17 +21,14 @@ export type ProfileConnectionsType = {
 }
 
 export type ProfileAboutType = {
-  firstname: string
-  avatar: string | null
+  streetName: string | ''
+  description: string | ''
   lastname: string
   email: string
-  role: string
-  dateOfBirth: string
+  dateOfBirth: Date | undefined
   address: string
   gender: string
+  firstname: string
   phone: string | null
   nickname: string | null
-  description: string | null
-  hyperlink: string[]
-  data: string[]
 }

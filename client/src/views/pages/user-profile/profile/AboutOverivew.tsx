@@ -17,12 +17,8 @@ import useSWR from 'swr'
 // ** Import hooks
 import { useAuth } from 'src/hooks/useAuth'
 import userProfileService from 'src/service/userProfileService.service'
+import { useEffect } from 'react'
 
-// interface Props {
-//   about: ProfileTabCommonType[]
-//   contacts: ProfileTabCommonType[]
-//   overview: ProfileTabCommonType[]
-// }
 
 const renderList = (arr: ProfileTabCommonType[]) => {
   if (arr && arr.length) {
@@ -88,9 +84,12 @@ const AboutOverivew = () => {
   const { user, setUser } = useAuth()
   const { data } = useSWR('GET_PROFILE_DATA', userProfileService.getUserProfile)
 
-  if (data && data.data) {
-    setUser(data.data)
-  }
+  useEffect(() => {
+    if (data && data.data) {
+      setUser(data.data)
+    }
+  }, [data, setUser])
+
   const { about, contacts, overview } = getProfileData.profile(user)
 
   return (

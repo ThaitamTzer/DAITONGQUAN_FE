@@ -3,6 +3,7 @@ import { ReactNode } from 'react'
 
 // ** Next Import
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 // ** MUI Components
 import Button from '@mui/material/Button'
@@ -37,6 +38,12 @@ const Img = styled('img')(({ theme }) => ({
 }))
 
 const Error401 = () => {
+  const router = useRouter()
+  const handleGoBack = () => {
+    window.localStorage.clear()
+    router.push('/')
+  }
+
   return (
     <Box className='content-center'>
       <Box sx={{ p: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
@@ -48,7 +55,7 @@ const Error401 = () => {
             You do not have permission to view this page using the credentials that you have provided while login.
           </Typography>
           <Typography sx={{ mb: 6, color: 'text.secondary' }}>Please contact your site administrator.</Typography>
-          <Button href='/' component={Link} variant='contained'>
+          <Button onClick={() => handleGoBack()} href='/' component={Link} variant='contained'>
             Back to Home
           </Button>
         </BoxWrapper>

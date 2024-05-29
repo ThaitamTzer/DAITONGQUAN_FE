@@ -573,6 +573,20 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
+      path: '/homepage',
+      action: 'read',
+      subject: 'member-page',
+      title: 'Homepage',
+      icon: 'tabler:home'
+    },
+    {
+      path: '/categories',
+      action: 'read',
+      subject: 'member-page',
+      title: 'Categories',
+      icon: 'tabler:grid'
+    },
+    {
       path: '/acl',
       action: 'read',
       subject: 'member-page',
