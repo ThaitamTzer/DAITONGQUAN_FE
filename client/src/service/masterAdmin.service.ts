@@ -13,8 +13,14 @@ const masterAdminService = {
   // ** Delete Admin
   deleteAdmin: async () => axiosClient.delete(`/admin`),
 
-  // ** Blocl Admin
-  blockAdmin: async () => axiosClient.put(`/admin/update-block`)
+  // ** Block Admin
+  blockAdmin: async () => axiosClient.put(`/admin/update-block`),
+
+  // ** Get All Role
+  getAllRole: async () => axiosClient.get('/role'),
+
+  // ** Create New Role
+  createRole: async (data: any) => axiosClient.post('/role', data)
 }
 
 export default masterAdminService

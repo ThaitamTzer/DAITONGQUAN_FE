@@ -17,7 +17,7 @@ import { SelectChangeEvent } from '@mui/material/Select'
 import Icon from 'src/@core/components/icon'
 
 // ** Store Imports
-import { useDispatch, useSelector } from 'react-redux'
+// import { useDispatch, useSelector } from 'react-redux'
 
 // ** Custom Components Imports
 import CustomChip from 'src/@core/components/mui/chip'
@@ -27,69 +27,74 @@ import CustomAvatar from 'src/@core/components/mui/avatar'
 import { getInitials } from 'src/@core/utils/get-initials'
 
 // ** Actions Imports
-import { fetchData } from 'src/store/apps/user'
+// import { fetchData } from 'src/store/apps/user'
 
 // ** Types Imports
-import { RootState, AppDispatch } from 'src/store'
-import { UsersType } from 'src/types/apps/userTypes'
+// import { RootState, AppDispatch } from 'src/store'
+import { AdminsType, UsersType } from 'src/types/apps/userTypes'
 import { ThemeColor } from 'src/@core/layouts/types'
 
 // ** Custom Components Imports
 import TableHeader from 'src/views/apps/roles/TableHeader'
 
-interface UserRoleType {
-  [key: string]: { icon: string; color: string }
-}
+// ** Import Third Party
+import useSWR from 'swr'
+import masterAdminService from 'src/service/masterAdmin.service'
+
+// interface UserRoleType {
+//   [key: string]: { icon: string; color: string }
+// }
 
 interface UserStatusType {
   [key: string]: ThemeColor
 }
 
 interface CellType {
-  row: UsersType
+  row: AdminsType
 }
 
 // ** Vars
-const userRoleObj: UserRoleType = {
-  editor: { icon: 'tabler:edit', color: 'info' },
-  author: { icon: 'tabler:user', color: 'warning' },
-  admin: { icon: 'tabler:device-laptop', color: 'error' },
-  maintainer: { icon: 'tabler:chart-pie-2', color: 'success' },
-  subscriber: { icon: 'tabler:circle-check', color: 'primary' },
-  userManagement: { icon: 'tabler:users', color: 'secondary' }
-}
+// const userRoleObj: UserRoleType = {
+//   editor: { icon: 'tabler:edit', color: 'info' },
+//   author: { icon: 'tabler:user', color: 'warning' },
+//   admin: { icon: 'tabler:device-laptop', color: 'error' },
+//   maintainer: { icon: 'tabler:chart-pie-2', color: 'success' },
+//   subscriber: { icon: 'tabler:circle-check', color: 'primary' },
+//   userManagement: { icon: 'tabler:users', color: 'secondary' }
+// }
 
-const userStatusObj: UserStatusType = {
-  active: 'success',
-  pending: 'warning',
-  inactive: 'secondary'
+// const userStatusObj: UserStatusType = {
+//   active: 'success',
+//   pending: 'warning',
+//   inactive: 'secondary'
+// }
+
+const adminStatusObj: UserStatusType = {
+  isBlock: 'error',
+  isActive: 'success'
 }
 
 // ** renders client column
-const renderClient = (row: UsersType) => {
-  if (row.avatar.length) {
-    return <CustomAvatar src={row.avatar} sx={{ mr: 3, width: 38, height: 38 }} />
-  } else {
-    return (
-      <CustomAvatar
-        skin='light'
-        color={row.avatarColor}
-        sx={{ mr: 2.5, width: 38, height: 38, fontWeight: 500, fontSize: theme => theme.typography.body1.fontSize }}
-      >
-        {getInitials(row.fullName ? row.fullName : 'John Doe')}
-      </CustomAvatar>
-    )
-  }
+const renderClient = (row: AdminsType) => {
+  return (
+    <CustomAvatar
+      skin='light'
+      color={row.avatarColor}
+      sx={{ mr: 2.5, width: 38, height: 38, fontWeight: 500, fontSize: theme => theme.typography.body1.fontSize }}
+    >
+      {getInitials(row.fullname ? row.fullname : 'Admin')}
+    </CustomAvatar>
+  )
 }
 
 const columns: GridColDef[] = [
   {
     flex: 0.25,
     minWidth: 280,
-    field: 'fullName',
+    field: 'fullname',
     headerName: 'Admin',
     renderCell: ({ row }: CellType) => {
-      const { fullName, email } = row
+      const { fullname, email } = row
 
       return (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -106,7 +111,7 @@ const columns: GridColDef[] = [
                 '&:hover': { color: 'primary.main' }
               }}
             >
-              {fullName}
+              {fullname}
             </Typography>
             <Typography noWrap variant='body2' sx={{ color: 'text.disabled' }}>
               {email}
@@ -116,54 +121,55 @@ const columns: GridColDef[] = [
       )
     }
   },
-  {
-    flex: 0.15,
-    field: 'role',
-    minWidth: 170,
-    headerName: 'Role',
-    renderCell: ({ row }: CellType) => {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <CustomAvatar
-            skin='light'
-            sx={{ mr: 4, width: 30, height: 30 }}
-            color={(userRoleObj[row.role].color as ThemeColor) || 'primary'}
-          >
-            <Icon icon={userRoleObj[row.role].icon} />
-          </CustomAvatar>
-          <Typography noWrap sx={{ color: 'text.secondary', textTransform: 'capitalize' }}>
-            {row.role}
-          </Typography>
-        </Box>
-      )
-    }
-  },
-  {
-    flex: 0.1,
-    minWidth: 120,
-    headerName: 'Plan',
-    field: 'currentPlan',
-    renderCell: ({ row }: CellType) => {
-      return (
-        <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary', textTransform: 'capitalize' }}>
-          {row.currentPlan}
-        </Typography>
-      )
-    }
-  },
-  {
-    flex: 0.15,
-    minWidth: 190,
-    field: 'billing',
-    headerName: 'Billing',
-    renderCell: ({ row }: CellType) => {
-      return (
-        <Typography noWrap sx={{ color: 'text.secondary' }}>
-          {row.billing}
-        </Typography>
-      )
-    }
-  },
+
+  // {
+  //   flex: 0.15,
+  //   field: 'role',
+  //   minWidth: 170,
+  //   headerName: 'Role',
+  //   renderCell: ({ row }: CellType) => {
+  //     return (
+  //       <Box sx={{ display: 'flex', alignItems: 'center' }}>
+  //         <CustomAvatar
+  //           skin='light'
+  //           sx={{ mr: 4, width: 30, height: 30 }}
+  //           color={(userRoleObj[row.role].color as ThemeColor) || 'primary'}
+  //         >
+  //           <Icon icon={userRoleObj[row.role].icon} />
+  //         </CustomAvatar>
+  //         <Typography noWrap sx={{ color: 'text.secondary', textTransform: 'capitalize' }}>
+  //           {row.role}
+  //         </Typography>
+  //       </Box>
+  //     )
+  //   }
+  // },
+  // {
+  //   flex: 0.1,
+  //   minWidth: 120,
+  //   headerName: 'Plan',
+  //   field: 'currentPlan',
+  //   renderCell: ({ row }: CellType) => {
+  //     return (
+  //       <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary', textTransform: 'capitalize' }}>
+  //         {row.currentPlan}
+  //       </Typography>
+  //     )
+  //   }
+  // },
+  // {
+  //   flex: 0.15,
+  //   minWidth: 190,
+  //   field: 'billing',
+  //   headerName: 'Billing',
+  //   renderCell: ({ row }: CellType) => {
+  //     return (
+  //       <Typography noWrap sx={{ color: 'text.secondary' }}>
+  //         {row.billing}
+  //       </Typography>
+  //     )
+  //   }
+  // },
   {
     flex: 0.1,
     minWidth: 110,
@@ -175,8 +181,8 @@ const columns: GridColDef[] = [
           rounded
           skin='light'
           size='small'
-          label={row.status}
-          color={userStatusObj[row.status]}
+          label={row.isBlock ? 'Blocked' : 'Active'}
+          color={adminStatusObj[row.isBlock ? 'inactive' : 'active']}
           sx={{ textTransform: 'capitalize' }}
         />
       )
@@ -203,19 +209,20 @@ const UserList = () => {
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
 
   // ** Hooks
-  const dispatch = useDispatch<AppDispatch>()
-  const store = useSelector((state: RootState) => state.user)
+  const { data } = useSWR('GET_ALL_ADMIN', masterAdminService.getAllAdmin)
 
-  useEffect(() => {
-    dispatch(
-      fetchData({
-        role: '',
-        q: value,
-        status: '',
-        currentPlan: plan
-      })
-    )
-  }, [dispatch, plan, value])
+  console.log(data)
+
+  // useEffect(() => {
+  //   dispatch(
+  //     fetchData({
+  //       role: '',
+  //       q: value,
+  //       status: '',
+  //       currentPlan: plan
+  //     })
+  //   )
+  // }, [dispatch, plan, value])
 
   const handleFilter = useCallback((val: string) => {
     setValue(val)
@@ -233,7 +240,7 @@ const UserList = () => {
           <DataGrid
             autoHeight
             rowHeight={62}
-            rows={store.data}
+            rows={data?.map((item: { _id: any }) => ({ ...item, id: item._id })) ?? []}
             columns={columns}
             checkboxSelection
             disableRowSelectionOnClick

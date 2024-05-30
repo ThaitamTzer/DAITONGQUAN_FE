@@ -89,6 +89,10 @@ export const getValidationMessages = (t: (arg0: string) => any) => ({
   },
   ward: {
     required: t('Phường/Xã không được để trống')
+  },
+  name: {
+    required: t('Tên vai trò không được để trống'),
+    max: t(`Tên vai trò không được quá ${MAX_FIRSTNAME_LENGTH} ký tự`)
   }
 })
 
@@ -220,5 +224,13 @@ export const getProfileValidationSchema = (t: (arg0: string) => any) => {
     nickname: yup.string().max(MAX_NICKNAME_LENGTH, messages.nickname.max),
     gender: yup.string().required(messages.gender.required),
     desciption: yup.string().max(MAX_DESCRIPTINO_LENGTH)
+  })
+}
+
+export const getRoleValidationSchema = (t: (arg0: string) => any) => {
+  const messages = getValidationMessages(t)
+
+  return yup.object().shape({
+    name: yup.string().required(messages.name.required).max(MAX_FIRSTNAME_LENGTH, messages.name.max)
   })
 }

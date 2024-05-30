@@ -22,7 +22,7 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import Icon from 'src/@core/components/icon'
 
 // ** Store Imports
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 
 // ** Custom Components Imports
 import CustomChip from 'src/@core/components/mui/chip'
@@ -31,8 +31,8 @@ import TableHeader from 'src/views/apps/permissions/TableHeader'
 import CustomTextField from 'src/@core/components/mui/text-field'
 
 // ** Types Imports
-import { RootState, AppDispatch } from 'src/store'
-import { PermissionRowType } from 'src/types/apps/permissionTypes'
+import { AppDispatch } from 'src/store'
+import { RolesRowType } from 'src/types/apps/roleTypes'
 
 // ** Actions Imports
 import { fetchData } from 'src/store/apps/permissions'
@@ -40,12 +40,22 @@ import { fetchData } from 'src/store/apps/permissions'
 // ** Types
 import { ThemeColor } from 'src/@core/layouts/types'
 
+// ** Import third party
+import { useTranslation } from 'react-i18next'
+import useSWR from 'swr'
+
+// ** Service
+import masterAdminService from 'src/service/masterAdmin.service'
+
+// ** Permission
+import permissions from '../../../configs/permissions.json'
+
 interface Colors {
   [key: string]: ThemeColor
 }
 
 interface CellType {
-  row: PermissionRowType
+  row: RolesRowType
 }
 
 const colors: Colors = {
@@ -61,7 +71,7 @@ const defaultColumns: GridColDef[] = [
     flex: 0.25,
     field: 'name',
     minWidth: 240,
-    headerName: 'Name',
+    headerName: 'Roles Name',
     renderCell: ({ row }: CellType) => <Typography sx={{ color: 'text.secondary' }}>{row.name}</Typography>
   },
   {
@@ -70,26 +80,32 @@ const defaultColumns: GridColDef[] = [
     field: 'assignedTo',
     headerName: 'Assigned To',
     renderCell: ({ row }: CellType) => {
-      return row.assignedTo.map((assignee: string, index: number) => (
-        <CustomChip
-          rounded
-          size='small'
-          key={index}
-          skin='light'
-          color={colors[assignee]}
-          label={assignee.replace('-', ' ')}
-          sx={{ '& .MuiChip-label': { textTransform: 'capitalize' }, '&:not(:last-of-type)': { mr: 3 } }}
-        />
-      ))
+      return row.permissionID.map((permissionID: any, index: number) => {
+        const permission = permissions.find((p: { id: number }) => p.id === permissionID)
+        const permissionName = permission ? permission.namePermission : 'Unknown'
+
+        return (
+          <CustomChip
+            rounded
+            size='small'
+            key={index}
+            skin='light'
+            color={colors[permissionName]}
+            label={permissionName.replace('-', ' ')}
+            sx={{ '& .MuiChip-label': { textTransform: 'capitalize' }, '&:not(:last-of-type)': { mr: 3 } }}
+          />
+        )
+      })
     }
-  },
-  {
-    flex: 0.25,
-    minWidth: 210,
-    field: 'createdDate',
-    headerName: 'Created Date',
-    renderCell: ({ row }: CellType) => <Typography sx={{ color: 'text.secondary' }}>{row.createdDate}</Typography>
   }
+
+  // {
+  //   flex: 0.25,
+  //   minWidth: 210,
+  //   field: 'createdDate',
+  //   headerName: 'Created Date',
+  //   renderCell: ({ row }: CellType) => <Typography sx={{ color: 'text.secondary' }}>{row.createdDate}</Typography>
+  // }
 ]
 
 const PermissionsTable = () => {
@@ -98,10 +114,12 @@ const PermissionsTable = () => {
   const [editValue, setEditValue] = useState<string>('')
   const [editDialogOpen, setEditDialogOpen] = useState<boolean>(false)
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
+  const { t } = useTranslation()
+  const { data: roles } = useSWR('GET_ALL_ROLES', masterAdminService.getAllRole)
+  console.log(roles?.data)
 
   // ** Hooks
   const dispatch = useDispatch<AppDispatch>()
-  const store = useSelector((state: RootState) => state.permissions)
 
   useEffect(() => {
     dispatch(
@@ -155,12 +173,7 @@ const PermissionsTable = () => {
           <PageHeader
             title={
               <Typography variant='h4' sx={{ mb: 6 }}>
-                Permissions List
-              </Typography>
-            }
-            subtitle={
-              <Typography sx={{ color: 'text.secondary' }}>
-                Each category (Basic, Professional, and Business) includes the four predefined roles shown below.
+                {t('Danh sách quyền')}
               </Typography>
             }
           />
@@ -170,7 +183,7 @@ const PermissionsTable = () => {
             <TableHeader value={value} handleFilter={handleFilter} />
             <DataGrid
               autoHeight
-              rows={store.data}
+              rows={roles?.data.map((item: { _id: any }) => ({ ...item, id: item._id })) ?? []}
               columns={columns}
               disableRowSelectionOnClick
               pageSizeOptions={[10, 25, 50]}
@@ -204,7 +217,6 @@ const PermissionsTable = () => {
             By editing the permission name, you might break the system permissions functionality. Please ensure you're
             absolutely certain before proceeding.
           </Alert>
-
           <Box component='form' sx={{ mt: 8 }} onSubmit={onSubmit}>
             <FormGroup sx={{ mb: 2, alignItems: 'center', flexDirection: 'row', flexWrap: ['wrap', 'nowrap'] }}>
               <CustomTextField

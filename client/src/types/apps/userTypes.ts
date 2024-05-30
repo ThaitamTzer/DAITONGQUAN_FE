@@ -17,6 +17,15 @@ export type UsersType = {
   avatarColor?: ThemeColor
 }
 
+export type AdminsType = {
+  id: number
+  fullname: string
+  email: string
+  roleId: string
+  isBlock: boolean
+  avatarColor?: ThemeColor
+}
+
 export type ProjectListDataType = {
   id: number
   img: string

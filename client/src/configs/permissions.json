@@ -91,9 +91,9 @@
   },
   {
     "id": 15,
-    "namePermission": "ReadlistPost",
+    "namePermission": "ReadListPost",
     "action": "read",
-    "subject": "permission"
+    "subject": "post"
   },
   {
     "id": 16,

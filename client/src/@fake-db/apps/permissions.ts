@@ -2,7 +2,7 @@
 import mock from 'src/@fake-db/mock'
 
 // ** Types
-import { PermissionRowType } from 'src/types/apps/permissionTypes'
+import { PermissionRowType } from 'src/types/apps/roleTypes'
 
 const data: { permissions: PermissionRowType[] } = {
   permissions: [
