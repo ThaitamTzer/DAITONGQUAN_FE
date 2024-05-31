@@ -121,29 +121,25 @@ const columns: GridColDef[] = [
       )
     }
   },
+  {
+    flex: 0.15,
+    field: 'role',
+    minWidth: 170,
+    headerName: 'Role',
+    renderCell: ({ row }: CellType) => {
+      const { roles } = row
+      const matchingRole = roles?.data.find(role => row.role.includes(role._id))
 
-  // {
-  //   flex: 0.15,
-  //   field: 'role',
-  //   minWidth: 170,
-  //   headerName: 'Role',
-  //   renderCell: ({ row }: CellType) => {
-  //     return (
-  //       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-  //         <CustomAvatar
-  //           skin='light'
-  //           sx={{ mr: 4, width: 30, height: 30 }}
-  //           color={(userRoleObj[row.role].color as ThemeColor) || 'primary'}
-  //         >
-  //           <Icon icon={userRoleObj[row.role].icon} />
-  //         </CustomAvatar>
-  //         <Typography noWrap sx={{ color: 'text.secondary', textTransform: 'capitalize' }}>
-  //           {row.role}
-  //         </Typography>
-  //       </Box>
-  //     )
-  //   }
-  // },
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography noWrap sx={{ color: 'text.secondary', textTransform: 'capitalize' }}>
+            {matchingRole ? matchingRole.name : 'Unknown Role'}
+          </Typography>
+        </Box>
+      )
+    }
+  },
+
   // {
   //   flex: 0.1,
   //   minWidth: 120,
@@ -202,16 +198,17 @@ const columns: GridColDef[] = [
   }
 ]
 
-const UserList = () => {
+const AdminList = () => {
   // ** State
   const [plan, setPlan] = useState<string>('')
   const [value, setValue] = useState<string>('')
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
 
   // ** Hooks
-  const { data } = useSWR('GET_ALL_ADMIN', masterAdminService.getAllAdmin)
+  const { data: admins } = useSWR('GET_ALL_ADMIN', masterAdminService.getAllAdmin)
+  const { data: roles } = useSWR('GET_ALL_ROLES', masterAdminService.getAllRole)
 
-  console.log(data)
+  console.log(roles?.data)
 
   // useEffect(() => {
   //   dispatch(
@@ -240,7 +237,7 @@ const UserList = () => {
           <DataGrid
             autoHeight
             rowHeight={62}
-            rows={data?.map((item: { _id: any }) => ({ ...item, id: item._id })) ?? []}
+            rows={admins?.map((item: { _id: any }) => ({ ...item, id: item._id })) ?? []}
             columns={columns}
             checkboxSelection
             disableRowSelectionOnClick
@@ -254,4 +251,4 @@ const UserList = () => {
   )
 }
 
-export default UserList
+export default AdminList

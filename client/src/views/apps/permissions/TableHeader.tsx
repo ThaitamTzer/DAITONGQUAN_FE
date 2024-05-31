@@ -174,29 +174,59 @@ const TableHeader = (props: TableHeaderProps) => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {Object.entries(permissionsBySubject).map(([subject, permissions]) => (
-                      <TableRow key={subject}>
-                        <TableCell>{subject.toUpperCase()}</TableCell>
-                        {permissions.map((permission: any) => (
-                          // eslint-disable-next-line react/jsx-key
+                    {Object.entries(permissionsBySubject).map(([subject, permissions]) => {
+                      const allSelected = permissions.every((permission: any) =>
+                        selectedPermissions.includes(permission.id)
+                      )
+
+                      const handleSelectAll = () => {
+                        if (allSelected) {
+                          // If all permissions are selected, unselect them
+                          setSelectedPermissions(
+                            selectedPermissions.filter(
+                              id => !permissions.map((permission: any) => permission.id).includes(id)
+                            )
+                          )
+                        } else {
+                          // If not all permissions are selected, select them
+                          setSelectedPermissions([
+                            ...selectedPermissions,
+                            ...permissions.map((permission: any) => permission.id)
+                          ])
+                        }
+                      }
+
+                      return (
+                        <TableRow key={subject}>
+                          <TableCell>{subject.toUpperCase()}</TableCell>
                           <TableCell>
-                            <FormGroup row>
-                              <FormControlLabel
-                                key={permission.id}
-                                control={
-                                  <Checkbox
-                                    checked={selectedPermissions.includes(permission.id)}
-                                    onChange={handleCheckboxChange}
-                                    name={permission.id.toString()}
-                                  />
-                                }
-                                label={permission.namePermission.toUpperCase()}
-                              />
-                            </FormGroup>
+                            <FormControlLabel
+                              key={permissions.id}
+                              control={<Checkbox checked={allSelected} onChange={handleSelectAll} />}
+                              label={'All'}
+                            />
                           </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
+                          {permissions.map((permission: any) => (
+                            // eslint-disable-next-line react/jsx-key
+                            <TableCell>
+                              <FormGroup row>
+                                <FormControlLabel
+                                  key={permission.id}
+                                  control={
+                                    <Checkbox
+                                      checked={selectedPermissions.includes(permission.id)}
+                                      onChange={handleCheckboxChange}
+                                      name={permission.id.toString()}
+                                    />
+                                  }
+                                  label={permission.namePermission.toUpperCase()}
+                                />
+                              </FormGroup>
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      )
+                    })}
                   </TableBody>
                 </Table>
               </TableContainer>

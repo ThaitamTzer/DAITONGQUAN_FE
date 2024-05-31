@@ -101,16 +101,16 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
-      title: 'Roles & Permissions',
+      title: 'Admins & Roles',
       icon: 'tabler:settings',
       children: [
         {
-          title: 'Roles',
-          path: '/apps/roles'
+          title: 'Admins',
+          path: '/apps/admins'
         },
         {
-          title: 'Permissions',
-          path: '/apps/permissions'
+          title: 'Roles',
+          path: '/apps/roles'
         }
       ]
     },

@@ -22,6 +22,8 @@ export type AdminsType = {
   fullname: string
   email: string
   roleId: string
+  role: string
+  roles: { data: [] }
   isBlock: boolean
   avatarColor?: ThemeColor
 }
