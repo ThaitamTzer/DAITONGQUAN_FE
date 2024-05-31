@@ -20,7 +20,13 @@ const masterAdminService = {
   getAllRole: async () => axiosClient.get('/role'),
 
   // ** Create New Role
-  createRole: async (data: any) => axiosClient.post('/role', data)
+  createRole: async (data: any) => axiosClient.post('/role', data),
+
+  // ** Update Role
+  updateRole: async (data: any) => axiosClient.put('/role', data),
+
+  // ** Delete Role with requestd body id
+  deleteRole: async (data: any) => axiosClient.delete('/role', { data })
 }
 
 export default masterAdminService
