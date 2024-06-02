@@ -35,7 +35,7 @@ import { AdminsType, UsersType } from 'src/types/apps/userTypes'
 import { ThemeColor } from 'src/@core/layouts/types'
 
 // ** Custom Components Imports
-import TableHeader from 'src/views/apps/roles/TableHeader'
+import TableHeader from 'src/views/apps/admin/TableHeader'
 
 // ** Import Third Party
 import useSWR from 'swr'
@@ -52,22 +52,6 @@ interface UserStatusType {
 interface CellType {
   row: AdminsType
 }
-
-// ** Vars
-// const userRoleObj: UserRoleType = {
-//   editor: { icon: 'tabler:edit', color: 'info' },
-//   author: { icon: 'tabler:user', color: 'warning' },
-//   admin: { icon: 'tabler:device-laptop', color: 'error' },
-//   maintainer: { icon: 'tabler:chart-pie-2', color: 'success' },
-//   subscriber: { icon: 'tabler:circle-check', color: 'primary' },
-//   userManagement: { icon: 'tabler:users', color: 'secondary' }
-// }
-
-// const userStatusObj: UserStatusType = {
-//   active: 'success',
-//   pending: 'warning',
-//   inactive: 'secondary'
-// }
 
 const adminStatusObj: UserStatusType = {
   isBlock: 'error',
@@ -89,7 +73,7 @@ const renderClient = (row: AdminsType) => {
 
 const columns: GridColDef[] = [
   {
-    flex: 0.25,
+    flex: 0,
     minWidth: 280,
     field: 'fullname',
     headerName: 'Admin',
@@ -102,13 +86,10 @@ const columns: GridColDef[] = [
           <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column' }}>
             <Typography
               noWrap
-              component={Link}
-              href='/apps/user/view/account'
               sx={{
                 fontWeight: 500,
                 textDecoration: 'none',
-                color: 'text.secondary',
-                '&:hover': { color: 'primary.main' }
+                color: 'text.secondary'
               }}
             >
               {fullname}
@@ -122,18 +103,23 @@ const columns: GridColDef[] = [
     }
   },
   {
-    flex: 0.15,
+    flex: 0.3,
     field: 'role',
     minWidth: 170,
     headerName: 'Role',
     renderCell: ({ row }: CellType) => {
-      const { roles } = row
-      const matchingRole = roles?.data.find(role => row.role.includes(role._id))
-
       return (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {/* <Typography
+            skin='light'
+            sx={{ mr: 4, width: 30, height: 30 }}
+
+            // color={(userRoleObj[row.role].color as ThemeColor) || 'primary'}
+          >
+            <Icon icon={userRoleObj[row.role].icon} />
+          </Typography> */}
           <Typography noWrap sx={{ color: 'text.secondary', textTransform: 'capitalize' }}>
-            {matchingRole ? matchingRole.name : 'Unknown Role'}
+            {row.role.name}
           </Typography>
         </Box>
       )
@@ -191,9 +177,14 @@ const columns: GridColDef[] = [
     field: 'actions',
     headerName: 'Actions',
     renderCell: () => (
-      <IconButton component={Link} href='/apps/user/view/account'>
-        <Icon icon='tabler:eye' />
-      </IconButton>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <IconButton>
+          <Icon icon='tabler:edit' />
+        </IconButton>
+        <IconButton>
+          <Icon icon='tabler:trash' />
+        </IconButton>
+      </Box>
     )
   }
 ]

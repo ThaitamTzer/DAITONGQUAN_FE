@@ -23,7 +23,7 @@ import Icon from 'src/@core/components/icon'
 // ** Custom Components Imports
 import CustomChip from 'src/@core/components/mui/chip'
 import PageHeader from 'src/@core/components/page-header'
-import TableHeader from 'src/views/apps/permissions/TableHeader'
+import TableHeader from 'src/views/apps/roles/TableHeader'
 import CustomTextField from 'src/@core/components/mui/text-field'
 
 // ** Types Imports
