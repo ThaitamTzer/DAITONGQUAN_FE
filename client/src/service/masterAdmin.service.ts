@@ -11,10 +11,10 @@ const masterAdminService = {
   updateAdmin: async (data: any) => axiosClient.put(`/admin`, data),
 
   // ** Delete Admin
-  deleteAdmin: async () => axiosClient.delete(`/admin`),
+  deleteAdmin: async (data: any) => axiosClient.delete(`/admin`, { data }),
 
   // ** Block Admin
-  blockAdmin: async () => axiosClient.put(`/admin/update-block`),
+  blockAdmin: async (data: any) => axiosClient.patch(`/admin/update-block`, data),
 
   // ** Get All Role
   getAllRole: async () => axiosClient.get('/role'),

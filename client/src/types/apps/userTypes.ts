@@ -18,15 +18,35 @@ export type UsersType = {
 }
 
 export type AdminsType = {
-  id: number
+  id: string
   fullname: string
   email: string
-  roleId: string
-  role: string
-  name: string
+  role: [{ name: string }]
   roles: { data: [] }
   isBlock: boolean
+  password: string
   avatarColor?: ThemeColor
+}
+
+export type getUpdateAdmin = {
+  _id: string
+  fullname: string
+  email: string
+  role: [{ _id: string; name: string }]
+  password: string
+}
+
+export type UpdateAdminsType = {
+  id: string
+  fullname: string
+  email: string
+  roleId: string[]
+  password: string
+}
+
+export type RoleType = {
+  _id: string
+  name: string
 }
 
 export type ProjectListDataType = {

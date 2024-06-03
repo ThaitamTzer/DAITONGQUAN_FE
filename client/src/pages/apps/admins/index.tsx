@@ -7,7 +7,6 @@ import PageHeader from 'src/@core/components/page-header'
 
 // ** Demo Components Imports
 import Table from 'src/views/apps/admin/Table'
-import RoleCards from 'src/views/apps/admin/RoleCards'
 
 // ** Import Third Party
 import { useTranslation } from 'react-i18next'

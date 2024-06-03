@@ -1,7 +1,5 @@
 // ** MUI Imports
-import { Button } from '@mui/material'
 import Box from '@mui/material/Box'
-import MenuItem from '@mui/material/MenuItem'
 import { SelectChangeEvent } from '@mui/material/Select'
 
 // ** Custom Component Import
@@ -18,7 +16,7 @@ interface TableHeaderProps {
 
 const TableHeader = (props: TableHeaderProps) => {
   // ** Props
-  const { plan, handlePlanChange, handleFilter, value } = props
+  const { handleFilter, value } = props
 
   const { t } = useTranslation()
 
