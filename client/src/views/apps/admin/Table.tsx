@@ -96,6 +96,8 @@ const AdminList = () => {
   const [adminId, setAdminId] = useState<string | null>(null)
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [currentAdminId, setCurrentAdminId] = useState<string | null>(null)
   const [selectedAdmin, setSelectedAdmin] = useState<any>({
     _id: '',
     fullname: '',
@@ -184,17 +186,40 @@ const AdminList = () => {
     setOpenUpdateDialog(false)
   }
 
-  const handleBlockAdmin = async (id: string) => {
-    const { isBlock } = admins?.find((item: { _id: string }) => item._id === id) ?? { isBlock: false }
+  const handleOpenDialog = (id: string) => {
+    setCurrentAdminId(id)
+    setOpen(true)
+  }
+
+  const handleCloseDialog = () => {
+    setOpen(false)
+  }
+
+  const handleConfirmBlockAdmin = async () => {
+    if (!currentAdminId) return
+
+    const adminToModify = admins?.find((item: { _id: string }) => item._id === currentAdminId)
+    const newIsBlockStatus = !adminToModify?.isBlock
 
     try {
-      await masterAdminService.blockAdmin({ id, isBlock: !isBlock }).then(() => {
-        mutate()
+      await masterAdminService.blockAdmin({ id: currentAdminId, isBlock: newIsBlockStatus }).then(() => {
+        mutate() // Refresh the data after updating
       })
-      toast.success(t('Block Admin thành công'))
+
+      if (newIsBlockStatus) {
+        toast.success(t('Block Admin thành công'))
+      } else {
+        toast.success(t('Mở Block Admin thành công'))
+      }
     } catch (error) {
-      toast.error(t('Block Admin thất bại'))
+      if (newIsBlockStatus) {
+        toast.error(t('Block Admin thất bại'))
+      } else {
+        toast.error(t('Mở Block Admin thất bại'))
+      }
     }
+
+    handleCloseDialog()
   }
 
   const renderClient = (row: AdminsType) => {
@@ -294,8 +319,8 @@ const AdminList = () => {
           >
             <Icon icon='tabler:edit' />
           </IconButton>
-          <IconButton onClick={() => handleBlockAdmin(row._id)}>
-            <Icon icon='tabler:lock' />
+          <IconButton onClick={() => handleOpenDialog(row._id)}>
+            <Icon icon={row.isBlock ? 'tabler:lock' : 'tabler:lock-open'} />
           </IconButton>
           <IconButton onClick={() => handleDeleteAdmin(row._id)}>
             <Icon icon='tabler:trash' />
@@ -338,6 +363,45 @@ const AdminList = () => {
         roleData={roles?.data ?? []}
         t={t}
       />
+      <Dialog
+        open={open}
+        onClose={handleCloseDialog}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      >
+        <DialogTitle id='alert-dialog-title'>
+          {
+            currentAdminId && admins
+              ? admins.find((item: { _id: string }) => item._id === currentAdminId)?.isBlock
+                ? t('Xác nhận mở khóa')
+                : t('Xác nhận khóa')
+              : '' // Or a default title if admin data isn't available yet
+          }
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>
+            {
+              currentAdminId && admins
+                ? admins.find((item: { _id: string }) => item._id === currentAdminId)?.isBlock
+                  ? t('Bạn có chắc chắn muốn mở khóa Admin này không?')
+                  : t('Bạn có chắc chắn muốn khóa Admin này không?')
+                : '' // Or a default message
+            }
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>{t('Hủy')}</Button>
+          <Button onClick={handleConfirmBlockAdmin} autoFocus>
+            {
+              currentAdminId && admins
+                ? admins.find((item: { _id: string }) => item._id === currentAdminId)?.isBlock
+                  ? t('Mở khóa')
+                  : t('Khóa')
+                : t('Xác nhận') // Or a default label
+            }
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   )
 }

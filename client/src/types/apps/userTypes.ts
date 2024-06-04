@@ -17,6 +17,18 @@ export type UsersType = {
   avatarColor?: ThemeColor
 }
 
+export type getAllUser = {
+  _id: string
+  firstname: string
+  lastname: string
+  email: string
+  avatar: string
+  createdAt: string
+  isBlock: boolean
+  avatarColor?: ThemeColor
+  gender: string
+}
+
 export type AdminsType = {
   id: string
   fullname: string

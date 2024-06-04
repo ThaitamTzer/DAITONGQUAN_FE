@@ -1,14 +1,12 @@
 // ** React Imports
-import { useState, useEffect, MouseEvent, useCallback } from 'react'
+import { useState, useCallback, useContext } from 'react'
 
 // ** Next Imports
-import Link from 'next/link'
 import { GetStaticProps, InferGetStaticPropsType } from 'next/types'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
-import Menu from '@mui/material/Menu'
 import Grid from '@mui/material/Grid'
 import Divider from '@mui/material/Divider'
 import MenuItem from '@mui/material/MenuItem'
@@ -17,13 +15,18 @@ import Typography from '@mui/material/Typography'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import { SelectChangeEvent } from '@mui/material/Select'
+import {
+  SelectChangeEvent,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button
+} from '@mui/material'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
-
-// ** Store Imports
-import { useDispatch, useSelector } from 'react-redux'
 
 // ** Custom Components Imports
 import CustomChip from 'src/@core/components/mui/chip'
@@ -34,52 +37,44 @@ import CardStatsHorizontalWithDetails from 'src/@core/components/card-statistics
 // ** Utils Import
 import { getInitials } from 'src/@core/utils/get-initials'
 
-// ** Actions Imports
-import { fetchData, deleteUser } from 'src/store/apps/user'
+// ** Context
+import { AbilityContext } from 'src/layouts/components/acl/Can'
 
 // ** Third Party Components
 import axios from 'axios'
+import useSWR, { mutate } from 'swr'
+import toast from 'react-hot-toast'
 
 // ** Types Imports
-import { RootState, AppDispatch } from 'src/store'
 import { CardStatsType } from 'src/@fake-db/types'
-import { ThemeColor } from 'src/@core/layouts/types'
-import { UsersType } from 'src/types/apps/userTypes'
+import { getAllUser } from 'src/types/apps/userTypes'
 import { CardStatsHorizontalWithDetailsProps } from 'src/@core/components/card-statistics/types'
 
 // ** Custom Table Components Imports
 import TableHeader from 'src/views/apps/user/list/TableHeader'
 import AddUserDrawer from 'src/views/apps/user/list/AddUserDrawer'
-
-interface UserRoleType {
-  [key: string]: { icon: string; color: string }
-}
-
-interface UserStatusType {
-  [key: string]: ThemeColor
-}
+import userAdminService from 'src/service/userAdmin.service'
 
 interface CellType {
-  row: UsersType
+  row: getAllUser
 }
 
-// ** renders client column
-const userRoleObj: UserRoleType = {
-  admin: { icon: 'tabler:device-laptop', color: 'secondary' },
-  author: { icon: 'tabler:circle-check', color: 'success' },
-  editor: { icon: 'tabler:edit', color: 'info' },
-  maintainer: { icon: 'tabler:chart-pie-2', color: 'primary' },
-  subscriber: { icon: 'tabler:user', color: 'warning' }
+// ** Utility function to format date
+function FormatDate(dateString: string | null): string | null {
+  if (dateString) {
+    const dateObj = new Date(dateString)
+    const day = String(dateObj.getDate()).padStart(2, '0')
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+    const year = dateObj.getFullYear()
+
+    return `${day}/${month}/${year}`
+  }
+
+  return null
 }
 
-const userStatusObj: UserStatusType = {
-  active: 'success',
-  pending: 'warning',
-  inactive: 'secondary'
-}
-
-// ** renders client column
-const renderClient = (row: UsersType) => {
+// ** Function to render client's avatar or initials
+const renderClient = (row: getAllUser) => {
   if (row.avatar.length) {
     return <CustomAvatar src={row.avatar} sx={{ mr: 2.5, width: 38, height: 38 }} />
   } else {
@@ -89,75 +84,129 @@ const renderClient = (row: UsersType) => {
         color={row.avatarColor}
         sx={{ mr: 2.5, width: 38, height: 38, fontWeight: 500, fontSize: theme => theme.typography.body1.fontSize }}
       >
-        {getInitials(row.fullName ? row.fullName : 'John Doe')}
+        {getInitials(row.firstname + ' ' + row.lastname)}
       </CustomAvatar>
     )
   }
 }
 
-const RowOptions = ({ id }: { id: number | string }) => {
-  // ** Hooks
-  const dispatch = useDispatch<AppDispatch>()
+// ** Component to handle row options (block/delete actions)
+const RowOptions = ({ id }: { id: string }) => {
+  const [openDialog, setOpenDialog] = useState(false)
+  const [openBlockDialog, setOpenBlockDialog] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+  const ability = useContext(AbilityContext)
 
-  // ** State
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const { data } = useSWR('GET_ALL_USERS', userAdminService.getAllUser)
 
-  const rowOptionsOpen = Boolean(anchorEl)
-
-  const handleRowOptionsClick = (event: MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-  const handleRowOptionsClose = () => {
-    setAnchorEl(null)
+  const handleOpenDialog = (id: string) => {
+    setUserId(id)
+    setOpenDialog(true)
   }
 
-  const handleDelete = () => {
-    dispatch(deleteUser(id))
-    handleRowOptionsClose()
+  const handleOpenDeleteDialog = (id: string) => {
+    setUserId(id)
+    setOpenBlockDialog(true)
+  }
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false)
+    setOpenBlockDialog(false)
+  }
+
+  const handleConfirmBlockUser = async () => {
+    if (!userId) return
+    const userToModify = data?.find((item: { _id: string }) => item._id === userId)
+    const newIsBlockStatus = !userToModify?.isBlock
+
+    try {
+      await userAdminService.blockUser({ _id: userId, isBlock: newIsBlockStatus })
+      toast.success(newIsBlockStatus ? 'Account successfully blocked' : 'Account successfully unblocked')
+      mutate('GET_ALL_USERS')
+    } catch (error) {
+      toast.error(newIsBlockStatus ? 'Failed to block account' : 'Failed to unblock account')
+    }
+
+    handleCloseDialog()
+  }
+
+  const handleDeleteUser = async () => {
+    if (!userId) return
+    try {
+      await userAdminService.deleteUser({ _id: userId })
+      toast.success('Account successfully deleted')
+      mutate('GET_ALL_USERS')
+    } catch (error) {
+      toast.error('Failed to delete account')
+    }
+
+    handleCloseDialog()
   }
 
   return (
     <>
-      <IconButton size='small' onClick={handleRowOptionsClick}>
-        <Icon icon='tabler:dots-vertical' />
-      </IconButton>
-      <Menu
-        keepMounted
-        anchorEl={anchorEl}
-        open={rowOptionsOpen}
-        onClose={handleRowOptionsClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right'
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right'
-        }}
-        PaperProps={{ style: { minWidth: '8rem' } }}
+      {ability.can('block', 'user') && (
+        <IconButton onClick={() => handleOpenDialog(id)}>
+          <Icon
+            icon={data?.find((item: { _id: string }) => item._id === id)?.isBlock ? 'tabler:lock' : 'tabler:lock-open'}
+          />
+        </IconButton>
+      )}
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
       >
-        <MenuItem
-          component={Link}
-          sx={{ '& svg': { mr: 2 } }}
-          href='/apps/user/view/account'
-          onClick={handleRowOptionsClose}
-        >
-          <Icon icon='tabler:eye' fontSize={20} />
-          View
-        </MenuItem>
-        <MenuItem onClick={handleRowOptionsClose} sx={{ '& svg': { mr: 2 } }}>
-          <Icon icon='tabler:edit' fontSize={20} />
-          Edit
-        </MenuItem>
-        <MenuItem onClick={handleDelete} sx={{ '& svg': { mr: 2 } }}>
+        <DialogTitle id='alert-dialog-title'>
+          {userId && data
+            ? data.find((item: { _id: string }) => item._id === userId)?.isBlock
+              ? 'Confirm Unblock'
+              : 'Confirm Block'
+            : ''}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>
+            {userId && data
+              ? data.find((item: { _id: string }) => item._id === userId)?.isBlock
+                ? 'Are you sure you want to unblock this user?'
+                : 'Are you sure you want to block this user?'
+              : ''}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleConfirmBlockUser} autoFocus>
+            {userId && data
+              ? data.find((item: { _id: string }) => item._id === userId)?.isBlock
+                ? 'Unblock'
+                : 'Block'
+              : 'Confirm'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {ability.can('delete', 'user') && (
+        <IconButton onClick={() => handleOpenDeleteDialog(id)}>
           <Icon icon='tabler:trash' fontSize={20} />
-          Delete
-        </MenuItem>
-      </Menu>
+        </IconButton>
+      )}
+      <Dialog open={openBlockDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Are you sure you want to delete this user?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleDeleteUser} color='error' autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }
 
+// ** Column definitions for the DataGrid
 const columns: GridColDef[] = [
   {
     flex: 0.25,
@@ -165,7 +214,7 @@ const columns: GridColDef[] = [
     field: 'fullName',
     headerName: 'User',
     renderCell: ({ row }: CellType) => {
-      const { fullName, email } = row
+      const { firstname, lastname, email } = row
 
       return (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -173,16 +222,13 @@ const columns: GridColDef[] = [
           <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column' }}>
             <Typography
               noWrap
-              component={Link}
-              href='/apps/user/view/account'
               sx={{
                 fontWeight: 500,
                 textDecoration: 'none',
-                color: 'text.secondary',
-                '&:hover': { color: 'primary.main' }
+                color: 'text.secondary'
               }}
             >
-              {fullName}
+              {firstname + ' ' + lastname}
             </Typography>
             <Typography noWrap variant='body2' sx={{ color: 'text.disabled' }}>
               {email}
@@ -194,21 +240,14 @@ const columns: GridColDef[] = [
   },
   {
     flex: 0.15,
-    field: 'role',
+    field: 'gender',
     minWidth: 170,
-    headerName: 'Role',
+    headerName: 'Gender',
     renderCell: ({ row }: CellType) => {
       return (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <CustomAvatar
-            skin='light'
-            sx={{ mr: 4, width: 30, height: 30 }}
-            color={(userRoleObj[row.role].color as ThemeColor) || 'primary'}
-          >
-            <Icon icon={userRoleObj[row.role].icon} />
-          </CustomAvatar>
           <Typography noWrap sx={{ color: 'text.secondary', textTransform: 'capitalize' }}>
-            {row.role}
+            {row.gender}
           </Typography>
         </Box>
       )
@@ -216,34 +255,8 @@ const columns: GridColDef[] = [
   },
   {
     flex: 0.15,
-    minWidth: 120,
-    headerName: 'Plan',
-    field: 'currentPlan',
-    renderCell: ({ row }: CellType) => {
-      return (
-        <Typography noWrap sx={{ fontWeight: 500, color: 'text.secondary', textTransform: 'capitalize' }}>
-          {row.currentPlan}
-        </Typography>
-      )
-    }
-  },
-  {
-    flex: 0.15,
-    minWidth: 190,
-    field: 'billing',
-    headerName: 'Billing',
-    renderCell: ({ row }: CellType) => {
-      return (
-        <Typography noWrap sx={{ color: 'text.secondary' }}>
-          {row.billing}
-        </Typography>
-      )
-    }
-  },
-  {
-    flex: 0.1,
-    minWidth: 110,
     field: 'status',
+    minWidth: 170,
     headerName: 'Status',
     renderCell: ({ row }: CellType) => {
       return (
@@ -251,10 +264,23 @@ const columns: GridColDef[] = [
           rounded
           skin='light'
           size='small'
-          label={row.status}
-          color={userStatusObj[row.status]}
+          label={row.isBlock ? 'Blocked' : 'Active'}
+          color={row.isBlock ? 'error' : 'success'}
           sx={{ textTransform: 'capitalize' }}
         />
+      )
+    }
+  },
+  {
+    flex: 0.15,
+    field: 'createdAt',
+    minWidth: 170,
+    headerName: 'Created At',
+    renderCell: ({ row }: CellType) => {
+      return (
+        <Typography noWrap sx={{ color: 'text.secondary' }}>
+          {FormatDate(row.createdAt)}
+        </Typography>
       )
     }
   },
@@ -264,37 +290,29 @@ const columns: GridColDef[] = [
     sortable: false,
     field: 'actions',
     headerName: 'Actions',
-    renderCell: ({ row }: CellType) => <RowOptions id={row.id} />
+    renderCell: ({ row }: CellType) => <RowOptions id={row._id} />
   }
 ]
 
+// ** Main component to display user list
 const UserList = ({ apiData }: InferGetStaticPropsType<typeof getStaticProps>) => {
-  // ** State
   const [role, setRole] = useState<string>('')
   const [plan, setPlan] = useState<string>('')
-  const [value, setValue] = useState<string>('')
   const [status, setStatus] = useState<string>('')
   const [addUserOpen, setAddUserOpen] = useState<boolean>(false)
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
+  const [searchQuery, setSearchQuery] = useState<string>('')
 
-  // ** Hooks
-  const dispatch = useDispatch<AppDispatch>()
-  const store = useSelector((state: RootState) => state.user)
+  const { data } = useSWR('GET_ALL_USERS', userAdminService.getAllUser)
 
-  useEffect(() => {
-    dispatch(
-      fetchData({
-        role,
-        status,
-        q: value,
-        currentPlan: plan
-      })
-    )
-  }, [dispatch, plan, role, status, value])
-
-  const handleFilter = useCallback((val: string) => {
-    setValue(val)
-  }, [])
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query)
+    try {
+      await userAdminService.searchUser(query)
+    } catch (error) {
+      toast.error('Failed to search users')
+    }
+  }
 
   const handleRoleChange = useCallback((e: SelectChangeEvent<unknown>) => {
     setRole(e.target.value as string)
@@ -315,13 +333,11 @@ const UserList = ({ apiData }: InferGetStaticPropsType<typeof getStaticProps>) =
       <Grid item xs={12}>
         {apiData && (
           <Grid container spacing={6}>
-            {apiData.statsHorizontalWithDetails.map((item: CardStatsHorizontalWithDetailsProps, index: number) => {
-              return (
-                <Grid item xs={12} md={3} sm={6} key={index}>
-                  <CardStatsHorizontalWithDetails {...item} />
-                </Grid>
-              )
-            })}
+            {apiData.statsHorizontalWithDetails.map((item: CardStatsHorizontalWithDetailsProps, index: number) => (
+              <Grid item xs={12} md={3} sm={6} key={index}>
+                <CardStatsHorizontalWithDetails {...item} />
+              </Grid>
+            ))}
           </Grid>
         )}
       </Grid>
@@ -387,11 +403,15 @@ const UserList = ({ apiData }: InferGetStaticPropsType<typeof getStaticProps>) =
             </Grid>
           </CardContent>
           <Divider sx={{ m: '0 !important' }} />
-          <TableHeader value={value} handleFilter={handleFilter} toggle={toggleAddUserDrawer} />
+          <TableHeader value={searchQuery} handleFilter={handleSearch} toggle={toggleAddUserDrawer} />
           <DataGrid
             autoHeight
             rowHeight={62}
-            rows={store.data}
+            rows={
+              (data?.map((item: { _id: any }) => ({ ...item, id: item._id })) ||
+                data?.user.map((item: { _id: any }) => ({ ...item, id: item._id }))) ??
+              []
+            }
             columns={columns}
             disableRowSelectionOnClick
             pageSizeOptions={[10, 25, 50]}
@@ -400,7 +420,6 @@ const UserList = ({ apiData }: InferGetStaticPropsType<typeof getStaticProps>) =
           />
         </Card>
       </Grid>
-
       <AddUserDrawer open={addUserOpen} toggle={toggleAddUserDrawer} />
     </Grid>
   )
@@ -416,8 +435,10 @@ export const getStaticProps: GetStaticProps = async () => {
     }
   }
 }
+
 UserList.acl = {
   action: 'read',
   subject: 'user'
 }
+
 export default UserList
