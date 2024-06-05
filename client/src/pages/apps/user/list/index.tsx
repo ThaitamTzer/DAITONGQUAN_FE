@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, useCallback, useContext } from 'react'
+import { useState, useCallback, useContext, useEffect } from 'react'
 
 // ** Next Imports
 import { GetStaticProps, InferGetStaticPropsType } from 'next/types'
@@ -299,18 +299,28 @@ const UserList = ({ apiData }: InferGetStaticPropsType<typeof getStaticProps>) =
   const [role, setRole] = useState<string>('')
   const [plan, setPlan] = useState<string>('')
   const [status, setStatus] = useState<string>('')
+  const [userData, setUserData] = useState<getAllUser[] | undefined>([])
   const [addUserOpen, setAddUserOpen] = useState<boolean>(false)
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [searchQuery, setSearchQuery] = useState<string>('')
 
   const { data } = useSWR('GET_ALL_USERS', userAdminService.getAllUser)
 
+  useEffect(() => {
+    if (data) {
+      setUserData(data)
+    }
+  }, [data])
+
   const handleSearch = async (query: string) => {
     setSearchQuery(query)
     try {
-      await userAdminService.searchUser(query)
+      const dataSearch = await userAdminService.searchUser(query)
+      setUserData(dataSearch.data.user)
     } catch (error) {
-      toast.error('Failed to search users')
+      if (error.response.data.statusCode === 404) {
+        setUserData([])
+      }
     }
   }
 
@@ -408,8 +418,8 @@ const UserList = ({ apiData }: InferGetStaticPropsType<typeof getStaticProps>) =
             autoHeight
             rowHeight={62}
             rows={
-              (data?.map((item: { _id: any }) => ({ ...item, id: item._id })) ||
-                data?.user.map((item: { _id: any }) => ({ ...item, id: item._id }))) ??
+              (userData?.map((item: { _id: any }) => ({ ...item, id: item._id })) ||
+                userData?.user.map((item: { _id: any }) => ({ ...item, id: item._id }))) ??
               []
             }
             columns={columns}
