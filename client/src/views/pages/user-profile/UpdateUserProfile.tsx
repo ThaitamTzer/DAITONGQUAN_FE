@@ -1,4 +1,4 @@
-import { Ref, useState, forwardRef, ReactElement } from 'react'
+import { Ref, useState, forwardRef, ReactElement, useEffect } from 'react'
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
 import Dialog from '@mui/material/Dialog'
@@ -156,6 +156,20 @@ const UpdateUserProfile = () => {
       toast.error('Failed to update profile.')
     }
   }
+
+  useEffect(() => {
+    const defaultProvince = provinceData?.find((item: any) => item.name === province)
+    if (defaultProvince) {
+      setProvinceID(defaultProvince.idProvince)
+    }
+  }, [province, provinceData])
+
+  useEffect(() => {
+    const defaultDistrict = districtData?.find((item: any) => item.name === district)
+    if (defaultDistrict) {
+      setDistrictID(defaultDistrict.idDistrict)
+    }
+  }, [district, districtData])
 
   return (
     <Card>
@@ -377,9 +391,7 @@ const UpdateUserProfile = () => {
                       onBlur={onBlur}
                       onChange={e => {
                         onChange(e)
-                        const provinceID = provinceData?.find(
-                          (item: any) => item.province_name === e.target.value
-                        ).province_id
+                        const provinceID = provinceData?.find((item: any) => item.name === e.target.value).idProvince
                         setProvinceID(provinceID)
                       }}
                       size='small'
@@ -388,8 +400,8 @@ const UpdateUserProfile = () => {
                       helperText={errors.province ? errors.province.message : ''}
                     >
                       {provinceData?.map((province: any) => (
-                        <MenuItem key={province.province_id} value={province.province_name}>
-                          {province.province_name}
+                        <MenuItem key={province.idProvince} value={province.name}>
+                          {province.name}
                         </MenuItem>
                       ))}
                     </TextField>
@@ -410,9 +422,7 @@ const UpdateUserProfile = () => {
                       onBlur={onBlur}
                       onChange={e => {
                         onChange(e)
-                        const districtID = districtData?.find(
-                          (item: any) => item.district_name === e.target.value
-                        ).district_id
+                        const districtID = districtData?.find((item: any) => item.name === e.target.value).idDistrict
                         setDistrictID(districtID)
                       }}
                       size='small'
@@ -421,8 +431,8 @@ const UpdateUserProfile = () => {
                       helperText={errors.district ? errors.district.message : ''}
                     >
                       {districtData?.map((district: any) => (
-                        <MenuItem key={district.district_id} value={district.district_name}>
-                          {district.district_name}
+                        <MenuItem key={district.idDistrict} value={district.name}>
+                          {district.name}
                         </MenuItem>
                       ))}
                     </TextField>
@@ -448,8 +458,8 @@ const UpdateUserProfile = () => {
                       helperText={errors.ward ? errors.ward.message : ''}
                     >
                       {wardData?.map((ward: any) => (
-                        <MenuItem key={ward.ward_id} value={ward.ward_name}>
-                          {ward.ward_name}
+                        <MenuItem key={ward.idCommune} value={ward.name}>
+                          {ward.name}
                         </MenuItem>
                       ))}
                     </TextField>

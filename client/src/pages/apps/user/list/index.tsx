@@ -8,15 +8,17 @@ import { GetStaticProps, InferGetStaticPropsType } from 'next/types'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
-import Divider from '@mui/material/Divider'
-import MenuItem from '@mui/material/MenuItem'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
+
+// import Divider from '@mui/material/Divider'
+// import MenuItem from '@mui/material/MenuItem'
+// import CardHeader from '@mui/material/CardHeader'
+// import CardContent from '@mui/material/CardContent'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import {
-  SelectChangeEvent,
+  
+  // SelectChangeEvent,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -324,17 +326,17 @@ const UserList = ({ apiData }: InferGetStaticPropsType<typeof getStaticProps>) =
     }
   }
 
-  const handleRoleChange = useCallback((e: SelectChangeEvent<unknown>) => {
-    setRole(e.target.value as string)
-  }, [])
+  // const handleRoleChange = useCallback((e: SelectChangeEvent<unknown>) => {
+  //   setRole(e.target.value as string)
+  // }, [])
 
-  const handlePlanChange = useCallback((e: SelectChangeEvent<unknown>) => {
-    setPlan(e.target.value as string)
-  }, [])
+  // const handlePlanChange = useCallback((e: SelectChangeEvent<unknown>) => {
+  //   setPlan(e.target.value as string)
+  // }, [])
 
-  const handleStatusChange = useCallback((e: SelectChangeEvent<unknown>) => {
-    setStatus(e.target.value as string)
-  }, [])
+  // const handleStatusChange = useCallback((e: SelectChangeEvent<unknown>) => {
+  //   setStatus(e.target.value as string)
+  // }, [])
 
   const toggleAddUserDrawer = () => setAddUserOpen(!addUserOpen)
 
@@ -353,7 +355,7 @@ const UserList = ({ apiData }: InferGetStaticPropsType<typeof getStaticProps>) =
       </Grid>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Search Filters' />
+          {/* <CardHeader title='Search Filters' />
           <CardContent>
             <Grid container spacing={6}>
               <Grid item sm={4} xs={12}>
@@ -412,7 +414,7 @@ const UserList = ({ apiData }: InferGetStaticPropsType<typeof getStaticProps>) =
               </Grid>
             </Grid>
           </CardContent>
-          <Divider sx={{ m: '0 !important' }} />
+          <Divider sx={{ m: '0 !important' }} /> */}
           <TableHeader value={searchQuery} handleFilter={handleSearch} toggle={toggleAddUserDrawer} />
           <DataGrid
             autoHeight

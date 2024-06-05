@@ -26,9 +26,9 @@ const TableHeader = (props: TableHeaderProps) => {
         justifyContent: 'space-between'
       }}
     >
-      <Button color='secondary' variant='tonal' startIcon={<Icon icon='tabler:upload' />}>
-        Export
-      </Button>
+      {/* <Button color='secondary' variant='tonal' startIcon={<Icon icon='tabler:upload' />}>
+        Exports
+      </Button> */}
       <Box sx={{ rowGap: 2, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
         <CustomTextField
           value={value}
