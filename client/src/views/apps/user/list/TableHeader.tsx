@@ -1,17 +1,14 @@
 import React from 'react'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
 import CustomTextField from 'src/@core/components/mui/text-field'
-import Icon from 'src/@core/components/icon'
 
 interface TableHeaderProps {
   value: string
-  toggle: () => void
   handleFilter: (val: string) => void
 }
 
 const TableHeader = (props: TableHeaderProps) => {
-  const { handleFilter, toggle, value } = props
+  const { handleFilter, value } = props
 
   return (
     <Box
@@ -26,9 +23,6 @@ const TableHeader = (props: TableHeaderProps) => {
         justifyContent: 'space-between'
       }}
     >
-      {/* <Button color='secondary' variant='tonal' startIcon={<Icon icon='tabler:upload' />}>
-        Exports
-      </Button> */}
       <Box sx={{ rowGap: 2, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
         <CustomTextField
           value={value}

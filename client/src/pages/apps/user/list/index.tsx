@@ -1,58 +1,25 @@
-// ** React Imports
-import { useState, useCallback, useContext, useEffect } from 'react'
-
-// ** Next Imports
+import { useState, useContext, useMemo, useCallback } from 'react'
 import { GetStaticProps, InferGetStaticPropsType } from 'next/types'
-
-// ** MUI Imports
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-
-// import Divider from '@mui/material/Divider'
-// import MenuItem from '@mui/material/MenuItem'
-// import CardHeader from '@mui/material/CardHeader'
-// import CardContent from '@mui/material/CardContent'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import {
-  
-  // SelectChangeEvent,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button
-} from '@mui/material'
-
-// ** Icon Imports
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material'
+import { debounce } from 'src/utils/debounce'
 import Icon from 'src/@core/components/icon'
-
-// ** Custom Components Imports
 import CustomChip from 'src/@core/components/mui/chip'
 import CustomAvatar from 'src/@core/components/mui/avatar'
-import CustomTextField from 'src/@core/components/mui/text-field'
 import CardStatsHorizontalWithDetails from 'src/@core/components/card-statistics/card-stats-horizontal-with-details'
-
-// ** Utils Import
 import { getInitials } from 'src/@core/utils/get-initials'
-
-// ** Context
 import { AbilityContext } from 'src/layouts/components/acl/Can'
-
-// ** Third Party Components
 import axios from 'axios'
 import useSWR, { mutate } from 'swr'
 import toast from 'react-hot-toast'
-
-// ** Types Imports
 import { CardStatsType } from 'src/@fake-db/types'
 import { getAllUser } from 'src/types/apps/userTypes'
 import { CardStatsHorizontalWithDetailsProps } from 'src/@core/components/card-statistics/types'
-
-// ** Custom Table Components Imports
 import TableHeader from 'src/views/apps/user/list/TableHeader'
 import AddUserDrawer from 'src/views/apps/user/list/AddUserDrawer'
 import userAdminService from 'src/service/userAdmin.service'
@@ -61,8 +28,7 @@ interface CellType {
   row: getAllUser
 }
 
-// ** Utility function to format date
-function FormatDate(dateString: string | null): string | null {
+const FormatDate = (dateString: string | null): string | null => {
   if (dateString) {
     const dateObj = new Date(dateString)
     const day = String(dateObj.getDate()).padStart(2, '0')
@@ -75,24 +41,22 @@ function FormatDate(dateString: string | null): string | null {
   return null
 }
 
-// ** Function to render client's avatar or initials
 const renderClient = (row: getAllUser) => {
   if (row.avatar.length) {
     return <CustomAvatar src={row.avatar} sx={{ mr: 2.5, width: 38, height: 38 }} />
-  } else {
-    return (
-      <CustomAvatar
-        skin='light'
-        color={row.avatarColor}
-        sx={{ mr: 2.5, width: 38, height: 38, fontWeight: 500, fontSize: theme => theme.typography.body1.fontSize }}
-      >
-        {getInitials(row.firstname + ' ' + row.lastname)}
-      </CustomAvatar>
-    )
   }
+
+  return (
+    <CustomAvatar
+      skin='light'
+      color={row.avatarColor}
+      sx={{ mr: 2.5, width: 38, height: 38, fontWeight: 500, fontSize: theme => theme.typography.body1.fontSize }}
+    >
+      {getInitials(row.firstname + ' ' + row.lastname)}
+    </CustomAvatar>
+  )
 }
 
-// ** Component to handle row options (block/delete actions)
 const RowOptions = ({ id }: { id: string }) => {
   const [openDialog, setOpenDialog] = useState(false)
   const [openBlockDialog, setOpenBlockDialog] = useState(false)
@@ -208,7 +172,6 @@ const RowOptions = ({ id }: { id: string }) => {
   )
 }
 
-// ** Column definitions for the DataGrid
 const columns: GridColDef[] = [
   {
     flex: 0.25,
@@ -222,14 +185,7 @@ const columns: GridColDef[] = [
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {renderClient(row)}
           <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column' }}>
-            <Typography
-              noWrap
-              sx={{
-                fontWeight: 500,
-                textDecoration: 'none',
-                color: 'text.secondary'
-              }}
-            >
+            <Typography noWrap sx={{ fontWeight: 500, textDecoration: 'none', color: 'text.secondary' }}>
               {firstname + ' ' + lastname}
             </Typography>
             <Typography noWrap variant='body2' sx={{ color: 'text.disabled' }}>
@@ -245,46 +201,40 @@ const columns: GridColDef[] = [
     field: 'gender',
     minWidth: 170,
     headerName: 'Gender',
-    renderCell: ({ row }: CellType) => {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography noWrap sx={{ color: 'text.secondary', textTransform: 'capitalize' }}>
-            {row.gender}
-          </Typography>
-        </Box>
-      )
-    }
+    renderCell: ({ row }: CellType) => (
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography noWrap sx={{ color: 'text.secondary', textTransform: 'capitalize' }}>
+          {row.gender}
+        </Typography>
+      </Box>
+    )
   },
   {
     flex: 0.15,
     field: 'status',
     minWidth: 170,
     headerName: 'Status',
-    renderCell: ({ row }: CellType) => {
-      return (
-        <CustomChip
-          rounded
-          skin='light'
-          size='small'
-          label={row.isBlock ? 'Blocked' : 'Active'}
-          color={row.isBlock ? 'error' : 'success'}
-          sx={{ textTransform: 'capitalize' }}
-        />
-      )
-    }
+    renderCell: ({ row }: CellType) => (
+      <CustomChip
+        rounded
+        skin='light'
+        size='small'
+        label={row.isBlock ? 'Blocked' : 'Active'}
+        color={row.isBlock ? 'error' : 'success'}
+        sx={{ textTransform: 'capitalize' }}
+      />
+    )
   },
   {
     flex: 0.15,
     field: 'createdAt',
     minWidth: 170,
     headerName: 'Created At',
-    renderCell: ({ row }: CellType) => {
-      return (
-        <Typography noWrap sx={{ color: 'text.secondary' }}>
-          {FormatDate(row.createdAt)}
-        </Typography>
-      )
-    }
+    renderCell: ({ row }: CellType) => (
+      <Typography noWrap sx={{ color: 'text.secondary' }}>
+        {FormatDate(row.createdAt)}
+      </Typography>
+    )
   },
   {
     flex: 0.1,
@@ -296,11 +246,7 @@ const columns: GridColDef[] = [
   }
 ]
 
-// ** Main component to display user list
 const UserList = ({ apiData }: InferGetStaticPropsType<typeof getStaticProps>) => {
-  const [role, setRole] = useState<string>('')
-  const [plan, setPlan] = useState<string>('')
-  const [status, setStatus] = useState<string>('')
   const [userData, setUserData] = useState<getAllUser[] | undefined>([])
   const [addUserOpen, setAddUserOpen] = useState<boolean>(false)
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
@@ -308,35 +254,32 @@ const UserList = ({ apiData }: InferGetStaticPropsType<typeof getStaticProps>) =
 
   const { data } = useSWR('GET_ALL_USERS', userAdminService.getAllUser)
 
-  useEffect(() => {
+  const debouncedSearch = useMemo(
+    () =>
+      debounce(async (query: string) => {
+        try {
+          const dataSearch = await userAdminService.searchUser(query)
+          setUserData(dataSearch.data.user)
+        } catch (error) {
+          console.log(error)
+        }
+      }, 200),
+    []
+  )
+
+  const handleSearch = useCallback(
+    (query: string) => {
+      setSearchQuery(query)
+      debouncedSearch(query)
+    },
+    [debouncedSearch]
+  )
+
+  useMemo(() => {
     if (data) {
       setUserData(data)
     }
   }, [data])
-
-  const handleSearch = async (query: string) => {
-    setSearchQuery(query)
-    try {
-      const dataSearch = await userAdminService.searchUser(query)
-      setUserData(dataSearch.data.user)
-    } catch (error) {
-      if (error.response.data.statusCode === 404) {
-        setUserData([])
-      }
-    }
-  }
-
-  // const handleRoleChange = useCallback((e: SelectChangeEvent<unknown>) => {
-  //   setRole(e.target.value as string)
-  // }, [])
-
-  // const handlePlanChange = useCallback((e: SelectChangeEvent<unknown>) => {
-  //   setPlan(e.target.value as string)
-  // }, [])
-
-  // const handleStatusChange = useCallback((e: SelectChangeEvent<unknown>) => {
-  //   setStatus(e.target.value as string)
-  // }, [])
 
   const toggleAddUserDrawer = () => setAddUserOpen(!addUserOpen)
 
@@ -355,75 +298,11 @@ const UserList = ({ apiData }: InferGetStaticPropsType<typeof getStaticProps>) =
       </Grid>
       <Grid item xs={12}>
         <Card>
-          {/* <CardHeader title='Search Filters' />
-          <CardContent>
-            <Grid container spacing={6}>
-              <Grid item sm={4} xs={12}>
-                <CustomTextField
-                  select
-                  fullWidth
-                  defaultValue='Select Role'
-                  SelectProps={{
-                    value: role,
-                    displayEmpty: true,
-                    onChange: e => handleRoleChange(e)
-                  }}
-                >
-                  <MenuItem value=''>Select Role</MenuItem>
-                  <MenuItem value='admin'>Admin</MenuItem>
-                  <MenuItem value='author'>Author</MenuItem>
-                  <MenuItem value='editor'>Editor</MenuItem>
-                  <MenuItem value='maintainer'>Maintainer</MenuItem>
-                  <MenuItem value='subscriber'>Subscriber</MenuItem>
-                </CustomTextField>
-              </Grid>
-              <Grid item sm={4} xs={12}>
-                <CustomTextField
-                  select
-                  fullWidth
-                  defaultValue='Select Plan'
-                  SelectProps={{
-                    value: plan,
-                    displayEmpty: true,
-                    onChange: e => handlePlanChange(e)
-                  }}
-                >
-                  <MenuItem value=''>Select Plan</MenuItem>
-                  <MenuItem value='basic'>Basic</MenuItem>
-                  <MenuItem value='company'>Company</MenuItem>
-                  <MenuItem value='enterprise'>Enterprise</MenuItem>
-                  <MenuItem value='team'>Team</MenuItem>
-                </CustomTextField>
-              </Grid>
-              <Grid item sm={4} xs={12}>
-                <CustomTextField
-                  select
-                  fullWidth
-                  defaultValue='Select Status'
-                  SelectProps={{
-                    value: status,
-                    displayEmpty: true,
-                    onChange: e => handleStatusChange(e)
-                  }}
-                >
-                  <MenuItem value=''>Select Status</MenuItem>
-                  <MenuItem value='pending'>Pending</MenuItem>
-                  <MenuItem value='active'>Active</MenuItem>
-                  <MenuItem value='inactive'>Inactive</MenuItem>
-                </CustomTextField>
-              </Grid>
-            </Grid>
-          </CardContent>
-          <Divider sx={{ m: '0 !important' }} /> */}
-          <TableHeader value={searchQuery} handleFilter={handleSearch} toggle={toggleAddUserDrawer} />
+          <TableHeader value={searchQuery} handleFilter={handleSearch} />
           <DataGrid
             autoHeight
             rowHeight={62}
-            rows={
-              (userData?.map((item: { _id: any }) => ({ ...item, id: item._id })) ||
-                userData?.user.map((item: { _id: any }) => ({ ...item, id: item._id }))) ??
-              []
-            }
+            rows={userData?.map(item => ({ ...item, id: item._id })) ?? []}
             columns={columns}
             disableRowSelectionOnClick
             pageSizeOptions={[10, 25, 50]}
