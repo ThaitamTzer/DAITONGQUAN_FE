@@ -13,6 +13,8 @@ const MAX_NICKNAME_LENGTH = 10
 const MAX_PHONE_LENGTH = 11
 const CODE_LENGTH = 6
 const MAX_DESCRIPTINO_LENGTH = 100
+const MAX_CATE_NAME_LENGTH = 10
+const MIN_CATE_NAME_LENGTH = 1
 
 export const getValidationMessages = (t: (arg0: string) => any) => ({
   email: {
@@ -97,6 +99,17 @@ export const getValidationMessages = (t: (arg0: string) => any) => ({
   fullname: {
     required: t('Tên Admin không được để trống'),
     max: t(`Tên Admin không được quá ${MAX_FIRSTNAME_LENGTH} ký tự `)
+  },
+  category: {
+    required: t('Tên danh mục không được để trống'),
+    max: t(`Tên danh mục không được quá ${MAX_CATE_NAME_LENGTH} ký tự`),
+    min: t(`Tên danh mục phải có ít nhất ${MIN_CATE_NAME_LENGTH} ký tự`)
+  },
+  type: {
+    required: t('Loại danh mục không được để trống')
+  },
+  icon: {
+    required: t('Cần chọn icon cho danh mục')
   }
 })
 
@@ -284,5 +297,19 @@ export const getUpdateAdminValidationSchema = (t: (arg0: string) => any) => {
       .matches(/[!@#$%^&*]/, messages.password.special)
       .matches(/[0-9]/, messages.password.number)
       .matches(/^\S*$/, messages.noWhitespace)
+  })
+}
+
+export const getCreateCategoryValidationSchema = (t: (arg0: string) => any) => {
+  const messages = getValidationMessages(t)
+
+  return yup.object().shape({
+    name: yup
+      .string()
+      .required(messages.category.required)
+      .max(MAX_CATE_NAME_LENGTH, messages.category.max)
+      .min(MIN_CATE_NAME_LENGTH, messages.category.min),
+    description: yup.string().max(MAX_DESCRIPTINO_LENGTH),
+    type: yup.string().required(messages.type.required)
   })
 }

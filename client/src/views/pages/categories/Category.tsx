@@ -16,24 +16,12 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import MuiTabList, { TabListProps } from '@mui/lab/TabList'
 import CircularProgress from '@mui/material/CircularProgress'
 
-// ** Type Import
-import {
-  TeamsTabType,
-  ProfileTabType,
-  ProjectsTabType,
-  ConnectionsTabType,
-  UserProfileActiveTab
-} from 'src/@fake-db/types'
-
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
 
 // ** Demo Components
-import Teams from 'src/views/pages/user-profile/teams'
-import Profile from 'src/views/pages/user-profile/profile'
-import Projects from 'src/views/pages/user-profile/projects'
-import Connections from 'src/views/pages/user-profile/connections'
-import UserProfileHeader from 'src/views/pages/user-profile/UserProfileHeader'
+import Spends from 'src/views/pages/categories/spends'
+import Incomes from 'src/views/pages/categories/incomes'
 
 const TabList = styled(MuiTabList)<TabListProps>(({ theme }) => ({
   borderBottom: '0 !important',
@@ -64,51 +52,39 @@ const TabList = styled(MuiTabList)<TabListProps>(({ theme }) => ({
   }
 }))
 
-const UserProfile = ({ tab, data }: { tab: string; data: UserProfileActiveTab }) => {
-  // ** State
-  const [activeTab, setActiveTab] = useState<string>(tab)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+const Category = () => {
+  // State
+  const [activeTab, setActiveTab] = useState<string>('spends') // Default tab
+  const [isLoading, setIsLoading] = useState<boolean>(false) // Initial loading state
 
-  // ** Hooks
+  // Hooks
   const router = useRouter()
   const hideText = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
 
   const handleChange = (event: SyntheticEvent, value: string) => {
-    setIsLoading(true)
+    setIsLoading(true) // Show loading indicator
     setActiveTab(value)
-    router
-      .push({
-        pathname: `/pages/user-profile/${value.toLowerCase()}`
-      })
-      .then(() => setIsLoading(false))
+
+    router.push(`/categories/${value.toLowerCase()}`).then(() => setIsLoading(false)) // Hide loading after navigation
   }
 
   useEffect(() => {
-    if (data) {
-      setIsLoading(false)
+    const currentTab = router.query.tab as string
+    if (currentTab) {
+      setActiveTab(currentTab)
+    } else {
+      router.replace('/categories/spends') // Redirect to default tab if none is specified
     }
-  }, [data])
-
-  useEffect(() => {
-    if (tab && tab !== activeTab) {
-      setActiveTab(tab)
-    }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab])
+  }, [router.query.tab])
 
   const tabContentList: { [key: string]: ReactElement } = {
-    profile: <Profile data={data as ProfileTabType} />,
-    teams: <Teams data={data as TeamsTabType[]} />,
-    projects: <Projects data={data as ProjectsTabType[]} />,
-    connections: <Connections data={data as ConnectionsTabType[]} />
+    spends: <Spends />,
+    incomes: <Incomes />
   }
 
   return (
     <Grid container spacing={6}>
-      <Grid item xs={12}>
-        <UserProfileHeader />
-      </Grid>
       {activeTab === undefined ? null : (
         <Grid item xs={12}>
           <TabContext value={activeTab}>
@@ -121,38 +97,20 @@ const UserProfile = ({ tab, data }: { tab: string; data: UserProfileActiveTab })
                   aria-label='customized tabs example'
                 >
                   <Tab
-                    value='profile'
+                    value='spends'
                     label={
                       <Box sx={{ display: 'flex', alignItems: 'center', ...(!hideText && { '& svg': { mr: 2 } }) }}>
-                        <Icon fontSize='1.125rem' icon='tabler:user-check' />
-                        {!hideText && 'Profile'}
+                        <Icon fontSize='1.125rem' icon='vaadin:money-withdraw' />
+                        {!hideText && 'Spends'}
                       </Box>
                     }
                   />
                   <Tab
-                    value='teams'
+                    value='incomes'
                     label={
                       <Box sx={{ display: 'flex', alignItems: 'center', ...(!hideText && { '& svg': { mr: 2 } }) }}>
-                        <Icon fontSize='1.125rem' icon='tabler:users' />
-                        {!hideText && 'Teams'}
-                      </Box>
-                    }
-                  />
-                  <Tab
-                    value='projects'
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', ...(!hideText && { '& svg': { mr: 2 } }) }}>
-                        <Icon fontSize='1.125rem' icon='tabler:layout-grid' />
-                        {!hideText && 'Projects'}
-                      </Box>
-                    }
-                  />
-                  <Tab
-                    value='connections'
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', ...(!hideText && { '& svg': { mr: 2 } }) }}>
-                        <Icon fontSize='1.125rem' icon='tabler:link' />
-                        {!hideText && 'Connections'}
+                        <Icon fontSize='1.125rem' icon='vaadin:money-deposit' />
+                        {!hideText && 'Incomes'}
                       </Box>
                     }
                   />
@@ -178,4 +136,4 @@ const UserProfile = ({ tab, data }: { tab: string; data: UserProfileActiveTab })
   )
 }
 
-export default UserProfile
+export default Category

@@ -580,11 +580,22 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'tabler:home'
     },
     {
-      path: '/categories',
-      action: 'read',
-      subject: 'member-page',
       title: 'Categories',
-      icon: 'tabler:grid'
+      icon: 'tabler:grid',
+      children: [
+        {
+          path: '/categories/spends',
+          title: 'Spends Category',
+          action: 'read',
+          subject: 'member-page'
+        },
+        {
+          path: '/categories/incomes',
+          title: 'Incomes Category',
+          action: 'read',
+          subject: 'member-page'
+        }
+      ]
     },
     {
       path: '/acl',
