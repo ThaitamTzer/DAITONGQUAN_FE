@@ -1,0 +1,140 @@
+[
+  {
+    "id": 0,
+    "namePermission": "Manager",
+    "action": "manage",
+    "subject": "all"
+  },
+  {
+    "id": 1,
+    "namePermission": "ReadAdmin",
+    "action": "read",
+    "subject": "admin"
+  },
+  {
+    "id": 2,
+    "namePermission": "CreateAdmin",
+    "action": "create",
+    "subject": "admin"
+  },
+  {
+    "id": 3,
+    "namePermission": "DeleteAdmin",
+    "action": "delete",
+    "subject": "admin"
+  },
+  {
+    "id": 4,
+    "namePermission": "UpdateAdmin",
+    "action": "update",
+    "subject": "admin"
+  },
+  {
+    "id": 5,
+    "namePermission": "blockAdmin",
+    "action": "block",
+    "subject": "admin"
+  },
+  {
+    "id": 6,
+    "namePermission": "readUser",
+    "action": "read",
+    "subject": "user"
+  },
+  {
+    "id": 7,
+    "namePermission": "blockUser",
+    "action": "block",
+    "subject": "user"
+  },
+  {
+    "id": 8,
+    "namePermission": "DeleteUser",
+    "action": "delete",
+    "subject": "user"
+  },
+  {
+    "id": 9,
+    "namePermission": "ReadRole",
+    "action": "read",
+    "subject": "role"
+  },
+  {
+    "id": 10,
+    "namePermission": "CreateRole",
+    "action": "create",
+    "subject": "role"
+  },
+  {
+    "id": 11,
+    "namePermission": "UpdateRole",
+    "action": "update",
+    "subject": "role"
+  },
+  {
+    "id": 12,
+    "namePermission": "DeleteRole",
+    "action": "delete",
+    "subject": "role"
+  },
+  {
+    "id": 13,
+    "namePermission": "ReadRank",
+    "action": "read",
+    "subject": "rank"
+  },
+  {
+    "id": 14,
+    "namePermission": "CreateRank",
+    "action": "create",
+    "subject": "rank"
+  },
+  {
+    "id": 15,
+    "namePermission": "UpdateRank",
+    "action": "update",
+    "subject": "rank"
+  },
+  {
+    "id": 16,
+    "namePermission": "DeleteRank",
+    "action": "delete",
+    "subject": "rank"
+  },
+  {
+    "id": 17,
+    "namePermission": "ReadlistPost",
+    "action": "read",
+    "subject": "permission"
+  },
+  {
+    "id": 18,
+    "namePermission": "ApprovePost",
+    "action": "update",
+    "subject": "post"
+  },
+  {
+    "id": 19,
+    "namePermission": "DeletePost",
+    "action": "delete",
+    "subject": "post"
+  },
+  {
+    "id": 20,
+    "namePermission": "ReadReport",
+    "action": "read",
+    "subject": "report"
+  },
+  {
+    "id": 21,
+    "namePermission": "DeleteReport",
+    "action": "delete",
+    "subject": "report"
+  },
+  {
+    "id": 22,
+    "namePermission": "WarningReport",
+    "action": "update",
+    "subject": "report"
+  }
+]

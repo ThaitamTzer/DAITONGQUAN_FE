@@ -1,0 +1,202 @@
+[
+  {
+    "id": 1,
+    "name": "mdi-cash",
+    "icon": "mdi-cash"
+  },
+  {
+    "id": 2,
+    "name": "mdi-credit-card",
+    "icon": "mdi-credit-card"
+  },
+  {
+    "id": 3,
+    "name": "mdi-bank",
+    "icon": "mdi-bank"
+  },
+  {
+    "id": 4,
+    "name": "mdi-receipt",
+    "icon": "mdi-receipt"
+  },
+  {
+    "id": 5,
+    "name": "mdi-shopping",
+    "icon": "mdi-shopping"
+  },
+  {
+    "id": 6,
+    "name": "mdi-wallet",
+    "icon": "mdi-wallet"
+  },
+  {
+    "id": 7,
+    "name": "mdi-currency-usd",
+    "icon": "mdi-currency-usd"
+  },
+  {
+    "id": 8,
+    "name": "mdi-currency-eur",
+    "icon": "mdi-currency-eur"
+  },
+  {
+    "id": 9,
+    "name": "mdi-currency-gbp",
+    "icon": "mdi-currency-gbp"
+  },
+  {
+    "id": 10,
+    "name": "mdi-currency-jpy",
+    "icon": "mdi-currency-jpy"
+  },
+  {
+    "id": 11,
+    "name": "mdi-gift",
+    "icon": "mdi-gift"
+  },
+  {
+    "id": 12,
+    "name": "mdi-coin",
+    "icon": "mdi-coin"
+  },
+  {
+    "id": 13,
+    "name": "mdi-sale",
+    "icon": "mdi-sale"
+  },
+  {
+    "id": 14,
+    "name": "mdi-cash-register",
+    "icon": "mdi-cash-register"
+  },
+  {
+    "id": 15,
+    "name": "mdi-safe",
+    "icon": "mdi-safe"
+  },
+  {
+    "id": 16,
+    "name": "mdi-invoice",
+    "icon": "mdi-invoice"
+  },
+  {
+    "id": 17,
+    "name": "mdi-checkbook",
+    "icon": "mdi-checkbook"
+  },
+  {
+    "id": 18,
+    "name": "mdi-trophy",
+    "icon": "mdi-trophy"
+  },
+  {
+    "id": 19,
+    "name": "mdi-cart",
+    "icon": "mdi-cart"
+  },
+  {
+    "id": 20,
+    "name": "mdi-cash-100",
+    "icon": "mdi-cash-100"
+  },
+  {
+    "id": 23,
+    "name": "mdi-coin-outline",
+    "icon": "mdi-coin-outline"
+  },
+  {
+    "id": 24,
+    "name": "mdi-receipt-outline",
+    "icon": "mdi-receipt-outline"
+  },
+  {
+    "id": 25,
+    "name": "mdi-cash-multiple",
+    "icon": "mdi-cash-multiple"
+  },
+  {
+    "id": 26,
+    "name": "mdi-sale-outline",
+    "icon": "mdi-sale-outline"
+  },
+  {
+    "id": 27,
+    "name": "mdi-cart-outline",
+    "icon": "mdi-cart-outline"
+  },
+  {
+    "id": 28,
+    "name": "mdi-wallet-outline",
+    "icon": "mdi-wallet-outline"
+  },
+  {
+    "id": 29,
+    "name": "mdi-bank-outline",
+    "icon": "mdi-bank-outline"
+  },
+  {
+    "id": 30,
+    "name": "mdi-credit-card-outline",
+    "icon": "mdi-credit-card-outline"
+  },
+  {
+    "id": 31,
+    "name": "mdi-receipt-text",
+    "icon": "mdi-receipt-text"
+  },
+  {
+    "id": 32,
+    "name": "mdi-receipt-text-outline",
+    "icon": "mdi-receipt-text-outline"
+  },
+  {
+    "id": 35,
+    "name": "mdi-piggy-bank",
+    "icon": "mdi-piggy-bank"
+  },
+  {
+    "id": 36,
+    "name": "mdi-piggy-bank-outline",
+    "icon": "mdi-piggy-bank-outline"
+  },
+  {
+    "id": 39,
+    "name": "mdi-shopping-outline",
+    "icon": "mdi-shopping-outline"
+  },
+  {
+    "id": 42,
+    "name": "mdi-basket",
+    "icon": "mdi-basket"
+  },
+  {
+    "id": 43,
+    "name": "mdi-basket-outline",
+    "icon": "mdi-basket-outline"
+  },
+  {
+    "id": 44,
+    "name": "mdi-cart-plus",
+    "icon": "mdi-cart-plus"
+  },
+  {
+    "id": 45,
+    "name": "mdi-cart-minus",
+    "icon": "mdi-cart-minus"
+  },
+  {
+    "id": 46,
+    "name": "mdi-wallet-plus",
+    "icon": "mdi-wallet-plus"
+  },
+  {
+    "id": 48,
+    "name": "mdi-bank-check",
+    "icon": "mdi-bank-check"
+  },
+  {
+    "id": 49,
+    "name": "mdi-bank-transfer",
+    "icon": "mdi-bank-transfer"
+  }
+]
