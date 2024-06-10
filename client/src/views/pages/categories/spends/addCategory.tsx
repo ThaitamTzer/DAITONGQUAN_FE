@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { LoadingButton } from '@mui/lab'
 import {
   Dialog,
@@ -29,20 +29,19 @@ import Icon from 'src/@core/components/icon'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { getCreateCategoryValidationSchema } from 'src/configs/validationSchema'
 import { useTranslation } from 'react-i18next'
-import { ColorPicker, useColor } from 'react-color-palette'
 import categoriesService from 'src/service/categories.service'
-import TableHeader from './tableHeader'
 
 // ** Import icon json
 import icons from 'src/configs/expense_icons.json'
 import toast from 'react-hot-toast'
 import { mutate } from 'swr'
+import { ColorPicker } from './colorPicker'
 
 const AddCategory = () => {
   const [open, setOpen] = React.useState<boolean>(false)
   const [loading, setLoading] = React.useState<boolean>(false)
   const [selectedIcon, setSelectedIcon] = React.useState<string | null>('mdi-cash')
-  const [color, setColor] = useColor('#a2be2b')
+  const [color, setColor] = useState('#a2be2b')
   const [show, setShow] = React.useState<string>('show')
   const { t } = useTranslation()
 
@@ -89,7 +88,7 @@ const AddCategory = () => {
         icon: selectedIcon,
         description: data.description,
         type: data.type,
-        color: color.hex,
+        color: color,
         status: show
       })
       setLoading(false)
@@ -271,7 +270,7 @@ const AddCategory = () => {
                   {icons.map((icon: any) => (
                     <ToggleButtonGroup key={icon.id} value={selectedIcon} exclusive onChange={handleSelectIcon}>
                       <ToggleButton value={icon.icon}>
-                        <Icon icon={icon.icon} color={color.hex} />
+                        <Icon icon={icon.icon} color={color} />
                       </ToggleButton>
                     </ToggleButtonGroup>
                   ))}
@@ -286,7 +285,11 @@ const AddCategory = () => {
                       width: 1700
                     }}
                   >
-                    <ColorPicker hideAlpha hideInput={['hsv']} color={color} onChange={setColor} />
+                    <ColorPicker
+                      color={color}
+                      onChange={setColor}
+                      presetColors={['#a2be2b', '#f9a825', '#f44336', '#ff5722', '#e91e63', '#9c27b0', '#673ab7']}
+                    />
                   </Box>
                 </Grid>
               </Grid>

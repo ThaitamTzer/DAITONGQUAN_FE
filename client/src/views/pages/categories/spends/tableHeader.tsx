@@ -1,7 +1,7 @@
 import React from 'react'
 import { Dialog, DialogContent, DialogTitle, Grid, Typography } from '@mui/material'
 import Button from '@mui/material/Button'
-import CategorySpendCard from './categorySpendCard'
+import SpendCategoryList from './spendCategoryList'
 
 const TableHeader = () => {
   const [open, setOpen] = React.useState(false)
@@ -19,9 +19,7 @@ const TableHeader = () => {
           <Typography variant='h3'>List of category</Typography>
         </DialogTitle>
         <DialogContent>
-          <Grid container spacing={3}>
-            <CategorySpendCard status='all' />
-          </Grid>
+          <SpendCategoryList />
         </DialogContent>
       </Dialog>
     </>

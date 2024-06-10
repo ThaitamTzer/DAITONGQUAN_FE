@@ -3,21 +3,19 @@ import React from 'react'
 // ** MUI Components
 import Grid from '@mui/material/Grid'
 
-import 'react-color-palette/css'
-
 // ** Import Custom Components
 import CategorySpendCard from './categorySpendCard'
 import AddCategory from './addCategory'
-import TableHeader from './tableHeader'
 import { Card, CardContent, CardHeader } from '@mui/material'
+import SpendCategoryList from './spendCategoryList'
 
 const Spends = () => {
   return (
     <Grid container spacing={3}>
-      <Card>
-        <CardHeader title='Spends' action={<TableHeader />} />
+      <Card sx={{ width: '100%' }}>
+        <CardHeader title='Spends' action={<SpendCategoryList />} />
         <CardContent sx={{ display: 'flex', flexWrap: 'wrap' }}>
-          <CategorySpendCard status={'show'} />
+          <CategorySpendCard />
           <AddCategory />
         </CardContent>
       </Card>

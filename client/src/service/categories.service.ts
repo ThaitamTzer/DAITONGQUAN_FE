@@ -19,7 +19,7 @@ const categoriesService = {
   updateCategory: async (data: any) => axiosClient.put(`/category`, data),
 
   // Delete category
-  deleteCategory: async (data: any) => axiosClient.delete(`/category`, { data }),
+  deleteCategory: async (data: any) => axiosClient.delete(`/category/${data}`),
 
   // Get income categories
   getIncomeCategories: async () => axiosClient.get('/category/income'),
