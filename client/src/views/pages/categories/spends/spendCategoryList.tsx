@@ -123,7 +123,6 @@ const SpendCategoryList = () => {
   const {
     control,
     handleSubmit,
-    reset,
     formState: { errors, isValid }
   } = useForm<FormData>({
     resolver: yupResolver(getCreateCategoryValidationSchema(t)),

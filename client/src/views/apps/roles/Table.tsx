@@ -1,5 +1,5 @@
 // ** React Imports
-import { useEffect, useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 // ** Next Import
 import Link from 'next/link'
@@ -31,7 +31,7 @@ import { getInitials } from 'src/@core/utils/get-initials'
 
 // ** Types Imports
 // import { RootState, AppDispatch } from 'src/store'
-import { AdminsType, UsersType } from 'src/types/apps/userTypes'
+import { AdminsType } from 'src/types/apps/userTypes'
 import { ThemeColor } from 'src/@core/layouts/types'
 
 // ** Custom Components Imports

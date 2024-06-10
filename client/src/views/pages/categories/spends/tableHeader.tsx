@@ -1,5 +1,5 @@
 import React from 'react'
-import { Dialog, DialogContent, DialogTitle, Grid, Typography } from '@mui/material'
+import { Dialog, DialogContent, DialogTitle, Typography } from '@mui/material'
 import Button from '@mui/material/Button'
 import SpendCategoryList from './spendCategoryList'
 
