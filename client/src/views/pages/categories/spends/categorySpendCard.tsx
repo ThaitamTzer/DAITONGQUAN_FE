@@ -1,8 +1,6 @@
-import Typography from '@mui/material/Typography'
-import Icon from 'src/@core/components/icon'
-import categoriesService from 'src/service/categories.service'
-import useSWR, { mutate } from 'swr'
+import React from 'react'
 import {
+  Typography,
   Button,
   Card,
   CardContent,
@@ -16,9 +14,12 @@ import {
   Tooltip
 } from '@mui/material'
 import { Box } from '@mui/system'
-import React from 'react'
-import toast from 'react-hot-toast'
 import { LoadingButton } from '@mui/lab'
+import Icon from 'src/@core/components/icon'
+import categoriesService from 'src/service/categories.service'
+import useSWR, { mutate } from 'swr'
+import toast from 'react-hot-toast'
+import Skeleton from '@mui/material/Skeleton'
 import UpdateCategory from './updateCategory'
 
 interface SquareButtonProps {
@@ -91,9 +92,7 @@ const DeleteCategoryDialog = ({ open, onClose, spendCategory, onSubmit, loading 
 }
 
 const CategorySpendCard = () => {
-  const { data: spends } = useSWR('GET_ALL_SPENDS', categoriesService.getCategoriesSpend)
-  console.log(spends)
-
+  const { data: spends, error } = useSWR('GET_ALL_SPENDS', categoriesService.getCategoriesSpend)
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false)
   const [categoryId, setCategoryId] = React.useState<string | null>(null)
   const [loading, setLoading] = React.useState(false)
@@ -118,6 +117,45 @@ const CategorySpendCard = () => {
     }
   }
 
+  if (!spends && !error) {
+    return (
+      <>
+        {Array.from(new Array(6)).map((_, index) => (
+          <Grid item key={index} marginRight={4} marginBottom={4} sx={{ display: 'flex' }}>
+            <Card
+              sx={{
+                minWidth: 300,
+                borderRadius: '16px',
+                height: 85,
+                padding: '0 !important'
+              }}
+            >
+              <CardHeader
+                sx={{
+                  padding: '7px 0 0 7px !important'
+                }}
+                title={<Skeleton animation='wave' variant='text' width={100} />}
+                avatar={<Skeleton animation='wave' variant='circular' width={40} height={40} />}
+              />
+              <CardContent
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  alignItems: 'flex-end',
+                  padding: '0px !important'
+                }}
+              >
+                <Skeleton animation='wave' variant='circular' width={38} height={38} />
+                <Skeleton animation='wave' variant='circular' width={38} height={38} />
+                <Skeleton animation='wave' variant='circular' width={38} height={38} />
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </>
+    )
+  }
+
   return (
     <>
       {spends
@@ -129,7 +167,6 @@ const CategorySpendCard = () => {
                 minWidth: 300,
                 borderRadius: '16px',
                 height: 'auto',
-                bgcolor: '',
                 padding: '0 !important'
               }}
             >

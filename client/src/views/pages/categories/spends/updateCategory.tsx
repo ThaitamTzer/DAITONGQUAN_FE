@@ -77,7 +77,8 @@ const UpdateCategory = ({ spendCategory }: any) => {
   const onSubmit = async (data: FormData) => {
     setLoading(true)
     try {
-      await categoriesService.createCategory({
+      await categoriesService.updateCategory({
+        CateId: category?._id,
         name: data.name,
         icon: selectedIcon,
         description: data.description,
