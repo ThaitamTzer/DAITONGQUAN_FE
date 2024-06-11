@@ -1,55 +1,169 @@
 import Typography from '@mui/material/Typography'
 import Icon from 'src/@core/components/icon'
 import categoriesService from 'src/service/categories.service'
-import useSWR from 'swr'
-import { Avatar, Button, Fade, Grid, Tooltip } from '@mui/material'
+import useSWR, { mutate } from 'swr'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  Tooltip
+} from '@mui/material'
+import { Box } from '@mui/system'
+import React from 'react'
+import toast from 'react-hot-toast'
+import { LoadingButton } from '@mui/lab'
+import UpdateCategory from './updateCategory'
+
+interface SquareButtonProps {
+  spendCategory: any
+  icon: string
+  tooltip: string
+  style: string
+}
+
+export const SquareButton: React.FC<SquareButtonProps> = ({ spendCategory, icon, tooltip, style }) => (
+  <Tooltip title={tooltip} placement='top' arrow>
+    <Button
+      variant='contained'
+      sx={{
+        padding: '0 !important',
+        display: 'flex',
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 0,
+        borderStyle: 'solid',
+        borderTopRightRadius: style || 0,
+        borderBottomRightRadius: style || 0,
+        backgroundColor: `${spendCategory.color}1A`,
+        borderColor: `${spendCategory.color}`,
+        ':hover': {
+          backgroundColor: `${spendCategory.color}3A`,
+          borderColor: `${spendCategory.color}9A`,
+          cursor: 'pointer'
+        }
+      }}
+    >
+      <Icon icon={icon} />
+    </Button>
+  </Tooltip>
+)
+
+// Custom rounded avatar
+const CustomAvatar = ({ spendCategory }: any) => (
+  <Box
+    sx={{
+      width: 40,
+      height: 40,
+      borderRadius: '50%',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: `${spendCategory.color}3A`
+    }}
+  >
+    <Icon icon={spendCategory.icon} color={spendCategory.color} width={20} height={20} />
+  </Box>
+)
+
+const DeleteCategoryDialog = ({ open, onClose, spendCategory, onSubmit, loading }: any) => {
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>Delete Category</DialogTitle>
+      <DialogContent>
+        <Typography>Are you sure you want to delete {spendCategory.name}?</Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <LoadingButton loading={loading} variant='contained' color='error' onClick={onSubmit}>
+          Delete
+        </LoadingButton>
+      </DialogActions>
+    </Dialog>
+  )
+}
 
 const CategorySpendCard = () => {
   const { data: spends } = useSWR('GET_ALL_SPENDS', categoriesService.getCategoriesSpend)
+  console.log(spends)
+
+  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false)
+  const [categoryId, setCategoryId] = React.useState<string | null>(null)
+  const [loading, setLoading] = React.useState(false)
+
+  const handleOpenDeleteDialog = (id: string) => {
+    setCategoryId(id)
+    setOpenDeleteDialog(true)
+  }
+  const handleCloseDeleteDialog = () => setOpenDeleteDialog(false)
+
+  const handleDeleteCategory = async () => {
+    if (!categoryId) return
+    setLoading(true)
+    try {
+      await categoriesService.deleteCategory(categoryId)
+      setOpenDeleteDialog(false)
+      setLoading(false)
+      mutate('GET_ALL_SPENDS')
+      toast.success('Category deleted successfully')
+    } catch (error: any) {
+      toast.error(error.response.data.message)
+    }
+  }
 
   return (
     <>
       {spends
         ?.filter((spendCategory: any) => spendCategory.status === 'show')
         .map((spendCategory: any) => (
-          <Grid item key={spendCategory.id} marginLeft={2} marginBottom={2}>
-            <Tooltip
-              title={`Spend for ${spendCategory.name}`}
-              placement='top'
-              TransitionComponent={Fade}
-              TransitionProps={{ timeout: 300 }}
-              arrow
+          <Grid item key={spendCategory._id} marginRight={4} marginBottom={4} sx={{ display: 'flex' }}>
+            <Card
+              sx={{
+                minWidth: 300,
+                borderRadius: '16px',
+                height: 'auto',
+                bgcolor: '',
+                padding: '0 !important'
+              }}
             >
-              <Button
-                variant='contained'
+              <CardHeader
                 sx={{
-                  width: 95,
-                  height: 95,
-                  borderWidth: 1,
+                  padding: '7px 0 0 7px !important'
+                }}
+                title={spendCategory.name}
+                avatar={<CustomAvatar spendCategory={spendCategory} />}
+              />
+              <CardContent
+                sx={{
                   display: 'flex',
-                  alignItems: 'center',
-                  borderRadius: '10px',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  borderStyle: 'solid',
-                  backgroundColor: `${spendCategory.color}1A`,
-                  borderColor: `${spendCategory.color}`,
-                  ':hover': {
-                    backgroundColor: `${spendCategory.color}3A`,
-                    borderColor: `${spendCategory.color}9A`
-                  }
+                  justifyContent: 'flex-end',
+                  alignItems: 'flex-end',
+                  padding: '0px !important'
                 }}
               >
-                <>
-                  <Avatar variant='rounded' sx={{ mb: 2, width: 34, height: 34, backgroundColor: 'transparent' }}>
-                    <Icon icon={spendCategory.icon} color={`${spendCategory.color}`} />
-                  </Avatar>
-                  <Typography sx={{ fontWeight: 500, color: `${spendCategory.color}`, textTransform: 'capitalize' }}>
-                    {spendCategory.name}
-                  </Typography>
-                </>
-              </Button>
-            </Tooltip>
+                <IconButton>
+                  <Icon icon='tabler:plus' />
+                </IconButton>
+                <UpdateCategory spendCategory={spendCategory} />
+                <IconButton onClick={() => handleOpenDeleteDialog(spendCategory._id)}>
+                  <Icon icon='tabler:trash' />
+                </IconButton>
+              </CardContent>
+            </Card>
+            <DeleteCategoryDialog
+              open={openDeleteDialog && categoryId === spendCategory._id}
+              onClose={handleCloseDeleteDialog}
+              spendCategory={spendCategory}
+              onSubmit={handleDeleteCategory}
+              loading={loading}
+            />
           </Grid>
         ))}
     </>

@@ -10,18 +10,22 @@ export const ColorPicker = ({
   onChange: (color: string) => void
   presetColors: string[]
 }) => {
+  const handleColorChange = (color: string) => {
+    onChange(color)
+  }
+
   return (
     <div className='picker'>
-      <HexColorPicker color={color} onChange={onChange} />
-      <HexColorInput color={color} onChange={onChange} />
-
+      <HexColorPicker color={color} onChange={handleColorChange} />
+      <HexColorInput color={color} onChange={handleColorChange} />
       <div className='picker__swatches'>
         {presetColors.map((presetColor: any) => (
           <button
             key={presetColor}
+            type='button'
             className='picker__swatch'
             style={{ background: presetColor }}
-            onClick={() => onChange(presetColor)}
+            onClick={() => handleColorChange(presetColor)}
           />
         ))}
       </div>
