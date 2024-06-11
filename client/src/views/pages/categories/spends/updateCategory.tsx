@@ -78,7 +78,7 @@ const UpdateCategory = ({ spendCategory }: any) => {
     setLoading(true)
     try {
       await categoriesService.updateCategory({
-        CateId: category?._id,
+        cateId: category?._id,
         name: data.name,
         icon: selectedIcon,
         description: data.description,
@@ -248,7 +248,7 @@ const UpdateCategory = ({ spendCategory }: any) => {
                       exclusive
                       onChange={handleSelectIcon}
                     >
-                      <ToggleButton value={icon.icon}>
+                      <ToggleButton sx={{ marginBottom: 1 }} value={icon.icon}>
                         <Icon icon={icon.icon} color={color} />
                       </ToggleButton>
                     </ToggleButtonGroup>

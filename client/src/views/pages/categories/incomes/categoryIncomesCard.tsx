@@ -21,16 +21,15 @@ import useSWR, { mutate } from 'swr'
 import toast from 'react-hot-toast'
 import Skeleton from '@mui/material/Skeleton'
 import UpdateCategory from './updateCategory'
-import LimitSpend from './limitSpend'
 
 interface SquareButtonProps {
-  spendCategory: any
+  incomesCategory: any
   icon: string
   tooltip: string
   style: string
 }
 
-export const SquareButton: React.FC<SquareButtonProps> = ({ spendCategory, icon, tooltip, style }) => (
+export const SquareButton: React.FC<SquareButtonProps> = ({ incomesCategory, icon, tooltip, style }) => (
   <Tooltip title={tooltip} placement='top' arrow>
     <Button
       variant='contained'
@@ -44,11 +43,11 @@ export const SquareButton: React.FC<SquareButtonProps> = ({ spendCategory, icon,
         borderStyle: 'solid',
         borderTopRightRadius: style || 0,
         borderBottomRightRadius: style || 0,
-        backgroundColor: `${spendCategory.color}1A`,
-        borderColor: `${spendCategory.color}`,
+        backgroundColor: `${incomesCategory.color}1A`,
+        borderColor: `${incomesCategory.color}`,
         ':hover': {
-          backgroundColor: `${spendCategory.color}3A`,
-          borderColor: `${spendCategory.color}9A`,
+          backgroundColor: `${incomesCategory.color}3A`,
+          borderColor: `${incomesCategory.color}9A`,
           cursor: 'pointer'
         }
       }}
@@ -59,7 +58,7 @@ export const SquareButton: React.FC<SquareButtonProps> = ({ spendCategory, icon,
 )
 
 // Custom rounded avatar
-const CustomAvatar = ({ spendCategory }: any) => (
+const CustomAvatar = ({ incomesCategory }: any) => (
   <Box
     sx={{
       width: 40,
@@ -68,19 +67,19 @@ const CustomAvatar = ({ spendCategory }: any) => (
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: `${spendCategory.color}3A`
+      backgroundColor: `${incomesCategory.color}3A`
     }}
   >
-    <Icon icon={spendCategory.icon} color={spendCategory.color} width={20} height={20} />
+    <Icon icon={incomesCategory.icon} color={incomesCategory.color} width={20} height={20} />
   </Box>
 )
 
-const DeleteCategoryDialog = ({ open, onClose, spendCategory, onSubmit, loading }: any) => {
+const DeleteCategoryDialog = ({ open, onClose, incomesCategory, onSubmit, loading }: any) => {
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>Delete Category</DialogTitle>
       <DialogContent>
-        <Typography>Are you sure you want to delete {spendCategory.name}?</Typography>
+        <Typography>Are you sure you want to delete {incomesCategory.name}?</Typography>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
@@ -92,8 +91,8 @@ const DeleteCategoryDialog = ({ open, onClose, spendCategory, onSubmit, loading 
   )
 }
 
-const CategorySpendCard = () => {
-  const { data: spends, error } = useSWR('GET_ALL_SPENDS', categoriesService.getCategoriesSpend)
+const CategoryIncomesCard = () => {
+  const { data: incomes, error } = useSWR('GET_ALL_INCOMES', categoriesService.getCategoriesIncome)
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false)
   const [categoryId, setCategoryId] = React.useState<string | null>(null)
   const [loading, setLoading] = React.useState(false)
@@ -111,14 +110,14 @@ const CategorySpendCard = () => {
       await categoriesService.deleteCategory(categoryId)
       setOpenDeleteDialog(false)
       setLoading(false)
-      mutate('GET_ALL_SPENDS')
+      mutate('GET_ALL_INCOMES')
       toast.success('Category deleted successfully')
     } catch (error: any) {
       toast.error(error.response.data.message)
     }
   }
 
-  if (!spends && !error) {
+  if (!incomes && !error) {
     return (
       <>
         {Array.from(new Array(8)).map((_, index) => (
@@ -159,10 +158,10 @@ const CategorySpendCard = () => {
 
   return (
     <>
-      {spends
-        ?.filter((spendCategory: any) => spendCategory.status === 'show')
-        .map((spendCategory: any) => (
-          <Grid item key={spendCategory._id} marginRight={4} marginBottom={4} sx={{ display: 'flex' }}>
+      {incomes
+        ?.filter((incomesCategory: any) => incomesCategory.status === 'show')
+        .map((incomesCategory: any) => (
+          <Grid item key={incomesCategory._id} marginRight={4} marginBottom={4} sx={{ display: 'flex' }}>
             <Card
               sx={{
                 minWidth: 300,
@@ -175,42 +174,32 @@ const CategorySpendCard = () => {
                 sx={{
                   padding: '7px 0 0 7px !important'
                 }}
-                title={spendCategory.name}
-                avatar={<CustomAvatar spendCategory={spendCategory} />}
+                title={incomesCategory.name}
+                avatar={<CustomAvatar incomesCategory={incomesCategory} />}
               />
               <CardContent
                 sx={{
                   display: 'flex',
-                  justifyContent: 'space-between',
+                  justifyContent: 'flex-end',
                   alignItems: 'center',
                   padding: '0px !important'
                 }}
               >
-                <Box sx={{ marginLeft: 2, display: 'flex', alignItems: 'center' }}>
-                  {spendCategory.spendingLimitId ? (
-                    <>
-                      <Typography variant='body2'>limit: {spendCategory.budget} 10.000.000</Typography>
-                      <Icon fontSize={18} icon={'tabler:currency-dong'} />
-                    </>
-                  ) : (
-                    <LimitSpend spendCategory={spendCategory} />
-                  )}
-                </Box>
                 <Box>
                   <IconButton>
                     <Icon icon='tabler:plus' />
                   </IconButton>
-                  <UpdateCategory spendCategory={spendCategory} />
-                  <IconButton onClick={() => handleOpenDeleteDialog(spendCategory._id)}>
+                  <UpdateCategory incomesCategory={incomesCategory} />
+                  <IconButton onClick={() => handleOpenDeleteDialog(incomesCategory._id)}>
                     <Icon icon='tabler:trash' />
                   </IconButton>
                 </Box>
               </CardContent>
             </Card>
             <DeleteCategoryDialog
-              open={openDeleteDialog && categoryId === spendCategory._id}
+              open={openDeleteDialog && categoryId === incomesCategory._id}
               onClose={handleCloseDeleteDialog}
-              spendCategory={spendCategory}
+              incomesCategory={incomesCategory}
               onSubmit={handleDeleteCategory}
               loading={loading}
             />
@@ -220,4 +209,4 @@ const CategorySpendCard = () => {
   )
 }
 
-export default CategorySpendCard
+export default CategoryIncomesCard

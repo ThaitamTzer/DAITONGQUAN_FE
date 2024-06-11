@@ -309,7 +309,6 @@ export const getCreateCategoryValidationSchema = (t: (arg0: string) => any) => {
       .required(messages.category.required)
       .max(MAX_CATE_NAME_LENGTH, messages.category.max)
       .min(MIN_CATE_NAME_LENGTH, messages.category.min),
-    description: yup.string().max(MAX_DESCRIPTINO_LENGTH),
-    type: yup.string().required(messages.type.required)
+    description: yup.string().max(MAX_DESCRIPTINO_LENGTH)
   })
 }

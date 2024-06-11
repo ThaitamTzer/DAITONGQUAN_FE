@@ -58,11 +58,6 @@ const AddCategory = () => {
     setSelectedIcon(newIconSelected)
   }
 
-  const handleChangeSwitch = () => {
-    setShow(show === 'show' ? 'hidden' : 'show')
-    console.log(show)
-  }
-
   interface FormData {
     name: string
     icon: string
@@ -89,14 +84,14 @@ const AddCategory = () => {
         name: data.name,
         icon: selectedIcon,
         description: data.description,
-        type: 'spend',
+        type: 'income',
         color: color,
         status: show
       })
       setLoading(false)
       handleClose()
       toast.success('Category added successfully')
-      mutate('GET_ALL_SPENDS')
+      mutate('GET_ALL_INCOMES')
     } catch (error: any) {
       toast.error(error.response.data.message || 'Error while adding category')
       setLoading(false)
@@ -236,7 +231,7 @@ const AddCategory = () => {
                 >
                   {icons.map((icon: any) => (
                     <ToggleButtonGroup key={icon.id} value={selectedIcon} exclusive onChange={handleSelectIcon}>
-                      <ToggleButton sx={{ marginBottom: 1 }} value={icon.icon}>
+                      <ToggleButton value={icon.icon} sx={{ marginBottom: 1 }}>
                         <Icon icon={icon.icon} color={color} />
                       </ToggleButton>
                     </ToggleButtonGroup>

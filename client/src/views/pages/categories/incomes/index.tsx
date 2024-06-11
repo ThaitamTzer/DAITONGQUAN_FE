@@ -1,20 +1,19 @@
-// ** Next Import
-import Link from 'next/link'
+import React from 'react'
 
 // ** MUI Components
-import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
-import Card from '@mui/material/Card'
-import Avatar from '@mui/material/Avatar'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import CardContent from '@mui/material/CardContent'
 
-// ** Icon Imports
-import Icon from 'src/@core/components/icon'
+// ** Import Custom Components
+import CategoryIncomesCard from './categoryIncomesCard'
+import AddCategory from './addCategory'
 
 const Incomes = () => {
-  return <Grid container spacing={6}></Grid>
+  return (
+    <Grid container spacing={2}>
+      <CategoryIncomesCard />
+      <AddCategory />
+    </Grid>
+  )
 }
 
 export default Incomes
