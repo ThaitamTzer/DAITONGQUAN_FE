@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid'
 
 // ** Import Custom Components
 import CategorySpendCard from './categorySpendCard'
-import AddCategory from './addCategory'
+import AddCategory from './utils/addCategory'
 
 const Spends = () => {
   return (

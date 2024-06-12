@@ -94,12 +94,13 @@ const LimitSpend = ({ spendCategory, openUpdateLimit, closeUpdateLimit, limitSpe
 
   const onSubmit = async (data: FormData) => {
     if (!cateId) return
-
+    setLoading(true)
     try {
       await limitSpendingService.createLimit({ spendingCateId: cateId, budget: data.budget })
-      toast.success('Limit added successfully')
-      handleClose()
       mutate('GET_ALL_SPENDS')
+      setLoading(false)
+      handleClose()
+      toast.success('Limit added successfully')
     } catch (error) {
       toast.error('Failed to add limit')
     }
