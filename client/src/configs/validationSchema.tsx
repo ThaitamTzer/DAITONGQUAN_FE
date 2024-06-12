@@ -110,6 +110,9 @@ export const getValidationMessages = (t: (arg0: string) => any) => ({
   },
   icon: {
     required: t('Cần chọn icon cho danh mục')
+  },
+  budget: {
+    number: t('Số tiền không hợp lệ')
   }
 })
 
@@ -310,5 +313,11 @@ export const getCreateCategoryValidationSchema = (t: (arg0: string) => any) => {
       .max(MAX_CATE_NAME_LENGTH, messages.category.max)
       .min(MIN_CATE_NAME_LENGTH, messages.category.min),
     description: yup.string().max(MAX_DESCRIPTINO_LENGTH)
+  })
+}
+
+export const getCreateLimitSpendingValidationSchema = () => {
+  return yup.object().shape({
+    budget: yup.number().min(0).required()
   })
 }

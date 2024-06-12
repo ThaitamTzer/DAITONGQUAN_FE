@@ -12,11 +12,18 @@ import {
 } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import styled from '@emotion/styled'
+import limitSpendingService from 'src/service/limitSpending.service'
+import toast from 'react-hot-toast'
+import { Controller, useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { getCreateLimitSpendingValidationSchema } from 'src/configs/validationSchema'
+import { mutate } from 'swr'
+import { LoadingButton } from '@mui/lab'
 
 const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
   top: 0,
   right: 0,
-  color: 'grey.500',
+  color: theme.palette.grey[500],
   position: 'absolute',
   boxShadow: theme.shadows[2],
   transform: 'translate(10px, -10px)',
@@ -28,19 +35,79 @@ const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
   }
 }))
 
-const LimitSpend = ({ spendCategory }: any) => {
+const LimitSpend = ({ spendCategory, openUpdateLimit, closeUpdateLimit, limitSpend }: any) => {
   const [open, setOpen] = React.useState(false)
   const [cateId, setCateId] = React.useState<string | null>(null)
+  const [formattedValue, setFormattedValue] = React.useState<string>('')
+  const [loading, setLoading] = React.useState(false)
 
-  const handleOpen = (id: string) => {
+  const handleOpen = (spendCategory: any) => {
     setOpen(true)
-    setCateId(id)
+    setCateId(spendCategory._id)
   }
-  const handleClose = () => setOpen(false)
+  const handleClose = () => {
+    setOpen(false)
+    reset()
+    setFormattedValue('')
+  }
+
+  interface FormData {
+    budget: number
+  }
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors, isValid } // Add isDirty to track form changes
+  } = useForm<FormData>({
+    resolver: yupResolver(getCreateLimitSpendingValidationSchema()),
+    mode: 'onBlur' // Validate on every change
+  })
+
+  const formatCurrency = (value: string) => {
+    const numericValue = value.replace(/[^0-9.]/g, '')
+    const floatValue = parseFloat(numericValue)
+    if (isNaN(floatValue)) {
+      return ''
+    }
+
+    return floatValue.toLocaleString('vn-VN', {
+      style: 'currency',
+      currency: 'vnd',
+      minimumFractionDigits: 0
+    })
+  }
+
+  const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = event.target.value
+    const numericValue = inputValue.replace(/[^0-9.]/g, '')
+    const formatted = formatCurrency(inputValue) // Format the value
+
+    // Set the formatted value in the TextField
+    setFormattedValue(formatted)
+
+    // Update the form state with the numeric value
+    setValue('budget', parseFloat(numericValue))
+  }
+
+  const onSubmit = async (data: FormData) => {
+    if (!cateId) return
+
+    try {
+      await limitSpendingService.createLimit({ spendingCateId: cateId, budget: data.budget })
+      toast.success('Limit added successfully')
+      handleClose()
+      mutate('GET_ALL_SPENDS')
+    } catch (error) {
+      toast.error('Failed to add limit')
+    }
+  }
 
   return (
     <>
-      <Button onClick={() => handleOpen(spendCategory._id)} variant='text' sx={{ padding: '0 !important' }}>
+      <Button onClick={() => handleOpen(spendCategory)} variant='text' sx={{ padding: '0 !important' }}>
         <Icon icon='tabler:plus' />
         <Typography variant='caption'>Add limit</Typography>
       </Button>
@@ -52,30 +119,51 @@ const LimitSpend = ({ spendCategory }: any) => {
         onBackdropClick={handleClose}
         sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
       >
-        <DialogTitle align='center' marginBottom={3}>
-          <Typography variant='h2'>Add limit</Typography>
-          <Typography variant='caption'>Set a limit for this category</Typography>
-        </DialogTitle>
-        <DialogContent
-          sx={{
-            pb: theme => `${theme.spacing(8)} !important`,
-            px: theme => [`${theme.spacing(5)} !important`, `${theme.spacing(15)} !important`],
-            pt: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
-          }}
-        >
-          <CustomCloseButton onClick={handleClose}>
-            <Icon icon='tabler:x' fontSize='1.25rem' />
-          </CustomCloseButton>
-          <TextField fullWidth label='Budget' size='small' />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color='error'>
-            Cancel
-          </Button>
-          <Button variant='contained' onClick={handleClose} color='primary'>
-            Save
-          </Button>
-        </DialogActions>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <DialogTitle>
+            <Typography variant='h2'>Add limit</Typography>
+            <Typography variant='caption'>Set a limit for {spendCategory.name} category</Typography>
+          </DialogTitle>
+          <DialogContent
+            sx={{
+              pb: theme => `${theme.spacing(8)} !important`,
+              px: theme => [`${theme.spacing(5)} !important`, `${theme.spacing(15)} !important`],
+              pt: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
+            }}
+          >
+            <CustomCloseButton onClick={handleClose}>
+              <Icon icon='tabler:x' fontSize='1.25rem' />
+            </CustomCloseButton>
+            <Controller
+              name='budget'
+              rules={{ required: true }}
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  value={formattedValue}
+                  onChange={handleBudgetChange}
+                  onBlur={field.onBlur}
+                  autoFocus
+                  fullWidth
+                  size='small'
+                  type='text'
+                  label='Budget'
+                  error={Boolean(errors.budget)}
+                  helperText={errors.budget ? errors.budget.message : ''}
+                />
+              )}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color='error'>
+              Cancel
+            </Button>
+
+            <LoadingButton type='submit' loading={loading} variant='contained' color='primary'>
+              Save
+            </LoadingButton>
+          </DialogActions>
+        </form>
       </Dialog>
     </>
   )

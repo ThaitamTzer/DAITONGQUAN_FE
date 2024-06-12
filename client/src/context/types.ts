@@ -62,7 +62,7 @@ export type ResetPassParams = {
 export type AuthValuesType = {
   loading: boolean
   logout: (value: string) => void
-  user: UserDataType | null
+  user: UserDataType | any
   setLoading: (value: boolean) => void
   setUser: (value: UserDataType | null) => void
   login: (params: LoginParams, errorCallback?: ErrCallbackType) => void

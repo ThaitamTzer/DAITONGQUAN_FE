@@ -78,7 +78,7 @@ const UserDropdown = (props: Props) => {
     if (typeof auth.user?.role === 'string') {
       return auth.user.role
     } else if (auth.user?.role && Array.isArray(auth.user.role)) {
-      return auth.user.role.map(roleObj => roleObj.name).join(', ') // Return a comma-separated string of role names
+      return auth.user.role.map((roleObj: any) => roleObj.name).join(', ') // Return a comma-separated string of role names
     } else {
       return 'Unknown'
     }
@@ -100,7 +100,7 @@ const UserDropdown = (props: Props) => {
   }
 
   const handleLogout = () => {
-    logout()
+    logout(window.localStorage.getItem('refreshToken') || '')
     handleDropdownClose()
   }
 

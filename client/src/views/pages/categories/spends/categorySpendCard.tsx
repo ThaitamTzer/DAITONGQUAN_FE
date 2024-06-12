@@ -1,108 +1,40 @@
-import React from 'react'
-import {
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  Tooltip
-} from '@mui/material'
-import { Box } from '@mui/system'
-import { LoadingButton } from '@mui/lab'
+import React, { useState } from 'react'
+import { Typography, Button, Card, CardContent, CardHeader, Grid, IconButton, Tooltip, Box } from '@mui/material'
+import { Skeleton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import categoriesService from 'src/service/categories.service'
 import useSWR, { mutate } from 'swr'
 import toast from 'react-hot-toast'
-import Skeleton from '@mui/material/Skeleton'
 import UpdateCategory from './updateCategory'
 import LimitSpend from './limitSpend'
-
-interface SquareButtonProps {
-  spendCategory: any
-  icon: string
-  tooltip: string
-  style: string
-}
-
-export const SquareButton: React.FC<SquareButtonProps> = ({ spendCategory, icon, tooltip, style }) => (
-  <Tooltip title={tooltip} placement='top' arrow>
-    <Button
-      variant='contained'
-      sx={{
-        padding: '0 !important',
-        display: 'flex',
-        height: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 0,
-        borderStyle: 'solid',
-        borderTopRightRadius: style || 0,
-        borderBottomRightRadius: style || 0,
-        backgroundColor: `${spendCategory.color}1A`,
-        borderColor: `${spendCategory.color}`,
-        ':hover': {
-          backgroundColor: `${spendCategory.color}3A`,
-          borderColor: `${spendCategory.color}9A`,
-          cursor: 'pointer'
-        }
-      }}
-    >
-      <Icon icon={icon} />
-    </Button>
-  </Tooltip>
-)
-
-// Custom rounded avatar
-const CustomAvatar = ({ spendCategory }: any) => (
-  <Box
-    sx={{
-      width: 40,
-      height: 40,
-      borderRadius: '50%',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: `${spendCategory.color}3A`
-    }}
-  >
-    <Icon icon={spendCategory.icon} color={spendCategory.color} width={20} height={20} />
-  </Box>
-)
-
-const DeleteCategoryDialog = ({ open, onClose, spendCategory, onSubmit, loading }: any) => {
-  return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Delete Category</DialogTitle>
-      <DialogContent>
-        <Typography>Are you sure you want to delete {spendCategory.name}?</Typography>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <LoadingButton loading={loading} variant='contained' color='error' onClick={onSubmit}>
-          Delete
-        </LoadingButton>
-      </DialogActions>
-    </Dialog>
-  )
-}
+import limitSpendingService from 'src/service/limitSpending.service'
+import DeleteCategoryDialog from './utils/deleteCategoryDialog'
+import ActionLimitDialog from './utils/actionLimitDialog'
 
 const CategorySpendCard = () => {
   const { data: spends, error } = useSWR('GET_ALL_SPENDS', categoriesService.getCategoriesSpend)
-  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false)
-  const [categoryId, setCategoryId] = React.useState<string | null>(null)
-  const [loading, setLoading] = React.useState(false)
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
+  const [openUpdateLimit, setOpenUpdateLimit] = useState(false)
+  const [categoryId, setCategoryId] = useState<string | null>(null)
+  const [limitId, setLimitId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [initialLimitValue, setInitialLimitValue] = useState<number>(0)
 
   const handleOpenDeleteDialog = (id: string) => {
     setCategoryId(id)
     setOpenDeleteDialog(true)
   }
+
   const handleCloseDeleteDialog = () => setOpenDeleteDialog(false)
+
+  const handleOpenUpdateLimit = (limitId: string, id: string, budget: number) => {
+    setCategoryId(id)
+    setLimitId(limitId)
+    setInitialLimitValue(budget)
+    setOpenUpdateLimit(true)
+  }
+
+  const handleCloseUpdateLimit = () => setOpenUpdateLimit(false)
 
   const handleDeleteCategory = async () => {
     if (!categoryId) return
@@ -118,23 +50,43 @@ const CategorySpendCard = () => {
     }
   }
 
-  if (!spends && !error) {
+  const handleUpdateLimit = async (budget: number) => {
+    if (!categoryId) return
+    setLoading(true)
+    try {
+      await limitSpendingService.updateLimit({ spendingLimitId: limitId, budget })
+      setOpenUpdateLimit(false)
+      setLoading(false)
+      mutate('GET_ALL_SPENDS')
+      toast.success('Limit updated successfully')
+    } catch (error: any) {
+      toast.error('Failed to update limit')
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteLimit = async () => {
+    setLoading(true)
+    try {
+      await limitSpendingService.deleteLimit(limitId)
+      setOpenUpdateLimit(false)
+      setLoading(false)
+      mutate('GET_ALL_SPENDS')
+      toast.success('Limit deleted successfully')
+    } catch (error: any) {
+      toast.error('Failed to delete limit')
+      setLoading(false)
+    }
+  }
+
+  const renderSkeleton = () => {
     return (
       <>
         {Array.from(new Array(8)).map((_, index) => (
           <Grid item key={index} marginRight={4} marginBottom={4} sx={{ display: 'flex' }}>
-            <Card
-              sx={{
-                minWidth: 300,
-                borderRadius: '16px',
-                height: 85,
-                padding: '0 !important'
-              }}
-            >
+            <Card sx={{ minWidth: 300, borderRadius: '16px', height: 85, padding: '0 !important' }}>
               <CardHeader
-                sx={{
-                  padding: '7px 0 0 7px !important'
-                }}
+                sx={{ padding: '7px 0 0 7px !important' }}
                 title={<Skeleton animation='wave' variant='text' width={100} />}
                 avatar={<Skeleton animation='wave' variant='circular' width={40} height={40} />}
               />
@@ -159,65 +111,98 @@ const CategorySpendCard = () => {
 
   return (
     <>
-      {spends
-        ?.filter((spendCategory: any) => spendCategory.status === 'show')
-        .map((spendCategory: any) => (
-          <Grid item key={spendCategory._id} marginRight={4} marginBottom={4} sx={{ display: 'flex' }}>
-            <Card
-              sx={{
-                minWidth: 300,
-                borderRadius: '16px',
-                height: '100',
-                padding: '0 !important'
-              }}
-            >
-              <CardHeader
-                sx={{
-                  padding: '7px 0 0 7px !important'
-                }}
-                title={spendCategory.name}
-                avatar={<CustomAvatar spendCategory={spendCategory} />}
+      {spends &&
+        spends
+          .filter((spendCategory: any) => spendCategory.status === 'show')
+          .map((spendCategory: any) => (
+            <Grid item key={spendCategory._id} marginRight={4} marginBottom={4} sx={{ display: 'flex' }}>
+              <Card sx={{ minWidth: 300, borderRadius: '16px', height: '100', padding: '0 !important' }}>
+                <CardHeader
+                  sx={{ padding: '7px 0 0 7px !important' }}
+                  title={spendCategory.name}
+                  avatar={<CustomAvatar spendCategory={spendCategory} />}
+                />
+                <CardContent
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0px !important'
+                  }}
+                >
+                  <Box sx={{ marginLeft: 2, display: 'flex', alignItems: 'center' }}>
+                    {spendCategory.spendingLimitId ? (
+                      <>
+                        <Button
+                          variant='text'
+                          onClick={() =>
+                            handleOpenUpdateLimit(
+                              spendCategory.spendingLimitId,
+                              spendCategory._id,
+                              spendCategory.budget
+                            )
+                          }
+                          sx={{ paddingLeft: '0px !important' }}
+                        >
+                          limit:{' '}
+                          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
+                            spendCategory.budget
+                          )}
+                        </Button>
+                      </>
+                    ) : (
+                      <LimitSpend spendCategory={spendCategory} />
+                    )}
+                  </Box>
+                  <Box>
+                    <IconButton>
+                      <Icon icon='tabler:plus' />
+                    </IconButton>
+                    <UpdateCategory spendCategory={spendCategory} />
+                    <IconButton onClick={() => handleOpenDeleteDialog(spendCategory._id)}>
+                      <Icon icon='tabler:trash' />
+                    </IconButton>
+                  </Box>
+                </CardContent>
+              </Card>
+              <DeleteCategoryDialog
+                open={openDeleteDialog && categoryId === spendCategory._id}
+                onClose={handleCloseDeleteDialog}
+                spendCategory={spendCategory}
+                onSubmit={handleDeleteCategory}
+                loading={loading}
               />
-              <CardContent
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '0px !important'
-                }}
-              >
-                <Box sx={{ marginLeft: 2, display: 'flex', alignItems: 'center' }}>
-                  {spendCategory.spendingLimitId ? (
-                    <>
-                      <Typography variant='body2'>limit: {spendCategory.budget} 10.000.000</Typography>
-                      <Icon fontSize={18} icon={'tabler:currency-dong'} />
-                    </>
-                  ) : (
-                    <LimitSpend spendCategory={spendCategory} />
-                  )}
-                </Box>
-                <Box>
-                  <IconButton>
-                    <Icon icon='tabler:plus' />
-                  </IconButton>
-                  <UpdateCategory spendCategory={spendCategory} />
-                  <IconButton onClick={() => handleOpenDeleteDialog(spendCategory._id)}>
-                    <Icon icon='tabler:trash' />
-                  </IconButton>
-                </Box>
-              </CardContent>
-            </Card>
-            <DeleteCategoryDialog
-              open={openDeleteDialog && categoryId === spendCategory._id}
-              onClose={handleCloseDeleteDialog}
-              spendCategory={spendCategory}
-              onSubmit={handleDeleteCategory}
-              loading={loading}
-            />
-          </Grid>
-        ))}
+              <ActionLimitDialog
+                open={openUpdateLimit && categoryId === spendCategory._id}
+                onClose={handleCloseUpdateLimit}
+                spendCategory={spendCategory}
+                onSubmit={handleUpdateLimit}
+                loading={loading}
+                value={initialLimitValue}
+                handleDeleteLimit={handleDeleteLimit}
+              />
+            </Grid>
+          ))}
+      {error && <Typography>Error fetching data</Typography>}
+      {!spends && !error && renderSkeleton()}
     </>
   )
 }
+
+const CustomAvatar = ({ spendCategory }: any) => (
+  <Box
+    sx={{
+      width: 40,
+      height: 40,
+      borderRadius: '50%',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: `${spendCategory.color}3A`
+    }}
+  >
+    <Icon icon={spendCategory.icon} color={spendCategory.color} width={20} height={20} />
+  </Box>
+)
 
 export default CategorySpendCard

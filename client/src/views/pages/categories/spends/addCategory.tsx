@@ -7,11 +7,6 @@ import {
   DialogContent,
   Grid,
   TextField,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
   Divider,
   Box,
   Tooltip,
@@ -19,9 +14,7 @@ import {
   ToggleButton,
   Fade,
   Button,
-  Avatar,
-  Switch,
-  FormGroup
+  Avatar
 } from '@mui/material'
 import { Controller } from 'react-hook-form'
 import { useForm } from 'react-hook-form'
@@ -56,11 +49,6 @@ const AddCategory = () => {
   }
   const handleSelectIcon = (event: React.MouseEvent<HTMLElement>, newIconSelected: string | null) => {
     setSelectedIcon(newIconSelected)
-  }
-
-  const handleChangeSwitch = () => {
-    setShow(show === 'show' ? 'hidden' : 'show')
-    console.log(show)
   }
 
   interface FormData {
