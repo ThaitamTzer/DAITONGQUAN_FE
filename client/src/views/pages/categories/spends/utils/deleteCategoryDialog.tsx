@@ -5,7 +5,7 @@ import { Toaster } from 'react-hot-toast'
 const DeleteCategoryDialog = ({ open, onClose, spendCategory, onSubmit, loading }: any) => {
   return (
     <Dialog open={open} onClose={onClose}>
-      <Toaster toastOptions={{ className: 'react-hot-toast' }} />
+      <Toaster position='top-right' toastOptions={{ className: 'react-hot-toast' }} />
       <DialogTitle>Delete Category</DialogTitle>
       <DialogContent>
         <Typography>Are you sure you want to delete {spendCategory.name}?</Typography>

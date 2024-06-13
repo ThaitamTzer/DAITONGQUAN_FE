@@ -146,10 +146,8 @@ const AuthProvider = ({ children }: Props) => {
         .patch(authConfig.logoutEndpoint, { refreshToken }, {})
         .then(() => {
           router.push('/login')
-          localStorage.removeItem('userData')
-          localStorage.removeItem('refreshToken')
-          localStorage.removeItem('access_token')
           setUser(null)
+          localStorage.clear()
         })
         .catch(err => {
           if (errorCallback) errorCallback(err)

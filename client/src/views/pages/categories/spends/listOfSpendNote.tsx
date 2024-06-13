@@ -1,12 +1,12 @@
-import { Card, Chip, IconButton, Typography, Modal, Box as MuiBox, DialogContent, Dialog, Tooltip } from '@mui/material'
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { Card, Chip, IconButton, Typography, DialogContent, Dialog, Tooltip, CardHeader, Button } from '@mui/material'
+import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid'
 import spendNoteService from 'src/service/spendNote.service'
 import Icon from 'src/@core/components/icon'
 import { Box } from '@mui/system'
-import useSWR from 'swr'
+import useSWR, { mutate } from 'swr'
 import { useState } from 'react'
 import categoriesService from 'src/service/categories.service'
-import CustomChip from 'src/@core/components/mui/chip'
+import toast from 'react-hot-toast'
 
 type SpendNote = {
   _id: string
@@ -31,26 +31,26 @@ interface CellType {
   row: SpendNote
 }
 
-const CustomAvatar = ({ category }: any) => (
-  <Box
-    sx={{
-      width: 40,
-      height: 40,
-      borderRadius: '50%',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: `${category.color}3A`
-    }}
-  >
-    <Icon icon={category.icon} color={category.color} width={20} height={20} />
-  </Box>
-)
+// const CustomAvatar = ({ category }: any) => (
+//   <Box
+//     sx={{
+//       width: 40,
+//       height: 40,
+//       borderRadius: '50%',
+//       display: 'flex',
+//       justifyContent: 'center',
+//       alignItems: 'center',
+//       backgroundColor: `${category.color}3A`
+//     }}
+//   >
+//     <Icon icon={category.icon} color={category.color} width={20} height={20} />
+//   </Box>
+// )
 
 const ListOfSpendNote = () => {
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
-  const [open, setOpen] = useState(false)
-  const [modalContent, setModalContent] = useState('')
+  const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>([])
+  const [loading, setLoading] = useState(false)
 
   const { data: cate } = useSWR('GET_ALL_CATEGORIES', categoriesService.getAllCategories)
 
@@ -70,12 +70,18 @@ const ListOfSpendNote = () => {
     return category
   }
 
-  const handleOpen = (content: string) => {
-    setModalContent(content)
-    setOpen(true)
+  const handleDeleteNote = async (id: string) => {
+    setLoading(true)
+    try {
+      await spendNoteService.deleteSpendNote(id)
+      mutate('GET_ALL_SPENDNOTES')
+      toast.success('Delete spend note successfully')
+      setLoading(false)
+    } catch (error: any) {
+      toast.error(error.response.data.message)
+      setLoading(false)
+    }
   }
-
-  const handleClose = () => setOpen(false)
 
   const columns: GridColDef[] = [
     {
@@ -153,7 +159,7 @@ const ListOfSpendNote = () => {
             <IconButton>
               <Icon icon='tabler:edit' />
             </IconButton>
-            <IconButton>
+            <IconButton onClick={() => handleDeleteNote(row._id)}>
               <Icon icon='tabler:trash' />
             </IconButton>
           </Box>
@@ -166,15 +172,27 @@ const ListOfSpendNote = () => {
 
   return (
     <>
-      <Typography variant='h4' sx={{ mb: 4, color: '#3f51b5' }}>
-        List Of Spend Note
-      </Typography>
       <Card sx={{ p: 3, boxShadow: 3 }}>
+        <CardHeader
+          title={
+            <Typography variant='h4' sx={{ color: '#3f51b5' }}>
+              List Of Spend Note
+            </Typography>
+          }
+          action={
+            <Button disabled={rowSelectionModel.length === 0} variant='contained' color='error' sx={{ color: 'white' }}>
+              Delete Selected
+            </Button>
+          }
+        />
         <DataGrid
           autoHeight
           rowHeight={62}
-          rows={data?.spendingNotes.map((item: { _id: any }) => ({ ...item, id: item._id })) ?? []}
+          rows={data?.spendingNotes.map((item: { _id: any }) => ({ ...item, id: item._id })).reverse() ?? []}
           columns={columns}
+          onRowSelectionModelChange={newSelection => {
+            setRowSelectionModel(newSelection)
+          }}
           checkboxSelection
           disableRowSelectionOnClick
           pageSizeOptions={[10, 25, 50]}
@@ -190,14 +208,6 @@ const ListOfSpendNote = () => {
           }}
         />
       </Card>
-      <Dialog open={open} fullWidth onClose={handleClose}>
-        <DialogContent>
-          <Typography variant='h6' component='h2'>
-            Content
-          </Typography>
-          <Typography sx={{ mt: 2 }}>{modalContent}</Typography>
-        </DialogContent>
-      </Dialog>
     </>
   )
 }

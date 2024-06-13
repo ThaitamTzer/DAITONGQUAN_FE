@@ -94,6 +94,7 @@ const AddSpendNote = ({ spendCate }: any) => {
     try {
       await spendNoteService.createSpendNote(spendNote)
       toast.success('Add Spend Note Successfully')
+      mutate('GET_ALL_SPENDS')
       mutate('GET_ALL_SPENDNOTES')
       handleClose()
     } catch (error) {

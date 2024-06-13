@@ -47,7 +47,7 @@ const CategorySpendCard = () => {
       mutate('GET_ALL_SPENDS')
       toast.success('Category deleted successfully')
     } catch (error: any) {
-      toast.error('Failed to delete category')
+      toast.error(error.response.data.message)
       setLoading(false)
     }
   }
