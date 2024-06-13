@@ -1,15 +1,16 @@
 import React, { useState } from 'react'
-import { Typography, Button, Card, CardContent, CardHeader, Grid, IconButton, Box } from '@mui/material'
+import { Typography, Button, Card, CardContent, CardHeader, Grid, IconButton, Box, Avatar } from '@mui/material'
 import { Skeleton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import categoriesService from 'src/service/categories.service'
 import useSWR, { mutate } from 'swr'
-import toast from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast'
 import UpdateCategory from './utils/updateCategory'
 import LimitSpend from './utils/limitSpend'
 import limitSpendingService from 'src/service/limitSpending.service'
 import DeleteCategoryDialog from './utils/deleteCategoryDialog'
 import ActionLimitDialog from './utils/actionLimitDialog'
+import AddSpendNote from './utils/addSpendNote'
 
 const CategorySpendCard = () => {
   const { data: spends, error } = useSWR('GET_ALL_SPENDS', categoriesService.getCategoriesSpend)
@@ -46,7 +47,8 @@ const CategorySpendCard = () => {
       mutate('GET_ALL_SPENDS')
       toast.success('Category deleted successfully')
     } catch (error: any) {
-      toast.error(error.response.data.message)
+      toast.error('Failed to delete category')
+      setLoading(false)
     }
   }
 
@@ -155,9 +157,7 @@ const CategorySpendCard = () => {
                     )}
                   </Box>
                   <Box>
-                    <IconButton>
-                      <Icon icon='tabler:plus' />
-                    </IconButton>
+                    <AddSpendNote spendCate={spendCategory} />
                     <UpdateCategory spendCategory={spendCategory} />
                     <IconButton onClick={() => handleOpenDeleteDialog(spendCategory._id)}>
                       <Icon icon='tabler:trash' />

@@ -60,7 +60,7 @@ const LimitSpend = ({ spendCategory, openUpdateLimit, closeUpdateLimit, limitSpe
     handleSubmit,
     reset,
     setValue,
-    formState: { errors, isValid } // Add isDirty to track form changes
+    formState: { errors } // Add isDirty to track form changes
   } = useForm<FormData>({
     resolver: yupResolver(getCreateLimitSpendingValidationSchema()),
     mode: 'onBlur' // Validate on every change

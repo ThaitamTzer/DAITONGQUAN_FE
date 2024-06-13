@@ -113,6 +113,13 @@ export const getValidationMessages = (t: (arg0: string) => any) => ({
   },
   budget: {
     number: t('Số tiền không hợp lệ')
+  },
+  title: {
+    required: t('Tiêu đề không được để trống')
+  },
+  amount: {
+    required: t('Số tiền không được để trống'),
+    number: t('Số tiền không hợp lệ')
   }
 })
 
@@ -319,5 +326,14 @@ export const getCreateCategoryValidationSchema = (t: (arg0: string) => any) => {
 export const getCreateLimitSpendingValidationSchema = () => {
   return yup.object().shape({
     budget: yup.number().min(0).required()
+  })
+}
+
+export const getCreateSpendNoteValidationSchema = (t: (arg0: string) => any) => {
+  const messages = getValidationMessages(t)
+
+  return yup.object().shape({
+    title: yup.string().required(messages.title.required),
+    amount: yup.number().required(messages.amount.required)
   })
 }
