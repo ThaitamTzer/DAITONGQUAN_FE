@@ -101,16 +101,16 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
-      title: 'Roles & Permissions',
+      title: 'Admins & Roles',
       icon: 'tabler:settings',
       children: [
         {
-          title: 'Roles',
-          path: '/apps/roles'
+          title: 'Admins',
+          path: '/apps/admins'
         },
         {
-          title: 'Permissions',
-          path: '/apps/permissions'
+          title: 'Roles',
+          path: '/apps/roles'
         }
       ]
     },
@@ -580,11 +580,22 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'tabler:home'
     },
     {
-      path: '/categories',
-      action: 'read',
-      subject: 'member-page',
       title: 'Categories',
-      icon: 'tabler:grid'
+      icon: 'tabler:grid',
+      children: [
+        {
+          path: '/categories/spends',
+          title: 'Spends Category',
+          action: 'read',
+          subject: 'member-page'
+        },
+        {
+          path: '/categories/incomes',
+          title: 'Incomes Category',
+          action: 'read',
+          subject: 'member-page'
+        }
+      ]
     },
     {
       path: '/acl',

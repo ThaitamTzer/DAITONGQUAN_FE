@@ -56,13 +56,11 @@ const AuthProvider = ({ children }: Props) => {
 
       try {
         // Check if the user role is available in local storage
-        const storedUserDataString = window.localStorage.getItem('access_token')
-
-        // console.log('storedUserDataString: ', storedUserDataString)
+        const storedUserDataString =
+          window.localStorage.getItem('access_token') || window.sessionStorage.getItem('access_token')
 
         if (storedUserDataString) {
           const decodeStoredUserDataString = jwtDecode(storedUserDataString) as JwtPayload // Add 'as JwtPayload' to cast the decoded data as JwtPayload
-          // console.log('decodeStoredUserDataString: ', decodeStoredUserDataString)
 
           const storedUserData = decodeStoredUserDataString as UserDataType // Cast storedUserData as UserDataType
 
@@ -73,6 +71,8 @@ const AuthProvider = ({ children }: Props) => {
 
             return // Exit early if admin user info is already in local storage
           }
+        } else {
+          throw new Error('No access token found')
         }
 
         // If not admin or user info not in storage, fetch user info from API
@@ -83,9 +83,8 @@ const AuthProvider = ({ children }: Props) => {
 
         // window.localStorage.setItem('userData', JSON.stringify({ ...response.data }))
       } catch (error) {
-        localStorage.removeItem('userData')
-        localStorage.removeItem('refreshToken')
-        localStorage.removeItem('access_token')
+        localStorage.clear()
+        sessionStorage.clear()
         setUser(null)
         setLoading(false)
         router.replace('/login')
@@ -96,12 +95,15 @@ const AuthProvider = ({ children }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // create handleLogin have remember me
-  const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
+  const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType, ) => {
     axiosClient
       .post(authConfig.loginEndpoint, params)
       .then(async response => {
-        params.rememberMe && window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.access_token)
+        if (params.rememberMe) {
+          window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.access_token)
+        } else {
+          window.sessionStorage.setItem(authConfig.storageTokenKeyName, response.data.access_token)
+        }
         const returnUrl = router.query.returnUrl
 
         const userData = response.data.user
@@ -109,11 +111,11 @@ const AuthProvider = ({ children }: Props) => {
 
         if (Array.isArray(role)) {
           // Role is an array (admin): use storedUserData from useEffect
-          const storedUserDataString = window.localStorage.getItem('access_token')
-          const decodeStoredUserDataString = storedUserDataString
-            ? (jwtDecode(storedUserDataString) as JwtPayload)
-            : null
-          const storedUserData = decodeStoredUserDataString as UserDataType
+          const storedAccessToken = params.rememberMe
+            ? window.localStorage.getItem(authConfig.storageTokenKeyName)
+            : window.sessionStorage.getItem(authConfig.storageTokenKeyName)
+          const decodeStoredAccessToken = storedAccessToken ? (jwtDecode(storedAccessToken) as JwtPayload) : null
+          const storedUserData = decodeStoredAccessToken as UserDataType
           const adminData = storedUserData.fullname
 
           window.localStorage.setItem('userData', JSON.stringify(adminData))
@@ -126,8 +128,6 @@ const AuthProvider = ({ children }: Props) => {
         } else {
           // Handle unexpected role types (if necessary)
           console.error('Unexpected role type:', role)
-
-          // You might want to throw an error or handle it gracefully
         }
 
         window.localStorage.setItem('refreshToken', response.data.refreshToken)
@@ -138,7 +138,6 @@ const AuthProvider = ({ children }: Props) => {
         if (errorCallback) errorCallback(err)
       })
   }
-
   const handleLogout = (refreshToken: string, errorCallback?: ErrCallbackType) => {
     try {
       refreshToken = refreshToken || window.localStorage.getItem('refreshToken') || ''
@@ -146,10 +145,9 @@ const AuthProvider = ({ children }: Props) => {
         .patch(authConfig.logoutEndpoint, { refreshToken }, {})
         .then(() => {
           router.push('/login')
-          localStorage.removeItem('userData')
-          localStorage.removeItem('refreshToken')
-          localStorage.removeItem('access_token')
           setUser(null)
+          localStorage.clear()
+          sessionStorage.clear()
         })
         .catch(err => {
           if (errorCallback) errorCallback(err)

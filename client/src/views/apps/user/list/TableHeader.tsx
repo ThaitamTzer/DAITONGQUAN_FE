@@ -1,22 +1,14 @@
-// ** MUI Imports
+import React from 'react'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-
-// ** Custom Component Import
 import CustomTextField from 'src/@core/components/mui/text-field'
-
-// ** Icon Imports
-import Icon from 'src/@core/components/icon'
 
 interface TableHeaderProps {
   value: string
-  toggle: () => void
   handleFilter: (val: string) => void
 }
 
 const TableHeader = (props: TableHeaderProps) => {
-  // ** Props
-  const { handleFilter, toggle, value } = props
+  const { handleFilter, value } = props
 
   return (
     <Box
@@ -31,9 +23,6 @@ const TableHeader = (props: TableHeaderProps) => {
         justifyContent: 'space-between'
       }}
     >
-      <Button color='secondary' variant='tonal' startIcon={<Icon icon='tabler:upload' />}>
-        Export
-      </Button>
       <Box sx={{ rowGap: 2, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
         <CustomTextField
           value={value}
@@ -41,11 +30,6 @@ const TableHeader = (props: TableHeaderProps) => {
           placeholder='Search User'
           onChange={e => handleFilter(e.target.value)}
         />
-
-        <Button onClick={toggle} variant='contained' sx={{ '& svg': { mr: 2 } }}>
-          <Icon fontSize='1.125rem' icon='tabler:plus' />
-          Add New User
-        </Button>
       </Box>
     </Box>
   )

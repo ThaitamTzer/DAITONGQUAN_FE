@@ -25,10 +25,12 @@ const AuthGuard = (props: AuthGuardProps) => {
       return
     }
 
-    const storedAccessToken = window.localStorage.getItem('access_token')
+    const storedAccessToken =
+      window.localStorage.getItem('access_token') || window.sessionStorage.getItem('access_token')
 
-    if ((!storedAccessToken && auth.user === null) || !window.localStorage.getItem('userData')) {
-      // Check both conditions
+    if (!storedAccessToken) {
+      // If access token is not found in either localStorage or sessionStorage, logout and clear localStorage
+      window.localStorage.clear()
       if (router.asPath !== '/') {
         router.replace({
           pathname: '/login',
@@ -55,6 +57,7 @@ const AuthGuard = (props: AuthGuardProps) => {
         router.replace('/login')
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Include auth in dependency array
 
   if (auth.loading || auth.user === null) {

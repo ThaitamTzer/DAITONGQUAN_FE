@@ -1,19 +1,23 @@
 import axios from 'axios'
+import { jwtDecode } from 'jwt-decode'
 import authConfig from 'src/configs/auth'
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
-// const token: Token = JSON.parse(window.localStorage.getItem(authConfig.storageTokenKeyName) || '')
 const axiosClient = axios.create({
   baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json'
   }
 })
+
 axiosClient.interceptors.request.use(
   config => {
     if (!config.headers['Authorization']) {
-      const access_token: string = localStorage.getItem(authConfig.storageTokenKeyName) || ''
+      const access_token =
+        localStorage.getItem(authConfig.storageTokenKeyName) ||
+        sessionStorage.getItem(authConfig.storageTokenKeyName) ||
+        ''
       config.headers['Authorization'] = `${authConfig.TOKEN_TYPE} ${access_token}`
     }
 
@@ -21,31 +25,97 @@ axiosClient.interceptors.request.use(
   },
   error => Promise.reject(error)
 )
+
+// axiosClient.interceptors.request.use(
+//   async config => {
+//     const refreshToken = localStorage.getItem(authConfig.onTokenExpiration)
+//     const access_token =
+//       localStorage.getItem(authConfig.storageTokenKeyName) ||
+//       sessionStorage.getItem(authConfig.storageTokenKeyName) ||
+//       ''
+
+//     // Check where the token is stored
+//     const isTokenInSessionStorage = sessionStorage.getItem(authConfig.storageTokenKeyName) !== null
+
+//     // Decode the token to get the expiration time
+//     const decodedToken = jwtDecode(access_token)
+
+//     // Check if the token is close to its expiration time
+//     const now = Math.floor(Date.now() / 1000) // Convert to seconds
+
+//     if (decodedToken.exp !== undefined && decodedToken.exp - now <= 15) {
+//       // 15 seconds
+//       try {
+//         const response = await axios.patch(
+//           BASE_URL + authConfig.refreshTokenEndpoint,
+//           { refreshToken },
+//           {
+//             headers: {
+//               'Content-Type': 'application/json',
+//               Authorization: `${authConfig.TOKEN_TYPE} ${access_token}`
+//             }
+//           }
+//         )
+
+//         if (response.status === 201) {
+//           localStorage.setItem(authConfig.onTokenExpiration, response.data.refreshToken)
+//           localStorage.setItem(authConfig.storageTokenKeyName, response.data.access_token)
+//           config.headers['Authorization'] = `${authConfig.TOKEN_TYPE} ${response.data.access_token}`
+//         }
+//       } catch (refreshError) {
+//         // If the token is in sessionStorage, clear all data from sessionStorage
+//         if (isTokenInSessionStorage) {
+//           sessionStorage.clear()
+//         }
+
+//         return Promise.reject(refreshError)
+//       }
+//     }
+
+//     return config
+//   },
+//   error => Promise.reject(error)
+// )
+
 axiosClient.interceptors.response.use(
   response => response.data,
   async error => {
     const prevRequest = error.config
-    if (error.response?.status === 401 && prevRequest.sent) {
-      prevRequest.sent = true
+
+    if (error.response?.status === 401 && !prevRequest._retry) {
+      prevRequest._retry = true
       const refreshToken = localStorage.getItem(authConfig.onTokenExpiration)
+      const access_token =
+        localStorage.getItem(authConfig.storageTokenKeyName) || sessionStorage.getItem(authConfig.storageTokenKeyName)
+
+      // Check where the token is stored
+      const isTokenInSessionStorage = sessionStorage.getItem(authConfig.storageTokenKeyName) !== null
+
       try {
-        const response = await axios.post(
-          authConfig.refreshTokenEndpoint,
-          {},
+        const response = await axios.patch(
+          BASE_URL + authConfig.refreshTokenEndpoint,
+          { refreshToken },
           {
-            withCredentials: true,
             headers: {
-              Authorization: `${authConfig.TOKEN_TYPE} ${refreshToken}`
+              'Content-Type': 'application/json',
+              Authorization: `${authConfig.TOKEN_TYPE} ${access_token}`
             }
           }
         )
+
         if (response.status === 201) {
           localStorage.setItem(authConfig.onTokenExpiration, response.data.refreshToken)
           localStorage.setItem(authConfig.storageTokenKeyName, response.data.access_token)
+          prevRequest.headers['Authorization'] = `${authConfig.TOKEN_TYPE} ${response.data.access_token}`
 
-          return axios(prevRequest)
+          return axiosClient(prevRequest)
         }
       } catch (refreshError) {
+        // If the token is in sessionStorage, clear all data from sessionStorage
+        if (isTokenInSessionStorage) {
+          sessionStorage.clear()
+        }
+
         return Promise.reject(refreshError)
       }
     }
@@ -53,12 +123,14 @@ axiosClient.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
 export default axiosClient
 
 export const axiosAuth = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' }
 })
+
 export const axiosUpload = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'multipart/form-data' }
@@ -67,7 +139,10 @@ export const axiosUpload = axios.create({
 axiosUpload.interceptors.request.use(
   config => {
     if (!config.headers['Authorization']) {
-      const access_token: string = localStorage.getItem(authConfig.storageTokenKeyName) || ''
+      const access_token =
+        localStorage.getItem(authConfig.storageTokenKeyName) ||
+        sessionStorage.getItem(authConfig.storageTokenKeyName) ||
+        ''
       config.headers['Authorization'] = `${authConfig.TOKEN_TYPE} ${access_token}`
     }
 
