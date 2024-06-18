@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, SyntheticEvent, Fragment, ReactNode } from 'react'
+import { useState, SyntheticEvent, Fragment, ReactNode, useEffect } from 'react'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -21,39 +21,41 @@ import PerfectScrollbarComponent from 'react-perfect-scrollbar'
 // ** Type Imports
 import { ThemeColor } from 'src/@core/layouts/types'
 import { Settings } from 'src/@core/context/settingsContext'
-import { CustomAvatarProps } from 'src/@core/components/mui/avatar/types'
+
+// import { CustomAvatarProps } from 'src/@core/components/mui/avatar/types'
 
 // ** Custom Components Imports
 import CustomChip from 'src/@core/components/mui/chip'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 
 // ** Util Import
-import { getInitials } from 'src/@core/utils/get-initials'
+// import { getInitials } from 'src/@core/utils/get-initials'
+import spendNoteService from 'src/service/spendNote.service'
+import useSWR, { mutate } from 'swr'
 
-export type NotificationsType = {
-  meta: string
-  title: string
-  subtitle: string
-} & (
-  | { avatarAlt: string; avatarImg: string; avatarText?: never; avatarColor?: never; avatarIcon?: never }
-  | {
-      avatarAlt?: never
-      avatarImg?: never
-      avatarText: string
-      avatarIcon?: never
-      avatarColor?: ThemeColor
-    }
-  | {
-      avatarAlt?: never
-      avatarImg?: never
-      avatarText?: never
-      avatarIcon: ReactNode
-      avatarColor?: ThemeColor
-    }
-)
+// export type NotificationsType = {
+//   meta: string
+//   title: string
+//   subtitle: string
+// } & (
+//   | { avatarAlt: string; avatarImg: string; avatarText?: never; avatarColor?: never; avatarIcon?: never }
+//   | {
+//       avatarAlt?: never
+//       avatarImg?: never
+//       avatarText: string
+//       avatarIcon?: never
+//       avatarColor?: ThemeColor
+//     }
+//   | {
+//       avatarAlt?: never
+//       avatarImg?: never
+//       avatarText?: never
+//       avatarIcon: ReactNode
+//       avatarColor?: ThemeColor
+//     }
+// )
 interface Props {
   settings: Settings
-  notifications: NotificationsType[]
 }
 
 // ** Styled Menu component
@@ -94,11 +96,11 @@ const PerfectScrollbar = styled(PerfectScrollbarComponent)({
 })
 
 // ** Styled Avatar component
-const Avatar = styled(CustomAvatar)<CustomAvatarProps>({
-  width: 38,
-  height: 38,
-  fontSize: '1.125rem'
-})
+// const Avatar = styled(CustomAvatar)<CustomAvatarProps>({
+//   width: 38,
+//   height: 38,
+//   fontSize: '1.125rem'
+// })
 
 // ** Styled component for the title in MenuItems
 const MenuItemTitle = styled(Typography)<TypographyProps>({
@@ -126,8 +128,14 @@ const ScrollWrapper = ({ children, hidden }: { children: ReactNode; hidden: bool
 }
 
 const NotificationDropdown = (props: Props) => {
+  const { data: notifications } = useSWR('GET_ALL_NOTIFICATIONS', spendNoteService.getNotificationOutOfMoney)
+
+  useEffect(() => {
+    mutate('GET_ALL_NOTIFICATIONS')
+  }, [notifications])
+
   // ** Props
-  const { settings, notifications } = props
+  const { settings } = props
 
   // ** States
   const [anchorEl, setAnchorEl] = useState<(EventTarget & Element) | null>(null)
@@ -146,33 +154,47 @@ const NotificationDropdown = (props: Props) => {
     setAnchorEl(null)
   }
 
-  const RenderAvatar = ({ notification }: { notification: NotificationsType }) => {
-    const { avatarAlt, avatarImg, avatarIcon, avatarText, avatarColor } = notification
-
-    if (avatarImg) {
-      return <Avatar alt={avatarAlt} src={avatarImg} />
-    } else if (avatarIcon) {
-      return (
-        <Avatar skin='light' color={avatarColor}>
-          {avatarIcon}
-        </Avatar>
-      )
-    } else {
-      return (
-        <Avatar skin='light' color={avatarColor}>
-          {getInitials(avatarText as string)}
-        </Avatar>
-      )
-    }
+  const handleFormatCost = (cost: number) => {
+    return cost.toLocaleString('vi', {
+      style: 'currency',
+      currency: 'VND'
+    })
   }
+
+  const handleUnderline = (str: string) => {
+    return <Typography sx={{ textDecoration: 'underline', display: 'inline' }}>{str}</Typography>
+  }
+
+  // const RenderAvatar = ({ notification }: { notification: NotificationsType }) => {
+  //   const { avatarAlt, avatarImg, avatarIcon, avatarText, avatarColor } = notification
+
+  //   if (avatarImg) {
+  //     return <Avatar alt={avatarAlt} src={avatarImg} />
+  //   } else if (avatarIcon) {
+  //     return (
+  //       <Avatar skin='light' color={avatarColor}>
+  //         {avatarIcon}
+  //       </Avatar>
+  //     )
+  //   } else {
+  //     return (
+  //       <Avatar skin='light' color={avatarColor}>
+  //         {getInitials(avatarText as string)}
+  //       </Avatar>
+  //     )
+  //   }
+  // }
 
   return (
     <Fragment>
       <IconButton color='inherit' aria-haspopup='true' onClick={handleDropdownOpen} aria-controls='customized-menu'>
         <Badge
           color='error'
-          variant='dot'
-          invisible={!notifications.length}
+          variant='standard'
+          badgeContent={
+            notifications?.outOfBudgetCategories? .length > 9 ? '9+' : notifications?.outOfBudgetCategories?.length
+          }
+          invisible={!notifications?.outOfBudgetCategories?.length}
           sx={{
             '& .MuiBadge-badge': { top: 4, right: 4, boxShadow: theme => `0 0 0 2px ${theme.palette.background.paper}` }
           }}
@@ -196,21 +218,27 @@ const NotificationDropdown = (props: Props) => {
             <Typography variant='h5' sx={{ cursor: 'text' }}>
               Notifications
             </Typography>
-            <CustomChip skin='light' size='small' color='primary' label={`${notifications.length} New`} />
+            <CustomChip
+              skin='light'
+              size='small'
+              color='primary'
+              label={`${notifications?.outOfBudgetCategories?.length} New`}
+            />
           </Box>
         </MenuItem>
         <ScrollWrapper hidden={hidden}>
-          {notifications.map((notification: NotificationsType, index: number) => (
+          {notifications?.outOfBudgetCategories?.map((notification: any, index: number) => (
             <MenuItem key={index} disableRipple disableTouchRipple onClick={handleDropdownClose}>
               <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
-                <RenderAvatar notification={notification} />
+                {/* <RenderAvatar notification={notification} /> */}
                 <Box sx={{ mr: 4, ml: 2.5, flex: '1 1', display: 'flex', overflow: 'hidden', flexDirection: 'column' }}>
-                  <MenuItemTitle>{notification.title}</MenuItemTitle>
-                  <MenuItemSubtitle variant='body2'>{notification.subtitle}</MenuItemSubtitle>
+                  <MenuItemTitle variant='body1'>
+                    Category {handleUnderline(notification.nameCate)} has limit {handleFormatCost(notification.budget)}
+                  </MenuItemTitle>
+                  <MenuItemSubtitle variant='body2'>
+                    {handleFormatCost(notification.budgetUsed)} has spent
+                  </MenuItemSubtitle>
                 </Box>
-                <Typography variant='body2' sx={{ color: 'text.disabled' }}>
-                  {notification.meta}
-                </Typography>
               </Box>
             </MenuItem>
           ))}

@@ -38,7 +38,7 @@ const spendNoteService = {
   getAllSpendNote: async (): Promise<SpendNote> => axiosClient.get('/spendingnote'),
 
   // ** Create Spend Note
-  createSpendNote: async (data: CreateSpendNote): Promise<CreateSpendNote> => axiosClient.post('/spendingnote', data),
+  createSpendNote: async (data: CreateSpendNote) => axiosClient.post('/spendingnote', data),
 
   // ** Update Spend Note
   updateSpendNote: async (data: UpdateSpendNote): Promise<UpdateSpendNote> => axiosClient.put('/spendingnote', data),

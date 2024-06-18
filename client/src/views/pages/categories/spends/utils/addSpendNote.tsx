@@ -52,7 +52,6 @@ const AddSpendNote = ({ spendCate }: any) => {
   const handleOpen = (cateId: any) => {
     setOpen(true)
     setCateId(cateId)
-    console.log(cateId)
   }
 
   const handleClose = () => {
@@ -92,11 +91,24 @@ const AddSpendNote = ({ spendCate }: any) => {
       cateId: cateId
     }
     try {
-      await spendNoteService.createSpendNote(spendNote)
-      toast.success('Add Spend Note Successfully')
-      mutate('GET_ALL_SPENDS')
-      mutate('GET_ALL_SPENDNOTES')
-      handleClose()
+      await spendNoteService
+        .createSpendNote(spendNote)
+        .then(res => {
+          mutate('GET_ALL_SPENDNOTES')
+          if (res.warningMessage) {
+            toast('Be careful, you are adding a note with a large amount of money', {
+              icon: '⚠️',
+              style: { backgroundColor: '#FFC1078A' }
+            })
+          } else {
+            toast.success('Add Spend Note Successfully')
+            mutate('GET_ALL_NOTIFICATIONS')
+          }
+          handleClose()
+        })
+        .catch(() => {
+          toast.error('Add Spend Note Failed')
+        })
     } catch (error) {
       toast.error('Add Spend Note Failed')
     }

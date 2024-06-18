@@ -1,9 +1,10 @@
 import React from 'react'
-import { Button, Dialog, DialogActions, DialogTitle } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogTitle, IconButton } from '@mui/material'
 import spendNoteService from 'src/service/spendNote.service'
 import { LoadingButton } from '@mui/lab'
 import toast from 'react-hot-toast'
 import { mutate } from 'swr'
+import Icon from 'src/@core/components/icon'
 
 const DeleteManyNotesDialog = ({ rowSelectionModel }: any) => {
   const [open, setOpen] = React.useState<boolean>(false)
@@ -35,22 +36,23 @@ const DeleteManyNotesDialog = ({ rowSelectionModel }: any) => {
 
   return (
     <>
-      <Button
-        onClick={() => handleOpen()}
-        disabled={rowSelectionModel.length === 0}
-        variant='contained'
-        color='error'
-        sx={{ color: 'white' }}
-      >
-        Delete Selected
-      </Button>
+      <IconButton size='large' onClick={() => handleOpen()} disabled={rowSelectionModel.length === 0} color='error'>
+        <Icon fontSize={'30px'} icon='ic:round-delete-sweep' />
+      </IconButton>
       <Dialog open={open}>
         <DialogTitle variant='h3'>
           {rowSelectionModel.length === totalNotes ? 'Delete All Notes' : `Delete ${rowSelectionModel.length} Notes`}
         </DialogTitle>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <LoadingButton loading={loading} onClick={handleDeleteManyNotes} color='error'>
+          <LoadingButton
+            variant='contained'
+            type='submit'
+            loading={loading}
+            onClick={handleDeleteManyNotes}
+            color='error'
+            autoFocus
+          >
             Delete
           </LoadingButton>
         </DialogActions>
