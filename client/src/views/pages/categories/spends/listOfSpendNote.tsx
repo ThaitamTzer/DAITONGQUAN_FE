@@ -7,6 +7,8 @@ import useSWR, { mutate } from 'swr'
 import { useState } from 'react'
 import categoriesService from 'src/service/categories.service'
 import toast from 'react-hot-toast'
+import DeleteManyNotesDialog from './utils/deleteManyNotesDialog'
+import React from 'react'
 
 type SpendNote = {
   _id: string
@@ -30,22 +32,6 @@ type Category = {
 interface CellType {
   row: SpendNote
 }
-
-// const CustomAvatar = ({ category }: any) => (
-//   <Box
-//     sx={{
-//       width: 40,
-//       height: 40,
-//       borderRadius: '50%',
-//       display: 'flex',
-//       justifyContent: 'center',
-//       alignItems: 'center',
-//       backgroundColor: `${category.color}3A`
-//     }}
-//   >
-//     <Icon icon={category.icon} color={category.color} width={20} height={20} />
-//   </Box>
-// )
 
 const ListOfSpendNote = () => {
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
@@ -99,7 +85,11 @@ const ListOfSpendNote = () => {
       field: 'amount',
       headerName: 'Amount',
       renderCell({ row }: CellType) {
-        return <Typography variant='subtitle1'>{row.amount}</Typography>
+        const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
+          row.amount
+        )
+
+        return <Typography variant='subtitle1'>{formattedAmount}</Typography>
       }
     },
     {
@@ -109,7 +99,7 @@ const ListOfSpendNote = () => {
       headerName: 'Content',
       renderCell({ row }: CellType) {
         return (
-          <Tooltip title={row.content} about={row.content || ''}>
+          <Tooltip arrow title={row.content} about={row.content || ''}>
             <Typography sx={{ cursor: 'pointer', textDecoration: 'underline' }}>
               {row.content ? row.content.substring(0, 10) + (row.content.length > 10 ? '...' : '') : ''}
             </Typography>
@@ -180,9 +170,9 @@ const ListOfSpendNote = () => {
             </Typography>
           }
           action={
-            <Button disabled={rowSelectionModel.length === 0} variant='contained' color='error' sx={{ color: 'white' }}>
-              Delete Selected
-            </Button>
+            <>
+              <DeleteManyNotesDialog rowSelectionModel={rowSelectionModel} />
+            </>
           }
         />
         <DataGrid

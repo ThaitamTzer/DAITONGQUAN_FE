@@ -68,7 +68,6 @@ const LoginPage = () => {
   const auth = useAuth()
   const theme = useTheme()
   const schema = getLoginValidationSchema(t)
-  const messages = getValidationMessages(t)
 
   const {
     control,
@@ -83,10 +82,8 @@ const LoginPage = () => {
   const onSubmit = (data: FormData) => {
     const { account, password } = data
     auth.login({ account, password, rememberMe }, () => {
-      setError('account', {
-        type: 'manual',
-        message: messages.invalidCredentials
-      })
+      setError('account', { type: 'manual', message: 'Tên người dùng hoặc mật khẩu không đúng' })
+      setError('password', { type: 'manual', message: 'Tên người dùng hoặc mật khẩu không đúng' })
     })
   }
 
