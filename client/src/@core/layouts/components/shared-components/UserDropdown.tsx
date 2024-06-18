@@ -168,7 +168,7 @@ const UserDropdown = (props: Props) => {
           </Box>
         </Box>
         <Divider sx={{ my: theme => `${theme.spacing(2)} !important` }} />
-        {ability.can('read', 'member-page') && ability.cannot('manage', 'all') && (
+        {ability.cannot('manage', 'all') && (
           <MenuItemStyled sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/user-profile/profile')}>
             <Box sx={styles}>
               <Icon icon='tabler:user-check' />

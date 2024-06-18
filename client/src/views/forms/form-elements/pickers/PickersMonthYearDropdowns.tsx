@@ -23,6 +23,7 @@ const PickersMonthYearDropdowns = ({
   const [year, setYear] = useState<DateType>(new Date())
   const [month, setMonth] = useState<DateType>(new Date())
   const [monthYear, setMonthYear] = useState<DateType>(new Date())
+  const [maxDate, setMaxDate] = useState<DateType>(new Date())
 
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap' }} className='demo-space-x'>

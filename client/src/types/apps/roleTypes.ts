@@ -1,5 +1,5 @@
 export type RolesRowType = {
-  _id: string
+  id: number
   name: string
   createdDate: string
   permissionID: string[]

@@ -1,5 +1,9 @@
 const HomePage = () => {
-  return <>Home Page</>
+  return (
+    <div>
+      <h1>Home Page</h1>
+    </div>
+  )
 }
 
 HomePage.acl = {

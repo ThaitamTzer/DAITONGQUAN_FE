@@ -55,7 +55,6 @@ const AuthGuard = (props: AuthGuardProps) => {
         router.replace('/login')
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Include auth in dependency array
 
   if (auth.loading || auth.user === null) {

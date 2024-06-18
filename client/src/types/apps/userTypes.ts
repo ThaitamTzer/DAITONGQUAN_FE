@@ -17,48 +17,13 @@ export type UsersType = {
   avatarColor?: ThemeColor
 }
 
-export type getAllUser = {
-  _id: string
-  firstname: string
-  lastname: string
-  email: string
-  avatar: string
-  createdAt: string
-  isBlock: boolean
-  avatarColor?: ThemeColor
-  gender: string
-}
-
 export type AdminsType = {
-  id: string
+  id: number
   fullname: string
   email: string
-  role: [{ name: string }]
-  roles: { data: [] }
+  roleId: string
   isBlock: boolean
-  password: string
   avatarColor?: ThemeColor
-}
-
-export type getUpdateAdmin = {
-  _id: string
-  fullname: string
-  email: string
-  role: [{ _id: string; name: string }]
-  password: string
-}
-
-export type UpdateAdminsType = {
-  id: string
-  fullname: string
-  email: string
-  roleId: string[]
-  password: string
-}
-
-export type RoleType = {
-  _id: string
-  name: string
 }
 
 export type ProjectListDataType = {
