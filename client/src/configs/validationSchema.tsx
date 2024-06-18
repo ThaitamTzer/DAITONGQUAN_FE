@@ -13,6 +13,8 @@ const MAX_NICKNAME_LENGTH = 10
 const MAX_PHONE_LENGTH = 11
 const CODE_LENGTH = 6
 const MAX_DESCRIPTINO_LENGTH = 100
+const MAX_CATE_NAME_LENGTH = 10
+const MIN_CATE_NAME_LENGTH = 1
 
 export const getValidationMessages = (t: (arg0: string) => any) => ({
   email: {
@@ -93,6 +95,31 @@ export const getValidationMessages = (t: (arg0: string) => any) => ({
   name: {
     required: t('Tên vai trò không được để trống'),
     max: t(`Tên vai trò không được quá ${MAX_FIRSTNAME_LENGTH} ký tự`)
+  },
+  fullname: {
+    required: t('Tên Admin không được để trống'),
+    max: t(`Tên Admin không được quá ${MAX_FIRSTNAME_LENGTH} ký tự `)
+  },
+  category: {
+    required: t('Tên danh mục không được để trống'),
+    max: t(`Tên danh mục không được quá ${MAX_CATE_NAME_LENGTH} ký tự`),
+    min: t(`Tên danh mục phải có ít nhất ${MIN_CATE_NAME_LENGTH} ký tự`)
+  },
+  type: {
+    required: t('Loại danh mục không được để trống')
+  },
+  icon: {
+    required: t('Cần chọn icon cho danh mục')
+  },
+  budget: {
+    number: t('Số tiền không hợp lệ')
+  },
+  title: {
+    required: t('Tiêu đề không được để trống')
+  },
+  amount: {
+    required: t('Số tiền không được để trống'),
+    number: t('Số tiền không hợp lệ')
   }
 })
 
@@ -232,5 +259,81 @@ export const getRoleValidationSchema = (t: (arg0: string) => any) => {
 
   return yup.object().shape({
     name: yup.string().required(messages.name.required).max(MAX_FIRSTNAME_LENGTH, messages.name.max)
+  })
+}
+
+export const getCreateAdminValidationSchema = (t: (arg0: string) => any) => {
+  const messages = getValidationMessages(t)
+
+  return yup.object().shape({
+    // email: yup
+    //   .string()
+    //   .email(messages.email.email)
+    //   .required(messages.email.required)
+    //   .max(MAX_EMAIL_LENGTH, messages.email.max)
+    //   .matches(/^\S*$/, messages.noWhitespace),
+    // password: yup
+    //   .string()
+    //   .min(MIN_PASSWORD_LENGTH, messages.password.min)
+    //   .max(MAX_PASSWORD_LENGTH, messages.password.max)
+    //   .matches(/^\S*$/, messages.noWhitespace)
+    //   .required(messages.password.required),
+    // comfirmPassword: yup
+    //   .string()
+    //   .oneOf([yup.ref('password')], messages.password.matches)
+    //   .matches(/^\S*$/, messages.noWhitespace)
+    //   .required(messages.password.requiredComfirm),
+    fullname: yup.string().required(messages.fullname.required).max(MAX_FIRSTNAME_LENGTH, messages.fullname.max),
+    roleId: yup.array().required(messages.name.required).min(1, messages.name.required)
+  })
+}
+
+export const getUpdateAdminValidationSchema = (t: (arg0: string) => any) => {
+  const messages = getValidationMessages(t)
+
+  return yup.object().shape({
+    email: yup
+      .string()
+      .email(messages.email.email)
+      .required(messages.email.required)
+      .max(MAX_EMAIL_LENGTH, messages.email.max)
+      .matches(/^\S*$/, messages.noWhitespace),
+    fullname: yup.string().required(messages.fullname.required).max(MAX_FIRSTNAME_LENGTH, messages.fullname.max),
+    roleId: yup.array().required(messages.name.required).min(1, messages.name.required),
+    password: yup
+      .string()
+      .max(MAX_PASSWORD_LENGTH, messages.password.max)
+      .matches(/[A-Z]/, messages.password.uppercase)
+      .matches(/[!@#$%^&*]/, messages.password.special)
+      .matches(/[0-9]/, messages.password.number)
+      .matches(/^\S*$/, messages.noWhitespace)
+  })
+}
+
+export const getCreateCategoryValidationSchema = (t: (arg0: string) => any) => {
+  const messages = getValidationMessages(t)
+
+  return yup.object().shape({
+    name: yup
+      .string()
+      .required(messages.category.required)
+      .max(MAX_CATE_NAME_LENGTH, messages.category.max)
+      .min(MIN_CATE_NAME_LENGTH, messages.category.min),
+    description: yup.string().max(MAX_DESCRIPTINO_LENGTH)
+  })
+}
+
+export const getCreateLimitSpendingValidationSchema = () => {
+  return yup.object().shape({
+    budget: yup.number().min(0).required()
+  })
+}
+
+export const getCreateSpendNoteValidationSchema = (t: (arg0: string) => any) => {
+  const messages = getValidationMessages(t)
+
+  return yup.object().shape({
+    title: yup.string().required(messages.title.required),
+    amount: yup.number().required(messages.amount.required)
   })
 }
