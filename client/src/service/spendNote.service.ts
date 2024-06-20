@@ -60,8 +60,9 @@ const spendNoteService = {
   // ** Get Spend Note By Category
   getSpendNoteByCategory: async (cateId: string) => axiosClient.get(`/spendingnote/get-by-cate/${cateId}`),
 
-  // ** Get Spend Note By Date
-  getSpendNoteByDate: async (date: string) => axiosClient.get(`/spendingnote/filter-by-date/${date}`),
+  // ** Get Spend Note By Range Date
+  getSpendNoteByRangeDate: async (data: { startDate: string; endDate: string }) =>
+    axiosClient.get(`/spendingnote/filter-by-date`, { params: data }),
 
   // Get Notification Out Of Money
   getNotificationOutOfMoney: async () => axiosClient.get(`/spendingnote/notify-out-of-money`)

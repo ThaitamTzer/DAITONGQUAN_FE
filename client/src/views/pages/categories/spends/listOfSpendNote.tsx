@@ -1,16 +1,32 @@
-import { Card, Chip, IconButton, Typography, Tooltip, CardHeader } from '@mui/material'
+import React, { forwardRef, useState, useEffect } from 'react'
+import {
+  Card,
+  Chip,
+  IconButton,
+  Typography,
+  Tooltip,
+  CardHeader,
+  LinearProgress,
+  Divider,
+  Grid,
+  Button,
+  InputAdornment,
+  TextField
+} from '@mui/material'
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid'
 import spendNoteService from 'src/service/spendNote.service'
 import Icon from 'src/@core/components/icon'
-import { Box, flexbox } from '@mui/system'
+import { Box } from '@mui/system'
 import useSWR, { mutate } from 'swr'
-import { useEffect, useState } from 'react'
 import categoriesService from 'src/service/categories.service'
 import toast from 'react-hot-toast'
 import DeleteManyNotesDialog from './utils/deleteManyNotesDialog'
-import React from 'react'
 import UpdateSpendNote from './utils/updateSpendNote'
 import CustomTextField from 'src/@core/components/mui/text-field'
+import DatePicker from 'react-datepicker'
+import { format } from 'date-fns'
+import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
+import { CustomNoRowsOverlay } from 'src/pages/components/datagrid/nodataOverlay'
 
 type SpendNote = {
   _id: string
@@ -39,6 +55,7 @@ const ListOfSpendNote = () => {
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>([])
   const [loading, setLoading] = useState(false)
+  const [notesToDisplay, setNotesToDisplay] = useState<SpendNote[]>([])
 
   const { data: cate } = useSWR('GET_ALL_CATEGORIES', categoriesService.getAllCategories)
 
@@ -152,38 +169,135 @@ const ListOfSpendNote = () => {
     }
   ]
 
-  const { data: notes } = useSWR('GET_ALL_SPENDNOTES', spendNoteService.getAllSpendNote)
+  const { data: notes, error } = useSWR('GET_ALL_SPENDNOTES', spendNoteService.getAllSpendNote)
 
-  // Kiểm tra xem có bất kỳ ghi chú nào có nội dung không
-  const hasContent = notes?.spendingNotes.some((note: SpendNote) => note.content)
+  const [startDate, setStartDate] = useState<Date | null>(null)
+  const [endDate, setEndDate] = useState<Date | null>(null)
 
-  // Nếu không có ghi chú nào có nội dung, loại bỏ cột 'Content'
+  const handleOnChange = (dates: [Date | null, Date | null]) => {
+    const [start, end] = dates
+    setStartDate(start)
+    setEndDate(end)
+  }
+
+  const handleDateGet = (date: Date) => {
+    const newDate = new Date(date)
+
+    newDate.toLocaleDateString('vi', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
+
+    return format(newDate, 'yyyy-MM-dd')
+  }
+
+  const { data: spendNoteByRangeDate, error: rangeDateError } = useSWR(
+    startDate && endDate ? ['GET_SPENDNOTE_BY_RANGE_DATE', startDate, endDate] : null,
+    () =>
+      spendNoteService.getSpendNoteByRangeDate({
+        startDate: handleDateGet(startDate!),
+        endDate: handleDateGet(endDate!)
+      }),
+    { refreshInterval: 0 }
+  )
+
+  useEffect(() => {
+    if (rangeDateError?.response?.status === 404) {
+      setNotesToDisplay([])
+    } else if (spendNoteByRangeDate) {
+      setNotesToDisplay(spendNoteByRangeDate)
+    } else if (notes) {
+      setNotesToDisplay(notes.spendingNotes)
+    }
+  }, [spendNoteByRangeDate, rangeDateError, notes])
+
+  const hasContent = notesToDisplay?.some((note: SpendNote) => note.content)
+
   const finalColumns = hasContent ? columns : columns.filter(column => column.field !== 'content')
+
+  const CustomInput = forwardRef((props: any, ref) => {
+    const startDate = props.start ? format(props.start, 'MM/dd/yy') : ''
+    const endDate = props.end ? ` - ${format(props.end, 'MM/dd/yy')}` : ''
+    const value = `${startDate}${endDate}`
+
+    return (
+      <TextField
+        size='small'
+        fullWidth
+        inputRef={ref}
+        label={props.label || ''}
+        {...props}
+        value={value}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position='end'>
+              <IconButton
+                edge='end'
+                onClick={() => {
+                  setStartDate(null)
+                  setEndDate(null)
+                }}
+                onMouseDown={e => e.preventDefault()}
+                aria-label='toggle password visibility'
+              >
+                <Icon icon='tabler:x' display={startDate && endDate ? 'block' : 'none'} />
+              </IconButton>
+            </InputAdornment>
+          )
+        }}
+      />
+    )
+  })
 
   return (
     <>
-      <Card sx={{ p: 3, boxShadow: 3 }}>
+      <Card>
         <CardHeader
-          title={
-            <Typography variant='h2' sx={{ color: '#3f51b5' }}>
-              List Of Spend Note
-            </Typography>
-          }
-          action={
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginRight: 3 }}>
-              {/* add filter by category */}
-
-              <CustomTextField />
-              <DeleteManyNotesDialog rowSelectionModel={rowSelectionModel} data={notes?.spendingNotes} />
-            </Box>
-          }
+          title={<Typography variant='h2'>List Of Spend Note</Typography>}
+          sx={{
+            borderLeft: '3px solid',
+            borderColor: 'primary.main',
+            paddingTop: '0 !important',
+            paddingBottom: '0 !important',
+            marginBottom: 10,
+            marginTop: 10
+          }}
         />
+        <Grid container spacing={3} sx={{ marginLeft: 2, marginRight: 2 }}>
+          <Grid item xs={5} md={3} lg={2}>
+            <DatePickerWrapper>
+              <DatePicker
+                selectsRange
+                startDate={startDate}
+                endDate={endDate}
+                selected={startDate}
+                id='date-range-picker'
+                onChange={handleOnChange}
+                shouldCloseOnSelect={false}
+                customInput={<CustomInput label='Date Range' start={startDate} end={endDate} />}
+              />
+            </DatePickerWrapper>
+          </Grid>
+          <Grid item xs={5} md={3} lg={2}>
+            <DeleteManyNotesDialog rowSelectionModel={rowSelectionModel} data={notesToDisplay} />
+          </Grid>
+        </Grid>
+        <Divider sx={{ marginBottom: 4, marginTop: 4 }} />
         <DataGrid
           autoHeight
+          loading={!notesToDisplay}
           rowHeight={62}
-          rows={notes?.spendingNotes.map((item: { _id: any }) => ({ ...item, id: item._id })).reverse() ?? []}
+          rows={notesToDisplay?.map((item: { _id: any }) => ({ ...item, id: item._id })).reverse() ?? []}
           columns={finalColumns}
+          disableColumnFilter
+          disableColumnSelector
+          disableDensitySelector
           disableColumnMenu
+          slots={{
+            noRowsOverlay: CustomNoRowsOverlay,
+            loadingOverlay: LinearProgress
+          }}
           onRowSelectionModelChange={(newSelection: any) => {
             setRowSelectionModel(newSelection)
           }}
@@ -198,7 +312,8 @@ const ListOfSpendNote = () => {
             },
             '& .MuiDataGrid-cell': {
               py: 2
-            }
+            },
+            '--DataGrid-overlayHeight': '300px'
           }}
         />
       </Card>

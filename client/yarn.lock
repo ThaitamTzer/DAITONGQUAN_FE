@@ -511,7 +511,7 @@
     prop-types "^15.8.1"
     react-is "^18.2.0"
 
-"@mui/x-data-grid@6.0.3":
+"@mui/x-data-grid@^6.0.3":
   version "6.0.3"
   resolved "https://registry.npmjs.org/@mui/x-data-grid/-/x-data-grid-6.0.3.tgz"
   integrity sha512-wcv5O+p25ouvB100FwVPLTLBAmvoP1SaTtOxpCYbfVSLMKkP4bbynA9a+enWtnuvcC8k5qvI75Tx5nRVbFUykA==
