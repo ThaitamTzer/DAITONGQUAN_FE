@@ -130,10 +130,6 @@ const ScrollWrapper = ({ children, hidden }: { children: ReactNode; hidden: bool
 const NotificationDropdown = (props: Props) => {
   const { data: notifications } = useSWR('GET_ALL_NOTIFICATIONS', spendNoteService.getNotificationOutOfMoney)
 
-  useEffect(() => {
-    mutate('GET_ALL_NOTIFICATIONS')
-  }, [notifications])
-
   // ** Props
   const { settings } = props
 

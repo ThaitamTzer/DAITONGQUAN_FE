@@ -27,7 +27,7 @@ import toast from 'react-hot-toast'
 import styled from '@emotion/styled'
 import { mutate } from 'swr'
 
-const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
+export const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
   top: 0,
   right: 0,
   color: 'white',
@@ -42,7 +42,7 @@ const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
   }
 }))
 
-const AddSpendNote = ({ spendCate }: any) => {
+const UpdateSpendNote = ({ spendCate }: any) => {
   const [open, setOpen] = React.useState(false)
   const [cateId, setCateId] = React.useState<string | null>(null)
 
@@ -56,22 +56,23 @@ const AddSpendNote = ({ spendCate }: any) => {
 
   const handleClose = () => {
     reset({
-      title: '',
-      amount: 0,
-      content: '',
-      paymentMethod: 'cash',
-      spendingDate: new Date()
+      title: spendCate.title,
+      amount: spendCate.amount,
+      content: spendCate.content,
+      paymentMethod: spendCate.paymentMethod,
+      spendingDate: new Date(spendCate.spendingDate)
     })
     setOpen(false)
   }
 
   interface FormData {
+    spendingNoteId: string
     cateId: string
     title: string
     content: string
-    amount: number
-    paymentMethod: string
     spendingDate: Date
+    paymentMethod: string
+    amount: number
   }
 
   const {
@@ -85,40 +86,46 @@ const AddSpendNote = ({ spendCate }: any) => {
   })
 
   const onSubmit = async (data: FormData) => {
+    if (cateId === null) {
+      toast.error('Category ID is missing')
+
+      return
+    }
+
     const spendNote = {
       ...data,
       content: data.content,
-      cateId: cateId
+      spendingNoteId: cateId
     }
     try {
       await spendNoteService
-        .createSpendNote(spendNote)
-        .then(res => {
+        .updateSpendNote(spendNote)
+        .then((res: any) => {
           mutate('GET_ALL_SPENDNOTES')
           if (res.warningMessage) {
-            toast('Be careful, you are adding a note with a large amount of money', {
+            toast('Be careful, you are update a note with a large amount of money', {
               icon: '⚠️',
               style: { backgroundColor: '#FFC1078A' }
             })
             mutate('GET_ALL_NOTIFICATIONS')
           } else {
-            toast.success('Add Spend Note Successfully')
+            toast.success('Update Spend Note Successfully')
             mutate('GET_ALL_NOTIFICATIONS')
           }
           handleClose()
         })
         .catch(() => {
-          toast.error('Add Spend Note Failed')
+          toast.error('Update Spend Note Failed')
         })
     } catch (error) {
-      toast.error('Add Spend Note Failed')
+      toast.error('Update Spend Note Failed')
     }
   }
 
   return (
     <>
       <IconButton onClick={() => handleOpen(spendCate._id)}>
-        <Icon icon='tabler:plus' />
+        <Icon icon='tabler:edit' />
       </IconButton>
       <Dialog
         fullWidth
@@ -139,6 +146,7 @@ const AddSpendNote = ({ spendCate }: any) => {
                   name='title'
                   rules={{ required: true }}
                   control={control}
+                  defaultValue={spendCate.title}
                   render={({ field: { value, onChange, onBlur } }) => (
                     <TextField
                       id='Title'
@@ -159,6 +167,7 @@ const AddSpendNote = ({ spendCate }: any) => {
                   name='amount'
                   rules={{ required: true }}
                   control={control}
+                  defaultValue={spendCate.amount}
                   render={({ field: { value, onChange, onBlur } }) => (
                     <TextField
                       id='amount'
@@ -179,7 +188,9 @@ const AddSpendNote = ({ spendCate }: any) => {
                 <Controller
                   name='spendingDate'
                   control={control}
-                  defaultValue={new Date()} // This sets the default value to the current date
+                  defaultValue={
+                    new Date(spendCate.spendingDate) // This sets the default value to the current date
+                  } // This sets the default value to the current date
                   render={({ field: { value, onChange } }) => (
                     <DatePickerWrapper>
                       <DatePicker
@@ -204,27 +215,28 @@ const AddSpendNote = ({ spendCate }: any) => {
                     </DatePickerWrapper>
                   )}
                 />
-                <Grid item xs={12}>
-                  <Controller
-                    name='paymentMethod'
-                    control={control}
-                    defaultValue='cash'
-                    render={({ field: { value, onChange } }) => (
-                      <FormControl>
-                        <FormLabel>Payment Method</FormLabel>
-                        <RadioGroup row value={value} name='paymentMethod' onChange={onChange}>
-                          <FormControlLabel value='cash' control={<Radio />} label='Cash' />
-                          <FormControlLabel value='banking' control={<Radio />} label='Banking' />
-                        </RadioGroup>
-                      </FormControl>
-                    )}
-                  />
-                </Grid>
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+                  name='paymentMethod'
+                  control={control}
+                  defaultValue={spendCate.paymentMethod}
+                  render={({ field: { value, onChange } }) => (
+                    <FormControl>
+                      <FormLabel>Payment Method</FormLabel>
+                      <RadioGroup row value={value} name='paymentMethod' onChange={onChange}>
+                        <FormControlLabel value='cash' control={<Radio />} label='Cash' />
+                        <FormControlLabel value='banking' control={<Radio />} label='Banking' />
+                      </RadioGroup>
+                    </FormControl>
+                  )}
+                />
               </Grid>
               <Grid item xs={12}>
                 <Controller
                   name='content'
                   control={control}
+                  defaultValue={spendCate.content}
                   render={({ field: { value, onChange } }) => (
                     <TextField
                       id='content'
@@ -253,4 +265,4 @@ const AddSpendNote = ({ spendCate }: any) => {
   )
 }
 
-export default AddSpendNote
+export default UpdateSpendNote

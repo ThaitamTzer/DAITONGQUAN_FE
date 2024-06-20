@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Typography, Button, Card, CardContent, CardHeader, Grid, IconButton, Box } from '@mui/material'
+import { Typography, Button, Card, CardContent, CardHeader, Grid, IconButton, Box, useMediaQuery } from '@mui/material'
 import { Skeleton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import categoriesService from 'src/service/categories.service'
@@ -8,18 +8,23 @@ import toast from 'react-hot-toast'
 import UpdateCategory from './utils/updateCategory'
 import LimitSpend from './utils/limitSpend'
 import limitSpendingService from 'src/service/limitSpending.service'
-import DeleteCategoryDialog from './utils/deleteCategoryDialog'
+import DeleteCategoryDialog, { ForceDeleteDialog } from './utils/deleteCategoryDialog'
 import ActionLimitDialog from './utils/actionLimitDialog'
 import AddSpendNote from './utils/addSpendNote'
+import { useTheme } from '@mui/system'
+import spendNoteService from 'src/service/spendNote.service'
 
 const CategorySpendCard = () => {
   const { data: spends, error } = useSWR('GET_ALL_SPENDS', categoriesService.getCategoriesSpend)
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
   const [openUpdateLimit, setOpenUpdateLimit] = useState(false)
+  const [openForceDelete, setOpenForceDelete] = useState(false)
   const [categoryId, setCategoryId] = useState<string | null>(null)
   const [limitId, setLimitId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [initialLimitValue, setInitialLimitValue] = useState<number>(0)
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const handleOpenDeleteDialog = (id: string) => {
     setCategoryId(id)
@@ -35,6 +40,13 @@ const CategorySpendCard = () => {
     setOpenUpdateLimit(true)
   }
 
+  const handleOpenFocreDelete = (id: string) => {
+    setCategoryId(id)
+    console.log('id', id)
+
+    setOpenForceDelete(true)
+  }
+
   const handleCloseUpdateLimit = () => setOpenUpdateLimit(false)
 
   const handleDeleteCategory = async () => {
@@ -44,10 +56,32 @@ const CategorySpendCard = () => {
       await categoriesService.deleteCategory(categoryId)
       setOpenDeleteDialog(false)
       setLoading(false)
+      mutate('GET_ALL_NOTIFICATIONS')
       mutate('GET_ALL_SPENDS')
       toast.success('Category deleted successfully')
+      setLoading(false)
     } catch (error: any) {
       toast.error(error.response.data.message)
+      if (error.response.status === 404) {
+        handleOpenFocreDelete(categoryId)
+        handleCloseDeleteDialog()
+      }
+      setLoading(false)
+    }
+  }
+
+  const handleForceDeleteCategory = async () => {
+    if (!categoryId) return
+    setLoading(true)
+    try {
+      await spendNoteService.forceDeleteSpendNote(categoryId)
+      setOpenForceDelete(false)
+      setLoading(false)
+      mutate('GET_ALL_NOTIFICATIONS')
+      mutate('GET_ALL_SPENDNOTES')
+      toast.success('Note Of Category deleted successfully')
+    } catch (error: any) {
+      toast.error('Failed to delete')
       setLoading(false)
     }
   }
@@ -60,10 +94,12 @@ const CategorySpendCard = () => {
       setOpenUpdateLimit(false)
       setLoading(false)
       mutate('GET_ALL_SPENDS')
+      mutate('GET_ALL_NOTIFICATIONS')
       toast.success('Limit updated successfully')
     } catch (error: any) {
       toast.error('Failed to update limit')
       setLoading(false)
+      mutate('GET_ALL_NOTIFICATIONS')
     }
   }
 
@@ -118,7 +154,15 @@ const CategorySpendCard = () => {
           .filter((spendCategory: any) => spendCategory.status === 'show')
           .map((spendCategory: any) => (
             <Grid item key={spendCategory._id} marginRight={4} marginBottom={4} sx={{ display: 'flex' }}>
-              <Card sx={{ minWidth: 300, borderRadius: '16px', height: '100', padding: '0 !important' }}>
+              <Card
+                sx={{
+                  minWidth: isMobile ? '150px' : '300px',
+                  borderRadius: '16px',
+                  height: isMobile ? '150px' : '100%',
+                  width: isMobile ? '150px' : '150px',
+                  padding: '0 !important'
+                }}
+              >
                 <CardHeader
                   sx={{ padding: '7px 0 0 7px !important' }}
                   title={spendCategory.name}
@@ -172,6 +216,13 @@ const CategorySpendCard = () => {
                 onSubmit={handleDeleteCategory}
                 loading={loading}
               />
+              <ForceDeleteDialog
+                open={openForceDelete}
+                onClose={() => setOpenForceDelete(false)}
+                spendCategory={spendCategory}
+                onSubmit={handleForceDeleteCategory}
+                loading={loading}
+              />
               <ActionLimitDialog
                 open={openUpdateLimit && categoryId === spendCategory._id}
                 onClose={handleCloseUpdateLimit}
@@ -183,7 +234,6 @@ const CategorySpendCard = () => {
               />
             </Grid>
           ))}
-      {error && <Typography>Error fetching data</Typography>}
       {!spends && !error && renderSkeleton()}
     </>
   )

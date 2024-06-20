@@ -13,7 +13,7 @@ const MAX_NICKNAME_LENGTH = 10
 const MAX_PHONE_LENGTH = 11
 const CODE_LENGTH = 6
 const MAX_DESCRIPTINO_LENGTH = 100
-const MAX_CATE_NAME_LENGTH = 10
+const MAX_CATE_NAME_LENGTH = 20
 const MIN_CATE_NAME_LENGTH = 1
 
 export const getValidationMessages = (t: (arg0: string) => any) => ({

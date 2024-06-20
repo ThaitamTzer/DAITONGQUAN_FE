@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import { mutate } from 'swr'
 import Icon from 'src/@core/components/icon'
 
-const DeleteManyNotesDialog = ({ rowSelectionModel }: any) => {
+const DeleteManyNotesDialog = ({ rowSelectionModel, data }: any) => {
   const [open, setOpen] = React.useState<boolean>(false)
   const [loading, setLoading] = React.useState<boolean>(false)
 
@@ -25,19 +25,22 @@ const DeleteManyNotesDialog = ({ rowSelectionModel }: any) => {
       setOpen(false)
       setLoading(false)
       toast.success('Notes deleted successfully')
+      mutate('GET_ALL_NOTIFICATIONS')
       mutate('GET_ALL_SPENDNOTES')
     } catch (error: any) {
       toast.error(error.response.data.message)
       setLoading(false)
+      mutate('GET_ALL_NOTIFICATIONS')
     }
   }
 
-  const totalNotes = rowSelectionModel.length
+  const totalNotes = data?.length
+  console.log(totalNotes)
 
   return (
     <>
       <IconButton size='large' onClick={() => handleOpen()} disabled={rowSelectionModel.length === 0} color='error'>
-        <Icon fontSize={'30px'} icon='ic:round-delete-sweep' />
+        <Icon fontSize={'25px'} icon='ic:round-delete-sweep' />
       </IconButton>
       <Dialog open={open}>
         <DialogTitle variant='h3'>
