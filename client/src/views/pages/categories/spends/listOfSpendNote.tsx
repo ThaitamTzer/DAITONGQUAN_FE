@@ -11,7 +11,8 @@ import {
   Grid,
   InputAdornment,
   TextField,
-  MenuItem
+  MenuItem,
+  Select
 } from '@mui/material'
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid'
 import spendNoteService from 'src/service/spendNote.service'
@@ -206,6 +207,8 @@ const ListOfSpendNote = () => {
     let filteredNotes: any = notes?.spendingNotes || []
     if (rangeDateError?.response?.status === 404) {
       setNotesToDisplay([])
+
+      return
     } else if (spendNoteByRangeDate) {
       filteredNotes = spendNoteByRangeDate
     }
@@ -292,13 +295,26 @@ const ListOfSpendNote = () => {
             </DatePickerWrapper>
           </Grid>
           <Grid item xs={5} md={3} lg={2}>
-            <TextField
+            <Select
               fullWidth
               id='filterByCategory'
-              label='Filter by category'
               size='small'
               value={categoryId}
-              select
+              MenuProps={{
+                anchorOrigin: {
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                },
+                transformOrigin: {
+                  vertical: 'top',
+                  horizontal: 'left'
+                },
+                MenuListProps: {
+                  style: {
+                    maxHeight: 300
+                  }
+                }
+              }}
               onChange={e => setCategoryId(e.target.value)}
             >
               <MenuItem value='all'>All</MenuItem>
@@ -307,7 +323,7 @@ const ListOfSpendNote = () => {
                   {category.name}
                 </MenuItem>
               ))}
-            </TextField>
+            </Select>
           </Grid>
           <Grid item xs={5} md={3} lg={2}>
             <TextField
