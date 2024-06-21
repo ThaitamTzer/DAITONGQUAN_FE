@@ -9,9 +9,9 @@ import {
   LinearProgress,
   Divider,
   Grid,
-  Button,
   InputAdornment,
-  TextField
+  TextField,
+  MenuItem
 } from '@mui/material'
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid'
 import spendNoteService from 'src/service/spendNote.service'
@@ -22,7 +22,6 @@ import categoriesService from 'src/service/categories.service'
 import toast from 'react-hot-toast'
 import DeleteManyNotesDialog from './utils/deleteManyNotesDialog'
 import UpdateSpendNote from './utils/updateSpendNote'
-import CustomTextField from 'src/@core/components/mui/text-field'
 import DatePicker from 'react-datepicker'
 import { format } from 'date-fns'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
@@ -55,9 +54,14 @@ const ListOfSpendNote = () => {
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>([])
   const [loading, setLoading] = useState(false)
+  const [categoryId, setCategoryId] = useState<string>('all')
+  const [searchText, setSearchText] = useState<string>('')
   const [notesToDisplay, setNotesToDisplay] = useState<SpendNote[]>([])
+  const [startDate, setStartDate] = useState<Date | null>(null)
+  const [endDate, setEndDate] = useState<Date | null>(null)
 
   const { data: cate } = useSWR('GET_ALL_CATEGORIES', categoriesService.getAllCategories)
+  const { data: notes } = useSWR('GET_ALL_SPENDNOTES', spendNoteService.getAllSpendNote)
 
   const handleDate = (date: Date) => {
     const newDate = new Date(date)
@@ -81,6 +85,8 @@ const ListOfSpendNote = () => {
       await spendNoteService.deleteSpendNote(id)
       mutate('GET_ALL_SPENDNOTES')
       mutate('GET_ALL_NOTIFICATIONS')
+      mutate('GET_SPENDNOTE_BY_RANGE_DATE')
+      setNotesToDisplay(prevNotes => prevNotes.filter(note => note._id !== id))
       toast.success('Delete spend note successfully')
       setLoading(false)
     } catch (error: any) {
@@ -169,11 +175,6 @@ const ListOfSpendNote = () => {
     }
   ]
 
-  const { data: notes, error } = useSWR('GET_ALL_SPENDNOTES', spendNoteService.getAllSpendNote)
-
-  const [startDate, setStartDate] = useState<Date | null>(null)
-  const [endDate, setEndDate] = useState<Date | null>(null)
-
   const handleOnChange = (dates: [Date | null, Date | null]) => {
     const [start, end] = dates
     setStartDate(start)
@@ -182,7 +183,6 @@ const ListOfSpendNote = () => {
 
   const handleDateGet = (date: Date) => {
     const newDate = new Date(date)
-
     newDate.toLocaleDateString('vi', {
       day: '2-digit',
       month: '2-digit',
@@ -203,17 +203,29 @@ const ListOfSpendNote = () => {
   )
 
   useEffect(() => {
+    let filteredNotes: any = notes?.spendingNotes || []
     if (rangeDateError?.response?.status === 404) {
       setNotesToDisplay([])
     } else if (spendNoteByRangeDate) {
-      setNotesToDisplay(spendNoteByRangeDate)
-    } else if (notes) {
-      setNotesToDisplay(notes.spendingNotes)
+      filteredNotes = spendNoteByRangeDate
     }
-  }, [spendNoteByRangeDate, rangeDateError, notes])
+
+    if (categoryId !== 'all') {
+      filteredNotes = filteredNotes.filter((note: any) => note.cateId === categoryId)
+    }
+
+    if (searchText) {
+      filteredNotes = filteredNotes.filter(
+        (note: any) =>
+          note.title.toLowerCase().includes(searchText.toLowerCase()) ||
+          note.content?.toLowerCase().includes(searchText.toLowerCase())
+      )
+    }
+
+    setNotesToDisplay(filteredNotes)
+  }, [spendNoteByRangeDate, rangeDateError, notes, categoryId, searchText])
 
   const hasContent = notesToDisplay?.some((note: SpendNote) => note.content)
-
   const finalColumns = hasContent ? columns : columns.filter(column => column.field !== 'content')
 
   const CustomInput = forwardRef((props: any, ref) => {
@@ -275,9 +287,42 @@ const ListOfSpendNote = () => {
                 id='date-range-picker'
                 onChange={handleOnChange}
                 shouldCloseOnSelect={false}
-                customInput={<CustomInput label='Date Range' start={startDate} end={endDate} />}
+                customInput={<CustomInput label='Filter by date range' start={startDate} end={endDate} />}
               />
             </DatePickerWrapper>
+          </Grid>
+          <Grid item xs={5} md={3} lg={2}>
+            <TextField
+              fullWidth
+              id='filterByCategory'
+              label='Filter by category'
+              size='small'
+              value={categoryId}
+              select
+              onChange={e => setCategoryId(e.target.value)}
+            >
+              <MenuItem value='all'>All</MenuItem>
+              {cate?.map((category: Category) => (
+                <MenuItem key={category._id} value={category._id}>
+                  {category.name}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+          <Grid item xs={5} md={3} lg={2}>
+            <TextField
+              size='small'
+              value={searchText}
+              onChange={e => setSearchText(e.target.value)}
+              placeholder='Search by title or content'
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <Icon icon='fluent:search-20-regular' />
+                  </InputAdornment>
+                )
+              }}
+            />
           </Grid>
           <Grid item xs={5} md={3} lg={2}>
             <DeleteManyNotesDialog rowSelectionModel={rowSelectionModel} data={notesToDisplay} />
