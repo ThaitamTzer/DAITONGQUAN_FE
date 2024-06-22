@@ -15,26 +15,26 @@ import {
   Select
 } from '@mui/material'
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid'
-import spendNoteService from 'src/service/spendNote.service'
+import incomesNoteService from 'src/service/incomesNote.service'
 import Icon from 'src/@core/components/icon'
 import { Box } from '@mui/system'
 import useSWR, { mutate } from 'swr'
 import categoriesService from 'src/service/categories.service'
 import toast from 'react-hot-toast'
 import DeleteManyNotesDialog from './utils/deleteManyNotesDialog'
-import UpdateSpendNote from './utils/updateSpendNote'
+import UpdateIncomeNote from './utils/updateIncomeNote'
 import DatePicker from 'react-datepicker'
 import { format } from 'date-fns'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { CustomNoRowsOverlay } from 'src/pages/components/datagrid/nodataOverlay'
 
-type SpendNote = {
+type IcomeNote = {
   _id: string
   cateId: string
   title: string
   content: string | null
-  spendingDate: Date
-  paymentMethod: string
+  incomeDate: Date
+  method: string
   amount: number
   createdAt: Date
   updatedAt: Date
@@ -48,7 +48,7 @@ type Category = {
 }
 
 interface CellType {
-  row: SpendNote
+  row: IcomeNote
 }
 
 const ListOfSpendNote = () => {
@@ -57,12 +57,12 @@ const ListOfSpendNote = () => {
   const [loading, setLoading] = useState(false)
   const [categoryId, setCategoryId] = useState<string>('all')
   const [searchText, setSearchText] = useState<string>('')
-  const [notesToDisplay, setNotesToDisplay] = useState<SpendNote[]>([])
+  const [notesToDisplay, setNotesToDisplay] = useState<IcomeNote[]>([])
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
 
-  const { data: cate } = useSWR('GET_ALL_CATEGORIES', categoriesService.getCategoriesSpend)
-  const { data: notes } = useSWR('GET_ALL_SPENDNOTES', spendNoteService.getAllSpendNote)
+  const { data: cate } = useSWR('GET_ALL_CATEGORIES', categoriesService.getCategoriesIncome)
+  const { data: notes } = useSWR('GET_ALL_INCOMENOTES', incomesNoteService.getAllIncomesNote)
 
   const handleDate = (date: Date) => {
     const newDate = new Date(date)
@@ -83,9 +83,8 @@ const ListOfSpendNote = () => {
   const handleDeleteNote = async (id: string) => {
     setLoading(true)
     try {
-      await spendNoteService.deleteSpendNote(id)
-      mutate('GET_ALL_SPENDNOTES')
-      mutate('GET_ALL_NOTIFICATIONS')
+      await incomesNoteService.deleteIncomesNote(id)
+      mutate('GET_ALL_INCOMENOTES')
       mutate('GET_SPENDNOTE_BY_RANGE_DATE')
       setNotesToDisplay(prevNotes => prevNotes.filter(note => note._id !== id))
       toast.success('Delete spend note successfully')
@@ -145,18 +144,18 @@ const ListOfSpendNote = () => {
     },
     {
       flex: 1,
-      field: 'paymentMethod',
+      field: 'method',
       headerName: 'Method',
       renderCell({ row }: CellType) {
-        return <Typography variant='subtitle1'>{row.paymentMethod}</Typography>
+        return <Typography variant='subtitle1'>{row.method}</Typography>
       }
     },
     {
       flex: 1,
-      field: 'spendingDate',
+      field: 'incomeDate',
       headerName: 'Date',
       renderCell({ row }: CellType) {
-        return <Typography variant='subtitle1'>{handleDate(row.spendingDate)}</Typography>
+        return <Typography variant='subtitle1'>{handleDate(row.incomeDate)}</Typography>
       }
     },
     {
@@ -166,7 +165,7 @@ const ListOfSpendNote = () => {
       renderCell({ row }: CellType) {
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <UpdateSpendNote spendCate={row} />
+            <UpdateIncomeNote incomeCate={row} />
             <IconButton onClick={() => handleDeleteNote(row._id)}>
               <Icon icon='tabler:trash' />
             </IconButton>
@@ -193,24 +192,26 @@ const ListOfSpendNote = () => {
     return format(newDate, 'yyyy-MM-dd')
   }
 
-  const { data: spendNoteByRangeDate, error: rangeDateError } = useSWR(
-    startDate && endDate ? ['GET_SPENDNOTE_BY_RANGE_DATE', startDate, endDate] : null,
+  const { data: incomeNoteByRangeDate, error: rangeDateError } = useSWR(
+    startDate && endDate ? ['GET_INCOMENOTE_BY_RANGE_DATE', startDate, endDate] : null,
     () =>
-      spendNoteService.getSpendNoteByRangeDate({
+      incomesNoteService.getIncomesByDateRange({
         startDate: handleDateGet(startDate!),
         endDate: handleDateGet(endDate!)
       }),
     { refreshInterval: 0 }
   )
 
+  console.log(incomeNoteByRangeDate)
+
   useEffect(() => {
-    let filteredNotes: any = notes?.spendingNotes || []
+    let filteredNotes: any = notes?.incomeNotes || []
     if (rangeDateError?.response?.status === 404) {
       setNotesToDisplay([])
 
       return
-    } else if (spendNoteByRangeDate) {
-      filteredNotes = spendNoteByRangeDate
+    } else if (incomeNoteByRangeDate) {
+      filteredNotes = incomeNoteByRangeDate
     }
 
     if (categoryId !== 'all') {
@@ -226,9 +227,9 @@ const ListOfSpendNote = () => {
     }
 
     setNotesToDisplay(filteredNotes)
-  }, [spendNoteByRangeDate, rangeDateError, notes, categoryId, searchText])
+  }, [incomeNoteByRangeDate, rangeDateError, notes, categoryId, searchText])
 
-  const hasContent = notesToDisplay?.some((note: SpendNote) => note.content)
+  const hasContent = notesToDisplay?.some((note: IcomeNote) => note.content)
   const finalColumns = hasContent ? columns : columns.filter(column => column.field !== 'content')
 
   const CustomInput = forwardRef((props: any, ref) => {
@@ -269,7 +270,7 @@ const ListOfSpendNote = () => {
     <>
       <Card>
         <CardHeader
-          title={<Typography variant='h2'>List Of Spend Note</Typography>}
+          title={<Typography variant='h2'>List Of Income Note</Typography>}
           sx={{
             borderLeft: '3px solid',
             borderColor: 'primary.main',
@@ -355,6 +356,7 @@ const ListOfSpendNote = () => {
           disableColumnSelector
           disableDensitySelector
           disableColumnMenu
+          checkboxSelection
           slots={{
             noRowsOverlay: CustomNoRowsOverlay,
             loadingOverlay: LinearProgress
@@ -362,7 +364,6 @@ const ListOfSpendNote = () => {
           onRowSelectionModelChange={(newSelection: any) => {
             setRowSelectionModel(newSelection)
           }}
-          checkboxSelection
           disableRowSelectionOnClick
           pageSizeOptions={[10, 25, 50]}
           paginationModel={paginationModel}

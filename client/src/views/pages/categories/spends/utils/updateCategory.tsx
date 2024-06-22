@@ -29,7 +29,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from 'src/@core/components/icon'
 import { ColorPicker } from '../../incomes/colorPicker'
-import { presetColors } from '../../incomes/addCategory'
+import { presetColors } from './addCategory'
 import DialogWithCustomCloseButton from 'src/views/components/dialog/customDialog'
 
 const UpdateCategory = ({ spendCategory }: any) => {
@@ -91,6 +91,7 @@ const UpdateCategory = ({ spendCategory }: any) => {
       handleCloseEdit()
       toast.success('Category added successfully')
       mutate('GET_ALL_SPENDS')
+      mutate('GET_ALL_SPENDNOTES')
     } catch (error: any) {
       toast.error(error.response.data.message || 'Error while adding category')
       setLoading(false)

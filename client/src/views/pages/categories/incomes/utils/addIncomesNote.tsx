@@ -19,7 +19,7 @@ import { Controller, useForm } from 'react-hook-form'
 import Icon from 'src/@core/components/icon'
 import { getCreateSpendNoteValidationSchema } from 'src/configs/validationSchema'
 import { useTranslation } from 'react-i18next'
-import spendNoteService from 'src/service/spendNote.service'
+import incomesNoteService from 'src/service/incomesNote.service'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import DatePicker from 'react-datepicker'
 import { useFormatter } from 'next-intl'
@@ -27,7 +27,7 @@ import toast from 'react-hot-toast'
 import styled from '@emotion/styled'
 import { mutate } from 'swr'
 
-export const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
+const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
   top: 0,
   right: 0,
   color: 'white',
@@ -42,7 +42,7 @@ export const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme })
   }
 }))
 
-const UpdateSpendNote = ({ spendCate }: any) => {
+const AddIncomesNote = ({ incomeCate }: any) => {
   const [open, setOpen] = React.useState(false)
   const [cateId, setCateId] = React.useState<string | null>(null)
 
@@ -52,28 +52,26 @@ const UpdateSpendNote = ({ spendCate }: any) => {
   const handleOpen = (cateId: any) => {
     setOpen(true)
     setCateId(cateId)
-    console.log(spendCate)
   }
 
   const handleClose = () => {
     reset({
-      title: spendCate.title,
-      amount: spendCate.amount,
-      content: spendCate.content,
-      paymentMethod: spendCate.paymentMethod,
-      spendingDate: new Date(spendCate.spendingDate)
+      title: '',
+      amount: 0,
+      content: '',
+      method: 'cash',
+      incomeDate: new Date()
     })
     setOpen(false)
   }
 
   interface FormData {
-    spendingNoteId: string
     cateId: string
     title: string
     content: string
-    spendingDate: Date
-    paymentMethod: string
     amount: number
+    method: string
+    incomeDate: Date
   }
 
   const {
@@ -87,46 +85,38 @@ const UpdateSpendNote = ({ spendCate }: any) => {
   })
 
   const onSubmit = async (data: FormData) => {
-    if (cateId === null) {
-      toast.error('Category ID is missing')
-
-      return
-    }
-
-    const spendNote = {
+    const incomeNote = {
       ...data,
       content: data.content,
-      spendingNoteId: cateId
+      cateId: cateId
     }
     try {
-      await spendNoteService
-        .updateSpendNote(spendNote)
-        .then((res: any) => {
-          mutate('GET_ALL_SPENDNOTES')
+      await incomesNoteService
+        .createIncomesNote(incomeNote)
+        .then(res => {
+          mutate('GET_ALL_INCOMENOTES')
           if (res.warningMessage) {
-            toast('Be careful, you are update a note with a large amount of money', {
+            toast('Be careful, you are adding a note with a large amount of money', {
               icon: '⚠️',
               style: { backgroundColor: '#FFC1078A' }
             })
-            mutate('GET_ALL_NOTIFICATIONS')
           } else {
-            toast.success('Update Spend Note Successfully')
-            mutate('GET_ALL_NOTIFICATIONS')
+            toast.success('Add Spend Note Successfully')
           }
           handleClose()
         })
         .catch(() => {
-          toast.error('Update Spend Note Failed')
+          toast.error('Add Spend Note Failed')
         })
     } catch (error) {
-      toast.error('Update Spend Note Failed')
+      toast.error('Add Spend Note Failed')
     }
   }
 
   return (
     <>
-      <IconButton onClick={() => handleOpen(spendCate._id)}>
-        <Icon icon='tabler:edit' />
+      <IconButton onClick={() => handleOpen(incomeCate._id)}>
+        <Icon icon='tabler:plus' />
       </IconButton>
       <Dialog
         fullWidth
@@ -135,7 +125,7 @@ const UpdateSpendNote = ({ spendCate }: any) => {
         onClose={handleClose}
         sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
       >
-        <DialogTitle variant='h3'>Update Spend Note For {spendCate.title}</DialogTitle>
+        <DialogTitle variant='h3'>Add Spend Note For {incomeCate.name}</DialogTitle>
         <DialogContent>
           <CustomCloseButton onClick={handleClose}>
             <Icon icon='tabler:x' fontSize='1.25rem' />
@@ -147,7 +137,6 @@ const UpdateSpendNote = ({ spendCate }: any) => {
                   name='title'
                   rules={{ required: true }}
                   control={control}
-                  defaultValue={spendCate.title}
                   render={({ field: { value, onChange, onBlur } }) => (
                     <TextField
                       id='Title'
@@ -168,7 +157,6 @@ const UpdateSpendNote = ({ spendCate }: any) => {
                   name='amount'
                   rules={{ required: true }}
                   control={control}
-                  defaultValue={spendCate.amount}
                   render={({ field: { value, onChange, onBlur } }) => (
                     <TextField
                       id='amount'
@@ -187,15 +175,13 @@ const UpdateSpendNote = ({ spendCate }: any) => {
               </Grid>
               <Grid item xs={12}>
                 <Controller
-                  name='spendingDate'
+                  name='incomeDate'
                   control={control}
-                  defaultValue={
-                    new Date(spendCate.spendingDate) // This sets the default value to the current date
-                  } // This sets the default value to the current date
+                  defaultValue={new Date()} // This sets the default value to the current date
                   render={({ field: { value, onChange } }) => (
                     <DatePickerWrapper>
                       <DatePicker
-                        id='spendingDate'
+                        id='incomeDate'
                         showYearDropdown
                         showMonthDropdown
                         selected={value}
@@ -211,33 +197,32 @@ const UpdateSpendNote = ({ spendCate }: any) => {
                           />
                         }
                         dateFormat='dd-MM-yyyy'
-                        onChange={onChange} // Update the onChange prop here
+                        onChange={onChange} // Add the onChange prop here
                       />
                     </DatePickerWrapper>
                   )}
                 />
-              </Grid>
-              <Grid item xs={12}>
-                <Controller
-                  name='paymentMethod'
-                  control={control}
-                  defaultValue={spendCate.paymentMethod}
-                  render={({ field: { value, onChange } }) => (
-                    <FormControl>
-                      <FormLabel>Payment Method</FormLabel>
-                      <RadioGroup row value={value} name='paymentMethod' onChange={onChange}>
-                        <FormControlLabel value='cash' control={<Radio />} label='Cash' />
-                        <FormControlLabel value='banking' control={<Radio />} label='Banking' />
-                      </RadioGroup>
-                    </FormControl>
-                  )}
-                />
+                <Grid item xs={12}>
+                  <Controller
+                    name='method'
+                    control={control}
+                    defaultValue='cash'
+                    render={({ field: { value, onChange } }) => (
+                      <FormControl>
+                        <FormLabel>Payment Method</FormLabel>
+                        <RadioGroup row value={value} name='method' onChange={onChange}>
+                          <FormControlLabel value='cash' control={<Radio />} label='Cash' />
+                          <FormControlLabel value='banking' control={<Radio />} label='Banking' />
+                        </RadioGroup>
+                      </FormControl>
+                    )}
+                  />
+                </Grid>
               </Grid>
               <Grid item xs={12}>
                 <Controller
                   name='content'
                   control={control}
-                  defaultValue={spendCate.content}
                   render={({ field: { value, onChange } }) => (
                     <TextField
                       id='content'
@@ -255,7 +240,7 @@ const UpdateSpendNote = ({ spendCate }: any) => {
               </Grid>
               <Grid item xs={12}>
                 <Button fullWidth variant='contained' color='primary' type='submit'>
-                  Update Note
+                  Add Note
                 </Button>
               </Grid>
             </Grid>
@@ -266,4 +251,4 @@ const UpdateSpendNote = ({ spendCate }: any) => {
   )
 }
 
-export default UpdateSpendNote
+export default AddIncomesNote

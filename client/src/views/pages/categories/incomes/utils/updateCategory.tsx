@@ -4,9 +4,13 @@ import {
   Dialog,
   DialogTitle,
   Typography,
-  DialogContent,
   Grid,
   TextField,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
   Button,
   Divider,
   ToggleButtonGroup,
@@ -23,10 +27,11 @@ import icons from 'src/configs/expense_icons.json'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from 'src/@core/components/icon'
-import { ColorPicker } from './colorPicker'
+import { ColorPicker } from '../colorPicker'
 import { presetColors } from './addCategory'
+import DialogWithCustomCloseButton from 'src/views/components/dialog/customDialog'
 
-const UpdateCategory = ({ incomesCategory }: any) => {
+const UpdateCategory = ({ incomeCate }: any) => {
   const [openEdit, setOpenEdit] = useState(false)
   const [category, setCategory] = useState<Category | null>(null)
   const [loading, setLoading] = useState(false)
@@ -50,7 +55,9 @@ const UpdateCategory = ({ incomesCategory }: any) => {
     name: string
     icon: string
     description: string
+    type: string
     color: any
+    status: string
   }
 
   const {
@@ -75,12 +82,14 @@ const UpdateCategory = ({ incomesCategory }: any) => {
         name: data.name,
         icon: selectedIcon,
         description: data.description,
-        color: color
+        type: data.type,
+        color: color,
+        status: 'show'
       })
       setLoading(false)
       handleCloseEdit()
       toast.success('Category added successfully')
-      mutate('GET_ALL_INCOMES')
+      mutate('GET_ALL_SPENDS')
     } catch (error: any) {
       toast.error(error.response.data.message || 'Error while adding category')
       setLoading(false)
@@ -102,17 +111,24 @@ const UpdateCategory = ({ incomesCategory }: any) => {
     <>
       <IconButton
         onClick={() => {
-          handleOpenEdit(incomesCategory)
+          handleOpenEdit(incomeCate)
         }}
       >
         <Icon icon='tabler:edit' />
       </IconButton>
-      <Dialog open={openEdit} onClose={() => setOpenEdit(false)} fullWidth maxWidth='md'>
+      <Dialog
+        sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+        fullWidth
+        maxWidth='md'
+      >
         <DialogTitle textAlign={'center'} marginBottom={3}>
           <Typography variant='h2'>Update Category</Typography>
         </DialogTitle>
         <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
-          <DialogContent
+          <DialogWithCustomCloseButton
+            handleClose={handleCloseEdit}
             sx={{
               padding: 5
             }}
@@ -175,6 +191,31 @@ const UpdateCategory = ({ incomesCategory }: any) => {
                       />
                     </Box>
                   </Grid>
+                  <Grid item xs={11}>
+                    <Controller
+                      name='type'
+                      control={control}
+                      rules={{ required: true }}
+                      defaultValue={category?.type}
+                      render={({ field: { value, onChange, onBlur } }) => (
+                        <FormControl>
+                          <FormLabel id='demo-radio-buttons-group-label'>Type</FormLabel>
+                          <RadioGroup
+                            onChange={onChange}
+                            onBlur={onBlur}
+                            value={value}
+                            row
+                            aria-labelledby='demo-radio-buttons-group-label'
+                            defaultValue='spend'
+                            name='radio-buttons-group'
+                          >
+                            <FormControlLabel value='spend' control={<Radio />} label='Spend' />
+                            <FormControlLabel value='income' control={<Radio />} label='Income' />
+                          </RadioGroup>
+                        </FormControl>
+                      )}
+                    />
+                  </Grid>
                   {/* add and cancel button */}
                   <Grid item xs={11}>
                     <LoadingButton
@@ -235,7 +276,7 @@ const UpdateCategory = ({ incomesCategory }: any) => {
                 </Grid>
               </Grid>
             </Grid>
-          </DialogContent>
+          </DialogWithCustomCloseButton>
         </form>
       </Dialog>
     </>

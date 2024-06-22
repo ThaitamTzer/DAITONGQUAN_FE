@@ -7,11 +7,6 @@ import {
   DialogContent,
   Grid,
   TextField,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
   Divider,
   Box,
   Tooltip,
@@ -19,9 +14,7 @@ import {
   ToggleButton,
   Fade,
   Button,
-  Avatar,
-  Switch,
-  FormGroup
+  Avatar
 } from '@mui/material'
 import { Controller } from 'react-hook-form'
 import { useForm } from 'react-hook-form'
@@ -35,7 +28,7 @@ import categoriesService from 'src/service/categories.service'
 import icons from 'src/configs/expense_icons.json'
 import toast from 'react-hot-toast'
 import { mutate } from 'swr'
-import { ColorPicker } from './colorPicker'
+import { ColorPicker } from '../colorPicker'
 
 export const presetColors = ['#a2be2b', '#f9a825', '#f44336', '#ff5722', '#e91e63', '#9c27b0', '#673ab7']
 
@@ -231,7 +224,7 @@ const AddCategory = () => {
                 >
                   {icons.map((icon: any) => (
                     <ToggleButtonGroup key={icon.id} value={selectedIcon} exclusive onChange={handleSelectIcon}>
-                      <ToggleButton value={icon.icon} sx={{ marginBottom: 1 }}>
+                      <ToggleButton sx={{ marginBottom: 1 }} value={icon.icon}>
                         <Icon icon={icon.icon} color={color} />
                       </ToggleButton>
                     </ToggleButtonGroup>

@@ -19,7 +19,7 @@ import { Controller, useForm } from 'react-hook-form'
 import Icon from 'src/@core/components/icon'
 import { getCreateSpendNoteValidationSchema } from 'src/configs/validationSchema'
 import { useTranslation } from 'react-i18next'
-import spendNoteService from 'src/service/spendNote.service'
+import incomesNoteService from 'src/service/incomesNote.service'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import DatePicker from 'react-datepicker'
 import { useFormatter } from 'next-intl'
@@ -42,7 +42,7 @@ export const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme })
   }
 }))
 
-const UpdateSpendNote = ({ spendCate }: any) => {
+const UpdateIncomeNote = ({ incomeCate }: any) => {
   const [open, setOpen] = React.useState(false)
   const [cateId, setCateId] = React.useState<string | null>(null)
 
@@ -52,27 +52,26 @@ const UpdateSpendNote = ({ spendCate }: any) => {
   const handleOpen = (cateId: any) => {
     setOpen(true)
     setCateId(cateId)
-    console.log(spendCate)
+    console.log(incomeCate)
   }
 
   const handleClose = () => {
     reset({
-      title: spendCate.title,
-      amount: spendCate.amount,
-      content: spendCate.content,
-      paymentMethod: spendCate.paymentMethod,
-      spendingDate: new Date(spendCate.spendingDate)
+      title: incomeCate.title,
+      amount: incomeCate.amount,
+      content: incomeCate.content,
+      method: incomeCate.method,
+      incomeDate: new Date(incomeCate.incomeDate)
     })
     setOpen(false)
   }
 
   interface FormData {
-    spendingNoteId: string
     cateId: string
     title: string
     content: string
-    spendingDate: Date
-    paymentMethod: string
+    incomeDate: Date
+    method: string
     amount: number
   }
 
@@ -93,16 +92,16 @@ const UpdateSpendNote = ({ spendCate }: any) => {
       return
     }
 
-    const spendNote = {
+    const incomeNotes = {
       ...data,
       content: data.content,
-      spendingNoteId: cateId
+      cateId: incomeCate.cateId
     }
     try {
-      await spendNoteService
-        .updateSpendNote(spendNote)
+      await incomesNoteService
+        .updateIncomesNote(incomeCate.id, incomeNotes)
         .then((res: any) => {
-          mutate('GET_ALL_SPENDNOTES')
+          mutate('GET_ALL_INCOMENOTES')
           if (res.warningMessage) {
             toast('Be careful, you are update a note with a large amount of money', {
               icon: '⚠️',
@@ -110,22 +109,22 @@ const UpdateSpendNote = ({ spendCate }: any) => {
             })
             mutate('GET_ALL_NOTIFICATIONS')
           } else {
-            toast.success('Update Spend Note Successfully')
+            toast.success('Update Income Note Successfully')
             mutate('GET_ALL_NOTIFICATIONS')
           }
           handleClose()
         })
         .catch(() => {
-          toast.error('Update Spend Note Failed')
+          toast.error('Update Income Note Failed')
         })
     } catch (error) {
-      toast.error('Update Spend Note Failed')
+      toast.error('Update Income Note Failed')
     }
   }
 
   return (
     <>
-      <IconButton onClick={() => handleOpen(spendCate._id)}>
+      <IconButton onClick={() => handleOpen(incomeCate._id)}>
         <Icon icon='tabler:edit' />
       </IconButton>
       <Dialog
@@ -135,7 +134,7 @@ const UpdateSpendNote = ({ spendCate }: any) => {
         onClose={handleClose}
         sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
       >
-        <DialogTitle variant='h3'>Update Spend Note For {spendCate.title}</DialogTitle>
+        <DialogTitle variant='h3'>Update Income Note For {incomeCate.name}</DialogTitle>
         <DialogContent>
           <CustomCloseButton onClick={handleClose}>
             <Icon icon='tabler:x' fontSize='1.25rem' />
@@ -147,7 +146,7 @@ const UpdateSpendNote = ({ spendCate }: any) => {
                   name='title'
                   rules={{ required: true }}
                   control={control}
-                  defaultValue={spendCate.title}
+                  defaultValue={incomeCate.title}
                   render={({ field: { value, onChange, onBlur } }) => (
                     <TextField
                       id='Title'
@@ -168,7 +167,7 @@ const UpdateSpendNote = ({ spendCate }: any) => {
                   name='amount'
                   rules={{ required: true }}
                   control={control}
-                  defaultValue={spendCate.amount}
+                  defaultValue={incomeCate.amount}
                   render={({ field: { value, onChange, onBlur } }) => (
                     <TextField
                       id='amount'
@@ -187,15 +186,15 @@ const UpdateSpendNote = ({ spendCate }: any) => {
               </Grid>
               <Grid item xs={12}>
                 <Controller
-                  name='spendingDate'
+                  name='incomeDate'
                   control={control}
                   defaultValue={
-                    new Date(spendCate.spendingDate) // This sets the default value to the current date
+                    new Date(incomeCate.incomeDate) // This sets the default value to the current date
                   } // This sets the default value to the current date
                   render={({ field: { value, onChange } }) => (
                     <DatePickerWrapper>
                       <DatePicker
-                        id='spendingDate'
+                        id='incomeDate'
                         showYearDropdown
                         showMonthDropdown
                         selected={value}
@@ -204,14 +203,14 @@ const UpdateSpendNote = ({ spendCate }: any) => {
                         customInput={
                           <TextField
                             size='medium'
-                            label={t('Spend Note Date')}
+                            label={t('Income Note Date')}
                             fullWidth
                             value={value ? format.dateTime(value, { dateStyle: 'medium' }) : ''}
                             onChange={onChange}
                           />
                         }
                         dateFormat='dd-MM-yyyy'
-                        onChange={onChange} // Update the onChange prop here
+                        onChange={onChange} // Add the onChange prop here
                       />
                     </DatePickerWrapper>
                   )}
@@ -219,13 +218,13 @@ const UpdateSpendNote = ({ spendCate }: any) => {
               </Grid>
               <Grid item xs={12}>
                 <Controller
-                  name='paymentMethod'
+                  name='method'
                   control={control}
-                  defaultValue={spendCate.paymentMethod}
+                  defaultValue={incomeCate.method}
                   render={({ field: { value, onChange } }) => (
                     <FormControl>
                       <FormLabel>Payment Method</FormLabel>
-                      <RadioGroup row value={value} name='paymentMethod' onChange={onChange}>
+                      <RadioGroup row value={value} name='method' onChange={onChange}>
                         <FormControlLabel value='cash' control={<Radio />} label='Cash' />
                         <FormControlLabel value='banking' control={<Radio />} label='Banking' />
                       </RadioGroup>
@@ -237,7 +236,7 @@ const UpdateSpendNote = ({ spendCate }: any) => {
                 <Controller
                   name='content'
                   control={control}
-                  defaultValue={spendCate.content}
+                  defaultValue={incomeCate.content}
                   render={({ field: { value, onChange } }) => (
                     <TextField
                       id='content'
@@ -266,4 +265,4 @@ const UpdateSpendNote = ({ spendCate }: any) => {
   )
 }
 
-export default UpdateSpendNote
+export default UpdateIncomeNote
