@@ -1,17 +1,19 @@
 import axiosClient from 'src/lib/axios'
 
 export type SpendNote = {
-  spendingNotes: {
-    _id: string
-    cateId: string
-    title: string
-    content: string | null
-    spendingDate: Date
-    paymentMethod: string
-    amount: number
-    createdAt: Date
-    updatedAt: Date
-  }
+  spendingNotes: [
+    {
+      _id: string
+      cateId: string
+      title: string
+      content: string | null
+      spendingDate: Date
+      paymentMethod: string
+      amount: number
+      createdAt: Date
+      updatedAt: Date
+    }
+  ]
 }
 
 type CreateSpendNote = {
@@ -27,7 +29,7 @@ type UpdateSpendNote = {
   spendingNoteId: string
   cateId: string
   title: string
-  content: string | null
+  content: string
   spendingDate: Date
   paymentMethod: string
   amount: number
@@ -49,14 +51,18 @@ const spendNoteService = {
   // ** Delete Many Spend Note
   deleteManySpendNote: async (data: string[]) => axiosClient.delete(`spendingnote/deleteMany`, { data }),
 
+  // ** Force Delete Spend Note
+  forceDeleteSpendNote: async (data: string) => axiosClient.delete(`/spendingnote/delete-all-by-cate/${data}`),
+
   // ** Search Spend Note
   searchSpendNote: async (data: string) => axiosClient.get(`/spendingnote/search/?${data}`),
 
   // ** Get Spend Note By Category
   getSpendNoteByCategory: async (cateId: string) => axiosClient.get(`/spendingnote/get-by-cate/${cateId}`),
 
-  // ** Get Spend Note By Date
-  getSpendNoteByDate: async (date: string) => axiosClient.get(`/spendingnote/filter-by-date/${date}`),
+  // ** Get Spend Note By Range Date
+  getSpendNoteByRangeDate: async (data: { startDate: string; endDate: string }) =>
+    axiosClient.get(`/spendingnote/filter-by-date`, { params: data }),
 
   // Get Notification Out Of Money
   getNotificationOutOfMoney: async () => axiosClient.get(`/spendingnote/notify-out-of-money`)

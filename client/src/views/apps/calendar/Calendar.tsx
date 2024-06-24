@@ -110,15 +110,25 @@ const Calendar = (props: CalendarType) => {
         ]
       },
 
-      eventClick({ event: clickedEvent }: any) {
-        dispatch(handleSelectEvent(clickedEvent))
-        handleAddEventSidebarToggle()
+      // eventClick({ event: clickedEvent }: any) {
+      //   if (clickedEvent.url) {
+      //     clickedEvent?.jsEvent?.preventDefault()
+      //   } else {
+      //     dispatch(handleSelectEvent(clickedEvent))
+      //     handleAddEventSidebarToggle()
+      //   }
+      // },
 
-        // * Only grab required field otherwise it goes in infinity loop
-        // ! Always grab all fields rendered by form (even if it get `undefined`) otherwise due to Vue3/Composition API you might get: "object is not extensible"
-        // event.value = grabEventDataFromEventApi(clickedEvent)
-
-        // isAddNewEventSidebarActive.value = true
+      eventClick: function (info: any) {
+        if (info.event.url) {
+          info.jsEvent.preventDefault()
+          dispatch(handleSelectEvent(info.event))
+          handleAddEventSidebarToggle()
+          confirm('Do you want to go to the event page?') && window.open(info.event.url, '_blank')
+        } else {
+          dispatch(handleSelectEvent(info.event))
+          handleAddEventSidebarToggle()
+        }
       },
 
       customButtons: {

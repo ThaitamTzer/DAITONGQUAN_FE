@@ -19,7 +19,7 @@ import { Controller, useForm } from 'react-hook-form'
 import Icon from 'src/@core/components/icon'
 import { getCreateSpendNoteValidationSchema } from 'src/configs/validationSchema'
 import { useTranslation } from 'react-i18next'
-import spendNoteService from 'src/service/spendNote.service'
+import incomesNoteService from 'src/service/incomesNote.service'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import DatePicker from 'react-datepicker'
 import { useFormatter } from 'next-intl'
@@ -42,7 +42,7 @@ const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
   }
 }))
 
-const AddSpendNote = ({ spendCate }: any) => {
+const AddIncomesNote = ({ incomeCate }: any) => {
   const [open, setOpen] = React.useState(false)
   const [cateId, setCateId] = React.useState<string | null>(null)
 
@@ -59,8 +59,8 @@ const AddSpendNote = ({ spendCate }: any) => {
       title: '',
       amount: 0,
       content: '',
-      paymentMethod: 'cash',
-      spendingDate: new Date()
+      method: 'cash',
+      incomeDate: new Date()
     })
     setOpen(false)
   }
@@ -70,8 +70,8 @@ const AddSpendNote = ({ spendCate }: any) => {
     title: string
     content: string
     amount: number
-    paymentMethod: string
-    spendingDate: Date
+    method: string
+    incomeDate: Date
   }
 
   const {
@@ -85,25 +85,23 @@ const AddSpendNote = ({ spendCate }: any) => {
   })
 
   const onSubmit = async (data: FormData) => {
-    const spendNote = {
+    const incomeNote = {
       ...data,
       content: data.content,
       cateId: cateId
     }
     try {
-      await spendNoteService
-        .createSpendNote(spendNote)
+      await incomesNoteService
+        .createIncomesNote(incomeNote)
         .then(res => {
-          mutate('GET_ALL_SPENDNOTES')
+          mutate('GET_ALL_INCOMENOTES')
           if (res.warningMessage) {
             toast('Be careful, you are adding a note with a large amount of money', {
               icon: '⚠️',
               style: { backgroundColor: '#FFC1078A' }
             })
-            mutate('GET_ALL_NOTIFICATIONS')
           } else {
             toast.success('Add Spend Note Successfully')
-            mutate('GET_ALL_NOTIFICATIONS')
           }
           handleClose()
         })
@@ -117,7 +115,7 @@ const AddSpendNote = ({ spendCate }: any) => {
 
   return (
     <>
-      <IconButton onClick={() => handleOpen(spendCate._id)}>
+      <IconButton onClick={() => handleOpen(incomeCate._id)}>
         <Icon icon='tabler:plus' />
       </IconButton>
       <Dialog
@@ -127,7 +125,7 @@ const AddSpendNote = ({ spendCate }: any) => {
         onClose={handleClose}
         sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
       >
-        <DialogTitle variant='h3'>Add Spend Note For {spendCate.name}</DialogTitle>
+        <DialogTitle variant='h3'>Add Spend Note For {incomeCate.name}</DialogTitle>
         <DialogContent>
           <CustomCloseButton onClick={handleClose}>
             <Icon icon='tabler:x' fontSize='1.25rem' />
@@ -177,13 +175,13 @@ const AddSpendNote = ({ spendCate }: any) => {
               </Grid>
               <Grid item xs={12}>
                 <Controller
-                  name='spendingDate'
+                  name='incomeDate'
                   control={control}
                   defaultValue={new Date()} // This sets the default value to the current date
                   render={({ field: { value, onChange } }) => (
                     <DatePickerWrapper>
                       <DatePicker
-                        id='spendingDate'
+                        id='incomeDate'
                         showYearDropdown
                         showMonthDropdown
                         selected={value}
@@ -206,13 +204,13 @@ const AddSpendNote = ({ spendCate }: any) => {
                 />
                 <Grid item xs={12}>
                   <Controller
-                    name='paymentMethod'
+                    name='method'
                     control={control}
                     defaultValue='cash'
                     render={({ field: { value, onChange } }) => (
                       <FormControl>
                         <FormLabel>Payment Method</FormLabel>
-                        <RadioGroup row value={value} name='paymentMethod' onChange={onChange}>
+                        <RadioGroup row value={value} name='method' onChange={onChange}>
                           <FormControlLabel value='cash' control={<Radio />} label='Cash' />
                           <FormControlLabel value='banking' control={<Radio />} label='Banking' />
                         </RadioGroup>
@@ -253,4 +251,4 @@ const AddSpendNote = ({ spendCate }: any) => {
   )
 }
 
-export default AddSpendNote
+export default AddIncomesNote

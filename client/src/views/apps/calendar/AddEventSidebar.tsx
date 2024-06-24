@@ -43,9 +43,9 @@ interface DefaultStateType {
   endDate: Date | string
   startDate: Date | string
   guests: string[] | string | undefined
+  location: string
+  _id: string
 }
-
-const capitalize = (string: string) => string && string[0].toUpperCase() + string.slice(1)
 
 const defaultState: DefaultStateType = {
   url: '',
@@ -55,7 +55,9 @@ const defaultState: DefaultStateType = {
   description: '',
   endDate: new Date(),
   calendar: 'Business',
-  startDate: new Date()
+  startDate: new Date(),
+  location: '',
+  _id: ''
 }
 
 const AddEventSidebar = (props: AddEventSidebarType) => {
@@ -93,22 +95,21 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
 
   const onSubmit = (data: { title: string }) => {
     const modifiedEvent = {
-      url: values.url,
-      display: 'block',
       title: data.title,
-      end: values.endDate,
-      allDay: values.allDay,
-      start: values.startDate,
-      extendedProps: {
-        calendar: capitalize(values.calendar),
-        guests: values.guests && values.guests.length ? values.guests : undefined,
-        description: values.description.length ? values.description : undefined
-      }
+      location: values.location,
+      isAllDay: values.allDay,
+      startDateTime: values.startDate,
+      endDateTime: values.endDate,
+      note: values.description,
+      isLoop: false,
+      calendars: values.calendar,
+      url: values.url
     }
+
     if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
       dispatch(addEvent(modifiedEvent))
     } else {
-      dispatch(updateEvent({ id: store.selectedEvent.id, ...modifiedEvent }))
+      dispatch(updateEvent({ _id: store.selectedEvent.id, ...modifiedEvent }))
     }
     calendarApi.refetchEvents()
     handleSidebarClose()
@@ -132,8 +133,11 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
   const resetToStoredValues = useCallback(() => {
     if (store.selectedEvent !== null) {
       const event = store.selectedEvent
+      console.log(event.id)
+
       setValue('title', event.title || '')
       setValues({
+        _id: event.id,
         url: event.url || '',
         title: event.title || '',
         allDay: event.allDay,
@@ -141,9 +145,14 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
         description: event.extendedProps.description || '',
         calendar: event.extendedProps.calendar || 'Business',
         endDate: event.end !== null ? event.end : event.start,
-        startDate: event.start !== null ? event.start : new Date()
+        startDate: event.start !== null ? event.start : new Date(),
+        location: event.extendedProps.location || ''
       })
     }
+
+    console.log(values)
+
+    // eslint-disable-next-line
   }, [setValue, store.selectedEvent])
 
   const resetToEmptyValues = useCallback(() => {
@@ -274,7 +283,7 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
                 onChange: e => setValues({ ...values, calendar: e.target.value as string })
               }}
             >
-              <MenuItem value='Personal'>Personal</MenuItem>
+              <MenuItem value='Work'>Work</MenuItem>
               <MenuItem value='Business'>Business</MenuItem>
               <MenuItem value='Family'>Family</MenuItem>
               <MenuItem value='Holiday'>Holiday</MenuItem>
@@ -344,6 +353,14 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
               <MenuItem value='john'>John</MenuItem>
               <MenuItem value='barry'>Barry</MenuItem>
             </CustomTextField>
+            <CustomTextField
+              fullWidth
+              sx={{ mb: 4 }}
+              label='Location'
+              id='event-location'
+              value={values.location}
+              onChange={e => setValues({ ...values, location: e.target.value })}
+            />
             <CustomTextField
               rows={4}
               multiline

@@ -7,11 +7,6 @@ import {
   DialogContent,
   Grid,
   TextField,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
   Divider,
   Box,
   Tooltip,
@@ -19,9 +14,7 @@ import {
   ToggleButton,
   Fade,
   Button,
-  Avatar,
-  Switch,
-  FormGroup
+  Avatar
 } from '@mui/material'
 import { Controller } from 'react-hook-form'
 import { useForm } from 'react-hook-form'
@@ -35,7 +28,9 @@ import categoriesService from 'src/service/categories.service'
 import icons from 'src/configs/expense_icons.json'
 import toast from 'react-hot-toast'
 import { mutate } from 'swr'
-import { ColorPicker } from './colorPicker'
+import { ColorPicker } from '../colorPicker'
+
+export const presetColors = ['#a2be2b', '#f9a825', '#f44336', '#ff5722', '#e91e63', '#9c27b0', '#673ab7']
 
 const AddCategory = () => {
   const [open, setOpen] = React.useState<boolean>(false)
@@ -56,15 +51,10 @@ const AddCategory = () => {
     setSelectedIcon(newIconSelected)
   }
 
-  const handleChangeSwitch = () => {
-    setShow(show === 'show' ? 'hidden' : 'show')
-    console.log(show)
-  }
-
   interface FormData {
     name: string
     icon: string
-    description: string | null
+    description: string
     type: string
     color: string
     status: string
@@ -87,14 +77,14 @@ const AddCategory = () => {
         name: data.name,
         icon: selectedIcon,
         description: data.description,
-        type: data.type,
+        type: 'income',
         color: color,
         status: show
       })
       setLoading(false)
       handleClose()
       toast.success('Category added successfully')
-      mutate('GET_ALL_SPENDS')
+      mutate('GET_ALL_INCOMES')
     } catch (error: any) {
       toast.error(error.response.data.message || 'Error while adding category')
       setLoading(false)
@@ -104,7 +94,7 @@ const AddCategory = () => {
 
   return (
     <>
-      <Grid item marginLeft={2}>
+      <Grid item marginBottom={3}>
         <Tooltip
           title={`Add new category`}
           placement='top'
@@ -115,8 +105,8 @@ const AddCategory = () => {
           <Button
             variant='outlined'
             sx={{
-              width: 95,
-              height: 95,
+              width: 300,
+              height: 85,
               borderWidth: 1,
               display: 'flex',
               alignItems: 'center',
@@ -135,7 +125,7 @@ const AddCategory = () => {
           </Button>
         </Tooltip>
       </Grid>
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='md'>
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth='md'>
         <DialogTitle textAlign={'center'} marginBottom={3}>
           <Typography variant='h2'>Add new category</Typography>
         </DialogTitle>
@@ -201,41 +191,6 @@ const AddCategory = () => {
                       />
                     </Box>
                   </Grid>
-                  <Grid item xs={11}>
-                    <Controller
-                      name='type'
-                      control={control}
-                      rules={{ required: true }}
-                      defaultValue={'spend'}
-                      render={({ field: { value, onChange, onBlur } }) => (
-                        <FormControl>
-                          <FormLabel id='demo-radio-buttons-group-label'>Type</FormLabel>
-                          <RadioGroup
-                            onChange={onChange}
-                            onBlur={onBlur}
-                            value={value}
-                            row
-                            aria-labelledby='demo-radio-buttons-group-label'
-                            defaultValue='spend'
-                            name='radio-buttons-group'
-                          >
-                            <FormControlLabel value='spend' control={<Radio />} label='Spend' />
-                            <FormControlLabel value='income' control={<Radio />} label='Income' />
-                          </RadioGroup>
-                        </FormControl>
-                      )}
-                    />
-                  </Grid>
-                  <Grid item>
-                    <FormGroup>
-                      <FormControlLabel
-                        control={
-                          <Switch defaultValue='show' defaultChecked value={show} onChange={handleChangeSwitch} />
-                        }
-                        label='Show'
-                      />
-                    </FormGroup>
-                  </Grid>
                   {/* add and cancel button */}
                   <Grid item xs={11}>
                     <LoadingButton
@@ -269,7 +224,7 @@ const AddCategory = () => {
                 >
                   {icons.map((icon: any) => (
                     <ToggleButtonGroup key={icon.id} value={selectedIcon} exclusive onChange={handleSelectIcon}>
-                      <ToggleButton value={icon.icon}>
+                      <ToggleButton sx={{ marginBottom: 1 }} value={icon.icon}>
                         <Icon icon={icon.icon} color={color} />
                       </ToggleButton>
                     </ToggleButtonGroup>
@@ -285,11 +240,7 @@ const AddCategory = () => {
                       width: 1700
                     }}
                   >
-                    <ColorPicker
-                      color={color}
-                      onChange={setColor}
-                      presetColors={['#a2be2b', '#f9a825', '#f44336', '#ff5722', '#e91e63', '#9c27b0', '#673ab7']}
-                    />
+                    <ColorPicker color={color} onChange={setColor} presetColors={presetColors} />
                   </Box>
                 </Grid>
               </Grid>

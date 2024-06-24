@@ -4,7 +4,7 @@ import { Dispatch } from 'redux'
 // ** Theme Type Import
 import { ThemeColor } from 'src/@core/layouts/types'
 
-export type CalendarFiltersType = 'Personal' | 'Business' | 'Family' | 'Holiday' | 'ETC'
+export type CalendarFiltersType = 'Work' | 'Business' | 'Family' | 'Holiday' | 'ETC'
 
 export type EventDateType = Date | null | undefined
 
@@ -12,12 +12,12 @@ export type CalendarColors = {
   ETC: ThemeColor
   Family: ThemeColor
   Holiday: ThemeColor
-  Personal: ThemeColor
+  Work: ThemeColor
   Business: ThemeColor
 }
 
 export type EventType = {
-  id: number
+  id: string
   url: string
   title: string
   allDay: boolean
@@ -29,6 +29,19 @@ export type EventType = {
     description?: string
     guests?: string[] | string | undefined
   }
+}
+
+export type EventTypes = {
+  title: string
+  location: string
+  isAllDay: boolean
+  startDateTime: Date | string
+  endDateTime: Date | string
+  note: string
+  isLoop: boolean
+  calendars: string
+  url: string
+  _id: string
 }
 
 export type AddEventType = {
@@ -43,6 +56,18 @@ export type AddEventType = {
     description: string | undefined
     guests: string[] | string | undefined
   }
+}
+
+export type AddEvent = {
+  title: string
+  location: string
+  isAllDay: boolean
+  startDateTime: Date | string
+  endDateTime: Date | string
+  note: string
+  isLoop: boolean
+  calendars: string
+  url: string
 }
 
 export type EventStateType = {
@@ -96,9 +121,9 @@ export type AddEventSidebarType = {
   dispatch: Dispatch<any>
   store: CalendarStoreType
   addEventSidebarOpen: boolean
-  deleteEvent: (id: number) => void
-  addEvent: (event: AddEventType) => void
-  updateEvent: (event: EventType) => void
+  deleteEvent: (_id: string) => void
+  addEvent: (event: AddEvent) => void
+  updateEvent: (event: EventTypes) => void
   handleAddEventSidebarToggle: () => void
   handleSelectEvent: (event: null | EventType) => void
 }

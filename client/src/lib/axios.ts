@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { jwtDecode } from 'jwt-decode'
 import authConfig from 'src/configs/auth'
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL
@@ -85,8 +84,6 @@ axiosClient.interceptors.response.use(
     if (error.response?.status === 401 && !prevRequest._retry) {
       prevRequest._retry = true
       const refreshToken = localStorage.getItem(authConfig.onTokenExpiration)
-      const access_token =
-        localStorage.getItem(authConfig.storageTokenKeyName) || sessionStorage.getItem(authConfig.storageTokenKeyName)
 
       // Check where the token is stored
       const isTokenInSessionStorage = sessionStorage.getItem(authConfig.storageTokenKeyName) !== null
@@ -97,13 +94,18 @@ axiosClient.interceptors.response.use(
           { refreshToken },
           {
             headers: {
-              'Content-Type': 'application/json',
-              Authorization: `${authConfig.TOKEN_TYPE} ${access_token}`
+              'Content-Type': 'application/json'
             }
           }
         )
 
-        if (response.status === 201) {
+        if (response.status === 201 && sessionStorage.getItem(authConfig.storageTokenKeyName) !== null) {
+          localStorage.setItem(authConfig.onTokenExpiration, response.data.refreshToken)
+          sessionStorage.setItem(authConfig.storageTokenKeyName, response.data.access_token)
+          prevRequest.headers['Authorization'] = `${authConfig.TOKEN_TYPE} ${response.data.access_token}`
+
+          return axiosClient(prevRequest)
+        } else if (response.status === 201 && localStorage.getItem(authConfig.storageTokenKeyName) !== null) {
           localStorage.setItem(authConfig.onTokenExpiration, response.data.refreshToken)
           localStorage.setItem(authConfig.storageTokenKeyName, response.data.access_token)
           prevRequest.headers['Authorization'] = `${authConfig.TOKEN_TYPE} ${response.data.access_token}`
@@ -114,6 +116,7 @@ axiosClient.interceptors.response.use(
         // If the token is in sessionStorage, clear all data from sessionStorage
         if (isTokenInSessionStorage) {
           sessionStorage.clear()
+          localStorage.clear()
         }
 
         return Promise.reject(refreshError)

@@ -3,51 +3,102 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 // ** Axios Imports
 import axios from 'axios'
+import axiosClient from 'src/lib/axios'
 
 // ** Types
-import { CalendarFiltersType, AddEventType, EventType } from 'src/types/apps/calendarTypes'
+import { CalendarFiltersType, AddEventType, EventTypes } from 'src/types/apps/calendarTypes'
+
+type CalendarState = {
+  _id: string
+  userId: string
+  title: string
+  location: string
+  isAllDay: boolean
+  startDateTime: Date
+  endDateTime: Date
+  note: string
+  isLoop: boolean
+  calendars: string
+  url: string
+}
+
+type AddEvent = {
+  title: string
+  location: string
+  isAllDay: boolean
+  startDateTime: Date
+  endDateTime: Date
+  note: string
+  isLoop: boolean
+  calendars: string
+  url: string
+}
 
 // ** Fetch Events
-export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async (calendars: CalendarFiltersType[]) => {
-  const response = await axios.get('/apps/calendar/events', {
-    params: {
-      calendars
-    }
-  })
+// export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async (calendars: CalendarFiltersType[]) => {
+//   const response = await axios.get('/apps/calendar/events', {
+//     params: {
+//       calendars
+//     }
+//   })
 
-  return response.data
+//   return response.data
+// })
+
+export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async (calendars: CalendarFiltersType[]) => {
+  try {
+    const response = await axiosClient.get('/schedule', {
+      params: {
+        calendars: calendars || ['']
+      }
+    })
+
+    return response.map((event: CalendarState) => {
+      return {
+        id: event._id,
+        title: event.title,
+        start: event.startDateTime,
+        end: event.endDateTime,
+        allDay: event.isAllDay,
+        url: event.url,
+        extendedProps: {
+          calendar: event.calendars,
+          guests: [],
+          location: event.location,
+          description: event.note
+        }
+      }
+    })
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 400) {
+      return []
+    }
+    throw error // Re-throw the error if it's not a 400 status
+  }
 })
 
 // ** Add Event
-export const addEvent = createAsyncThunk('appCalendar/addEvent', async (event: AddEventType, { dispatch }) => {
-  const response = await axios.post('/apps/calendar/add-event', {
-    data: {
-      event
-    }
-  })
-  await dispatch(fetchEvents(['Personal', 'Business', 'Family', 'Holiday', 'ETC']))
+export const addEvent = createAsyncThunk('appCalendar/addEvent', async (event: AddEvent, { dispatch }) => {
+  const response = await axiosClient.post('/schedule', event)
 
-  return response.data.event
+  await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
+
+  return response
 })
 
 // ** Update Event
-export const updateEvent = createAsyncThunk('appCalendar/updateEvent', async (event: EventType, { dispatch }) => {
-  const response = await axios.post('/apps/calendar/update-event', {
-    data: {
-      event
-    }
-  })
-  await dispatch(fetchEvents(['Personal', 'Business', 'Family', 'Holiday', 'ETC']))
+export const updateEvent = createAsyncThunk('appCalendar/updateEvent', async (event: EventTypes, { dispatch }) => {
+  const response = await axiosClient.put(`/schedule/${event._id}`, event)
+
+  await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
 
   return response.data.event
 })
 
 // ** Delete Event
-export const deleteEvent = createAsyncThunk('appCalendar/deleteEvent', async (id: number | string, { dispatch }) => {
-  const response = await axios.delete('/apps/calendar/remove-event', {
-    params: { id }
-  })
-  await dispatch(fetchEvents(['Personal', 'Business', 'Family', 'Holiday', 'ETC']))
+export const deleteEvent = createAsyncThunk('appCalendar/deleteEvent', async (_id: string | string, { dispatch }) => {
+  const response = await axiosClient.delete(`/schedule/${_id}`)
+  await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
 
   return response.data
 })
@@ -57,7 +108,7 @@ export const appCalendarSlice = createSlice({
   initialState: {
     events: [],
     selectedEvent: null,
-    selectedCalendars: ['Personal', 'Business', 'Family', 'Holiday', 'ETC']
+    selectedCalendars: ['Work', 'Business', 'Family', 'Holiday', 'ETC']
   },
   reducers: {
     handleSelectEvent: (state, action) => {
@@ -77,7 +128,7 @@ export const appCalendarSlice = createSlice({
     handleAllCalendars: (state, action) => {
       const value = action.payload
       if (value === true) {
-        state.selectedCalendars = ['Personal', 'Business', 'Family', 'Holiday', 'ETC']
+        state.selectedCalendars = ['Work', 'Business', 'Family', 'Holiday', 'ETC']
       } else {
         state.selectedCalendars = []
       }

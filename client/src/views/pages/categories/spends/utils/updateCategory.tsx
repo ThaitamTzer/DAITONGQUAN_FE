@@ -29,7 +29,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from 'src/@core/components/icon'
 import { ColorPicker } from '../../incomes/colorPicker'
-import { presetColors } from '../../incomes/addCategory'
+import { presetColors } from './addCategory'
+import DialogWithCustomCloseButton from 'src/views/components/dialog/customDialog'
 
 const UpdateCategory = ({ spendCategory }: any) => {
   const [openEdit, setOpenEdit] = useState(false)
@@ -90,6 +91,7 @@ const UpdateCategory = ({ spendCategory }: any) => {
       handleCloseEdit()
       toast.success('Category added successfully')
       mutate('GET_ALL_SPENDS')
+      mutate('GET_ALL_SPENDNOTES')
     } catch (error: any) {
       toast.error(error.response.data.message || 'Error while adding category')
       setLoading(false)
@@ -116,12 +118,19 @@ const UpdateCategory = ({ spendCategory }: any) => {
       >
         <Icon icon='tabler:edit' />
       </IconButton>
-      <Dialog open={openEdit} onClose={() => setOpenEdit(false)} fullWidth maxWidth='md'>
+      <Dialog
+        sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+        fullWidth
+        maxWidth='md'
+      >
         <DialogTitle textAlign={'center'} marginBottom={3}>
           <Typography variant='h2'>Update Category</Typography>
         </DialogTitle>
         <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
-          <DialogContent
+          <DialogWithCustomCloseButton
+            handleClose={handleCloseEdit}
             sx={{
               padding: 5
             }}
@@ -269,7 +278,7 @@ const UpdateCategory = ({ spendCategory }: any) => {
                 </Grid>
               </Grid>
             </Grid>
-          </DialogContent>
+          </DialogWithCustomCloseButton>
         </form>
       </Dialog>
     </>

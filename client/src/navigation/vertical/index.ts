@@ -39,7 +39,9 @@ const navigation = (): VerticalNavItemsType => {
     {
       title: 'Calendar',
       icon: 'tabler:calendar',
-      path: '/apps/calendar'
+      path: '/apps/calendar',
+      subject: 'member-page',
+      action: 'read'
     },
     {
       title: 'Invoice',

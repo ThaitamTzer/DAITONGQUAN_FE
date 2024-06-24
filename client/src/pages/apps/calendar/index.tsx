@@ -35,7 +35,7 @@ import {
 
 // ** CalendarColors
 const calendarsColor: CalendarColors = {
-  Personal: 'error',
+  Work: 'error',
   Business: 'primary',
   Family: 'warning',
   Holiday: 'success',
@@ -128,5 +128,8 @@ const AppCalendar = () => {
     </CalendarWrapper>
   )
 }
-
+AppCalendar.acl = {
+  action: 'read',
+  subject: 'member-page'
+}
 export default AppCalendar
