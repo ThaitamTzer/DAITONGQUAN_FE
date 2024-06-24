@@ -47,8 +47,6 @@ interface DefaultStateType {
   _id: string
 }
 
-const capitalize = (string: string) => string && string[0].toUpperCase() + string.slice(1)
-
 const defaultState: DefaultStateType = {
   url: '',
   title: '',
