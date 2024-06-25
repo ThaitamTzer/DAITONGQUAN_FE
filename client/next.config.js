@@ -14,6 +14,9 @@ module.exports = {
   eslint: {
     ignoreDuringBuilds: true
   },
+  yarn: {
+    ignoreVersionCheck: true
+  },
 
   pageExtensions: ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'],
 
