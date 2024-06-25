@@ -15,6 +15,8 @@ module.exports = {
     ignoreDuringBuilds: true
   },
 
+  pageExtensions: ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'],
+
   webpack: config => {
     config.resolve.alias = {
       ...config.resolve.alias,
