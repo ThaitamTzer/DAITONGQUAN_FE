@@ -37,13 +37,6 @@ const navigation = (): VerticalNavItemsType => {
       path: '/apps/chat'
     },
     {
-      title: 'Calendar',
-      icon: 'tabler:calendar',
-      path: '/apps/calendar',
-      subject: 'member-page',
-      action: 'read'
-    },
-    {
       title: 'Invoice',
       icon: 'tabler:file-dollar',
       children: [
@@ -600,17 +593,18 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
+      title: 'Calendar',
+      icon: 'tabler:calendar',
+      path: '/apps/calendar',
+      subject: 'member-page',
+      action: 'read'
+    },
+    {
       path: '/acl',
       action: 'read',
       subject: 'member-page',
       icon: 'tabler:shield',
       title: 'Access Control'
-    },
-    {
-      title: 'Settings',
-      icon: 'tabler:settings',
-      subject: 'member-page',
-      action: 'read'
     },
     {
       title: 'Others',
