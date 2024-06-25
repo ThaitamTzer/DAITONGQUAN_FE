@@ -26,7 +26,7 @@ const StyledGridOverlay = styled('div')(({ theme }) => ({
   }
 }))
 
-export function CustomNoRowsOverlay() {
+export default function CustomNoRowsOverlay() {
   return (
     <StyledGridOverlay>
       <svg width='120' height='100' viewBox='0 0 184 152' aria-hidden focusable='false'>
