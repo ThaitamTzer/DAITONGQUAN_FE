@@ -41,7 +41,7 @@ export type EventTypes = {
   isLoop: boolean
   calendars: string
   url: string
-  _id: string
+  id: string
 }
 
 export type AddEventType = {
@@ -95,7 +95,7 @@ export type CalendarType = {
   calendarsColor: CalendarColors
   setCalendarApi: (val: any) => void
   handleLeftSidebarToggle: () => void
-  updateEvent: (event: EventType) => void
+  updateEvent: (event: EventTypes) => void
   handleAddEventSidebarToggle: () => void
   handleSelectEvent: (event: EventType) => void
 }
@@ -113,6 +113,11 @@ export type SidebarLeftType = {
   handleAllCalendars: (val: boolean) => void
   handleSelectEvent: (event: null | EventType) => void
   handleCalendarsUpdate: (val: CalendarFiltersType) => void
+}
+
+export type ListOfEvents = {
+  dispatch: Dispatch<any>
+  store: CalendarStoreType
 }
 
 export type AddEventSidebarType = {

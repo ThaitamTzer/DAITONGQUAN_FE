@@ -27,6 +27,7 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 
 // ** Types
 import { EventDateType, AddEventSidebarType } from 'src/types/apps/calendarTypes'
+import toast from 'react-hot-toast'
 
 interface PickerProps {
   label?: string
@@ -109,7 +110,10 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
     if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
       dispatch(addEvent(modifiedEvent))
     } else {
-      dispatch(updateEvent({ _id: store.selectedEvent.id, ...modifiedEvent }))
+      dispatch(
+        updateEvent({ id: store.selectedEvent.id, ...modifiedEvent }),
+        toast.success('Event Updated Successfully')
+      )
     }
     calendarApi.refetchEvents()
     handleSidebarClose()
@@ -133,7 +137,6 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
   const resetToStoredValues = useCallback(() => {
     if (store.selectedEvent !== null) {
       const event = store.selectedEvent
-      console.log(event.id)
 
       setValue('title', event.title || '')
       setValues({
@@ -149,8 +152,6 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
         location: event.extendedProps.location || ''
       })
     }
-
-    console.log(values)
 
     // eslint-disable-next-line
   }, [setValue, store.selectedEvent])

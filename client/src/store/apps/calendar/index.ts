@@ -3,10 +3,12 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 // ** Axios Imports
 import axios from 'axios'
+import { useEffect } from 'react'
+import toast from 'react-hot-toast'
 import axiosClient from 'src/lib/axios'
 
 // ** Types
-import { CalendarFiltersType, AddEventType, EventTypes } from 'src/types/apps/calendarTypes'
+import { CalendarFiltersType, EventTypes } from 'src/types/apps/calendarTypes'
 
 type CalendarState = {
   _id: string
@@ -79,17 +81,20 @@ export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async (ca
 
 // ** Add Event
 export const addEvent = createAsyncThunk('appCalendar/addEvent', async (event: AddEvent, { dispatch }) => {
-  const response = await axiosClient.post('/schedule', event)
+  try {
+    const response = await axiosClient.post('/schedule', event)
+    await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
+    toast.success('Event Added Successfully')
 
-  await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
-
-  return response
+    return response
+  } catch (error) {
+    toast.error('Error Adding Event')
+  }
 })
 
 // ** Update Event
 export const updateEvent = createAsyncThunk('appCalendar/updateEvent', async (event: EventTypes, { dispatch }) => {
-  const response = await axiosClient.put(`/schedule/${event._id}`, event)
-
+  const response = await axiosClient.put(`/schedule/${event.id}`, event)
   await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
 
   return response.data.event
@@ -97,11 +102,32 @@ export const updateEvent = createAsyncThunk('appCalendar/updateEvent', async (ev
 
 // ** Delete Event
 export const deleteEvent = createAsyncThunk('appCalendar/deleteEvent', async (_id: string | string, { dispatch }) => {
-  const response = await axiosClient.delete(`/schedule/${_id}`)
-  await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
+  try {
+    const response = await axiosClient.delete(`/schedule/${_id}`)
+    await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
 
-  return response.data
+    return response.data
+  } catch (error) {
+    toast.error('Error Deleting Event')
+  }
 })
+
+// ** Delete Many Events
+export const deleteManyEvents = createAsyncThunk(
+  'appCalendar/deleteManyEvents',
+  async (scheduleIds: string[], { dispatch }) => {
+    try {
+      const response = await axiosClient.delete('/schedule/delete-many', {
+        data: { scheduleIds } // Changed from params to data
+      })
+      await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
+
+      return response.data
+    } catch (error) {
+      toast.error('Error Deleting Events')
+    }
+  }
+)
 
 export const appCalendarSlice = createSlice({
   name: 'appCalendar',

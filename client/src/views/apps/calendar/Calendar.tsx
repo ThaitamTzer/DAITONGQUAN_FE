@@ -157,7 +157,8 @@ const Calendar = (props: CalendarType) => {
         ? We can use `eventDragStop` but it doesn't return updated event so we have to use `eventDrop` which returns updated event
       */
       eventDrop({ event: droppedEvent }: any) {
-        dispatch(updateEvent(droppedEvent))
+        const { id, start: startDateTime, end: endDateTime } = droppedEvent
+        dispatch(updateEvent({ id, startDateTime, endDateTime }))
       },
 
       /*
@@ -165,9 +166,9 @@ const Calendar = (props: CalendarType) => {
         ? Docs: https://fullcalendar.io/docs/eventResize
       */
       eventResize({ event: resizedEvent }: any) {
-        dispatch(updateEvent(resizedEvent))
+        const { id, start: startDateTime, end: endDateTime } = resizedEvent
+        dispatch(updateEvent({ id, startDateTime, endDateTime }))
       },
-
       ref: calendarRef,
 
       // Get direction from app state (store)

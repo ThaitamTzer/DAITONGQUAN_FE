@@ -9,6 +9,7 @@ export type Schedule = {
   endDateTime: Date
   note: string
   isLoop: boolean
+  url: string
   _id: string
 }
 
@@ -42,8 +43,9 @@ const ScheduleService = {
   // Delete a schedule
   deleteSchedule: async (scheduleId: string) => axiosClient.delete(`/schedule/${scheduleId}`),
 
-  // Delete many schedules
-  deleteManySchedule: async (data: string[]) => axiosClient.delete('/schedule/delete-many', { data }),
+  // Adjust the deleteManySchedule method to match the server's expected payload structure
+  deleteManySchedule: async (scheduleIds: string[]) =>
+    axiosClient.delete('/schedule/delete-many', { data: { scheduleIds } }),
 
   // Notify a schedule
   notifySchedule: async (): Promise<Schedule[]> => axiosClient.get('/schedule/notify-schedule'),

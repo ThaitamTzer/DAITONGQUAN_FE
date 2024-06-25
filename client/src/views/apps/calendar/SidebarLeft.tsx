@@ -19,6 +19,7 @@ import { SidebarLeftType, CalendarFiltersType } from 'src/types/apps/calendarTyp
 
 // ** Styled Component
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
+import ListOfEvent from './ListOfEvent'
 
 const SidebarLeft = (props: SidebarLeftType) => {
   const {
@@ -129,6 +130,7 @@ const SidebarLeft = (props: SidebarLeftType) => {
           />
           {renderFilters}
         </Box>
+        <ListOfEvent />
       </Drawer>
     )
   } else {
