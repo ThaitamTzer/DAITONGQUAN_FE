@@ -607,6 +607,12 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Access Control'
     },
     {
+      title: 'Settings',
+      icon: 'tabler:settings',
+      subject: 'member-page',
+      action: 'read'
+    },
+    {
       title: 'Others',
       icon: 'tabler:dots',
       children: [
