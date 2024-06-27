@@ -7,7 +7,7 @@ type AddDebt = {
   creditor: string
   amount: number | null
   type: string
-  description: string
+  description: string | ''
   status: string
   dueDate: Date | string
   isEncrypted?: boolean
@@ -16,6 +16,8 @@ type AddDebt = {
 
 export const fetchDebts = createAsyncThunk('appDebt/fetchDebts', async () => {
   const response: any = await DebtService.getLend()
+
+  console.log(response)
 
   return response
 })

@@ -1,4 +1,4 @@
-import React, { Dispatch, useState } from 'react'
+import React, { Dispatch } from 'react'
 import { Card, Typography, CardHeader, IconButton } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import format from 'date-fns/format'
@@ -19,6 +19,7 @@ type ListOfDebtType = {
   deleteDebt: (id: string) => void
   encryptDebt: (id: string) => void
   decryptDebt: (id: string) => void
+  selectedDebt: GetDebt
 }
 
 interface CellType {
@@ -93,7 +94,14 @@ const ListOfLeding = (props: ListOfDebtType) => {
             <IconButton>
               <Icon icon='tabler:eye' />
             </IconButton>
-            <UpdateDabt LendId={row._id} dispatch={dispatch} updateDebt={updateDebt} store={store} />
+            <UpdateDabt
+              store={store}
+              dispatch={dispatch}
+              updateDebt={updateDebt}
+              encryptDebt={encryptDebt}
+              decryptDebt={decryptDebt}
+              selectedDebt={row}
+            />
             <IconButton onClick={() => handleDelete(row._id)}>
               <Icon icon='tabler:trash' />
             </IconButton>

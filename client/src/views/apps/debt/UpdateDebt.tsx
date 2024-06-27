@@ -1,5 +1,16 @@
-import { Button, Dialog, DialogActions, DialogTitle, Grid, IconButton, MenuItem } from '@mui/material'
-import { Dispatch, useState } from 'react'
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  MenuItem,
+  Switch
+} from '@mui/material'
+import { Dispatch, useState, useEffect } from 'react'
 
 import DialogWithCustomCloseButton from 'src/views/components/dialog/customDialog'
 
@@ -9,7 +20,6 @@ import CustomTextField from 'src/@core/components/mui/text-field'
 import DatePicker from 'react-datepicker'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { subDays } from 'date-fns'
-import { DateType } from 'src/types/forms/reactDatepickerTypes'
 import Icon from 'src/@core/components/icon'
 
 type AddDebt = {
@@ -32,23 +42,20 @@ type UpdateDebt = {
   store: AddDebtType
   dispatch: Dispatch<any>
   updateDebt: (debt: AddDebt) => void
-  LendId: string
+  encryptDebt: (id: string) => void
+  decryptDebt: (id: string) => void
+  selectedDebt: AddDebt
 }
 
 const UpdateDabt = (props: UpdateDebt) => {
-  const { store, dispatch, updateDebt, LendId } = props
+  const { store, dispatch, updateDebt, selectedDebt, decryptDebt, encryptDebt } = props
   const [openAddDebtDialog, setOpenAddDebtDialog] = useState(false)
 
   const handleOpenAddDebtDialog = () => {
-    if (store.debts.length > 0) {
-      const debt = store.debts.find(debt => debt._id === LendId)
-      if (debt) {
-        setValue('creditor', debt.creditor)
-        setValues({ ...debt, description: debt.description || '' })
-      }
-
-      setOpenAddDebtDialog(true)
-    }
+    setOpenAddDebtDialog(true)
+    setValue('creditor', selectedDebt.creditor)
+    setValues(selectedDebt)
+    console.log(selectedDebt)
   }
 
   interface AddDebtInterFace {
@@ -88,19 +95,30 @@ const UpdateDabt = (props: UpdateDebt) => {
     setOpenAddDebtDialog(false)
     reset(defaultAddDebt)
     setValues(defaultAddDebt)
+
     clearErrors()
   }
 
-  const onSubmit = (data: { creditor: string }) => {
+  const onSubmit = (data: { creditor: string; description?: string }) => {
     const modifiedDebt = {
       ...values,
       creditor: data.creditor,
+      description: values.description, // Ensure the latest description is used
       status: 'active'
     }
 
+    console.log(modifiedDebt)
+
     dispatch(updateDebt(modifiedDebt))
+    if (selectedDebt.isEncrypted) {
+      dispatch(encryptDebt(selectedDebt._id as string))
+    } else if (!selectedDebt.isEncrypted) {
+      dispatch(decryptDebt(selectedDebt._id as string))
+    }
     handleCloseAddDebtDialog()
   }
+
+  console.log(selectedDebt)
 
   return (
     <>
@@ -116,7 +134,7 @@ const UpdateDabt = (props: UpdateDebt) => {
       >
         <DatePickerWrapper>
           <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
-            <DialogTitle>Add Debt</DialogTitle>
+            <DialogTitle>Update Debt</DialogTitle>
             <DialogWithCustomCloseButton handleClose={handleCloseAddDebtDialog}>
               <Grid container spacing={3}>
                 <Grid item md={12} sm={9}>
@@ -185,6 +203,19 @@ const UpdateDabt = (props: UpdateDebt) => {
                     onChange={e => setValues({ ...values, description: e.target.value })}
                   />
                 </Grid>
+                <Grid item md={12} sm={9}>
+                  <FormControl sx={{ mb: 4 }}>
+                    <FormControlLabel
+                      label='Encrypt'
+                      control={
+                        <Switch
+                          checked={values.isEncrypted}
+                          onChange={e => setValues({ ...values, isEncrypted: e.target.checked })}
+                        />
+                      }
+                    />
+                  </FormControl>
+                </Grid>
               </Grid>
             </DialogWithCustomCloseButton>
             <DialogActions>
@@ -192,7 +223,7 @@ const UpdateDabt = (props: UpdateDebt) => {
                 Cancel
               </Button>
               <Button type='submit' variant='contained'>
-                Add
+                Update
               </Button>
             </DialogActions>
           </form>
