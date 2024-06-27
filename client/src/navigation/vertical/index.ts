@@ -600,6 +600,13 @@ const navigation = (): VerticalNavItemsType => {
       action: 'read'
     },
     {
+      title: 'Debt',
+      icon: 'tabler:credit-card',
+      path: '/apps/debt',
+      subject: 'member-page',
+      action: 'read'
+    },
+    {
       path: '/acl',
       action: 'read',
       subject: 'member-page',

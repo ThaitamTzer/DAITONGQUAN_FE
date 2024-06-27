@@ -44,6 +44,8 @@ const Calendar = (props: CalendarType) => {
     handleAddEventSidebarToggle
   } = props
 
+  console.log(store)
+
   // ** Refs
   const calendarRef = useRef()
 

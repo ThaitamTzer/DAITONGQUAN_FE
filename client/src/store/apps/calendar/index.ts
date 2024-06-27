@@ -28,8 +28,8 @@ type AddEvent = {
   title: string
   location: string
   isAllDay: boolean
-  startDateTime: Date
-  endDateTime: Date
+  startDateTime: Date | string
+  endDateTime: Date | string
   note: string
   isLoop: boolean
   calendars: string

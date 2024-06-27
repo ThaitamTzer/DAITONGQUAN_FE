@@ -27,7 +27,6 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 
 // ** Types
 import { EventDateType, AddEventSidebarType } from 'src/types/apps/calendarTypes'
-import toast from 'react-hot-toast'
 
 interface PickerProps {
   label?: string
@@ -197,7 +196,6 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
       />
     )
   })
-
 
   const RenderSidebarFooter = () => {
     if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
