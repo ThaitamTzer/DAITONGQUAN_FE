@@ -29,7 +29,15 @@ const AppDebt = () => {
         <Tab label='List of Borrow' />
       </Tabs>
       <Box hidden={tabIndex !== 0}>
-        <ListOfLeding dispatch={dispatch} store={store} addDebt={addDebt} />
+        <ListOfLeding
+          dispatch={dispatch}
+          store={store}
+          addDebt={addDebt}
+          updateDebt={updateDebt}
+          deleteDebt={deleteDebt}
+          encryptDebt={encryptDebt}
+          decryptDebt={decryptDebt}
+        />
       </Box>
     </>
   )

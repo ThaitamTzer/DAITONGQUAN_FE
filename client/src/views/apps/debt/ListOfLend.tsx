@@ -5,6 +5,7 @@ import format from 'date-fns/format'
 import { GetDebt } from 'src/service/debt.service'
 import AddDebt from './AddDebt'
 import Icon from 'src/@core/components/icon'
+import UpdateDabt from './UpdateDebt'
 
 type DebtType = {
   debts: GetDebt[]
@@ -14,6 +15,10 @@ type ListOfDebtType = {
   store: DebtType
   dispatch: Dispatch<any>
   addDebt: (debt: AddDebt) => void
+  updateDebt: (debt: AddDebt) => void
+  deleteDebt: (id: string) => void
+  encryptDebt: (id: string) => void
+  decryptDebt: (id: string) => void
 }
 
 interface CellType {
@@ -21,7 +26,7 @@ interface CellType {
 }
 
 const ListOfLeding = (props: ListOfDebtType) => {
-  const { store, dispatch, addDebt } = props
+  const { store, dispatch, addDebt, updateDebt, deleteDebt, encryptDebt, decryptDebt } = props
 
   const handleDate = (date: Date | string) => {
     return format(new Date(date), 'dd/MM/yyyy')
@@ -88,10 +93,8 @@ const ListOfLeding = (props: ListOfDebtType) => {
             <IconButton>
               <Icon icon='tabler:eye' />
             </IconButton>
-            <IconButton>
-              <Icon icon='tabler:edit' />
-            </IconButton>
-            <IconButton>
+            <UpdateDabt LendId={row._id} dispatch={dispatch} updateDebt={updateDebt} store={store} />
+            <IconButton onClick={() => handleDelete(row._id)}>
               <Icon icon='tabler:trash' />
             </IconButton>
           </>
@@ -99,6 +102,10 @@ const ListOfLeding = (props: ListOfDebtType) => {
       }
     }
   ]
+
+  const handleDelete = (id: string) => {
+    dispatch(deleteDebt(id))
+  }
 
   return (
     <Card>
