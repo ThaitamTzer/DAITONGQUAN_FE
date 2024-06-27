@@ -35,7 +35,8 @@ const DeleteManyNotesDialog = ({ rowSelectionModel, data }: any) => {
   }
 
   const totalNotes = data?.length
-  console.log(totalNotes)
+  
+  // console.log(totalNotes)
 
   return (
     <>

@@ -65,7 +65,7 @@ const spendNoteService = {
     axiosClient.get(`/spendingnote/filter-by-date`, { params: data }),
 
   // Get Notification Out Of Money
-  getNotificationOutOfMoney: async () => axiosClient.get(`/spendingnote/notify-out-of-money`)
+  getNotificationOutOfMoney: async (): Promise<any> => axiosClient.get(`/spendingnote/notify-out-of-money`)
 }
 
 export default spendNoteService

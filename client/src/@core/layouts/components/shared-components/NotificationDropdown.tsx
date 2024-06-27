@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, SyntheticEvent, Fragment, ReactNode, useEffect } from 'react'
+import { useState, SyntheticEvent, Fragment, ReactNode, useEffect, useContext } from 'react'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -17,6 +17,7 @@ import Icon from 'src/@core/components/icon'
 
 // ** Third Party Components
 import PerfectScrollbarComponent from 'react-perfect-scrollbar'
+import { AbilityContext } from 'src/layouts/components/acl/Can'
 
 // ** Type Imports
 import { ThemeColor } from 'src/@core/layouts/types'
@@ -129,6 +130,7 @@ const ScrollWrapper = ({ children, hidden }: { children: ReactNode; hidden: bool
 
 const NotificationDropdown = (props: Props) => {
   const { data: notifications } = useSWR('GET_ALL_NOTIFICATIONS', spendNoteService.getNotificationOutOfMoney)
+  const ability = useContext(AbilityContext)
 
   // ** Props
   const { settings } = props
@@ -184,19 +186,39 @@ const NotificationDropdown = (props: Props) => {
   return (
     <Fragment>
       <IconButton color='inherit' aria-haspopup='true' onClick={handleDropdownOpen} aria-controls='customized-menu'>
-        <Badge
-          color='error'
-          variant='standard'
-          badgeContent={
-            notifications?.outOfBudgetCategories? .length > 9 ? '9+' : notifications?.outOfBudgetCategories?.length
-          }
-          invisible={!notifications?.outOfBudgetCategories?.length}
-          sx={{
-            '& .MuiBadge-badge': { top: 4, right: 4, boxShadow: theme => `0 0 0 2px ${theme.palette.background.paper}` }
-          }}
-        >
-          <Icon fontSize='1.625rem' icon='tabler:bell' />
-        </Badge>
+        {ability.cannot('manage', 'all') && notifications?.outOfBudgetCategories?.length > 0 ? (
+          <Badge
+            color='error'
+            variant='standard'
+            badgeContent={
+              notifications?.outOfBudgetCategories?.length > 9 ? '9+' : notifications?.outOfBudgetCategories?.length
+            }
+            invisible={!notifications?.outOfBudgetCategories?.length}
+            sx={{
+              '& .MuiBadge-badge': {
+                top: 4,
+                right: 4,
+                boxShadow: theme => `0 0 0 2px ${theme.palette.background.paper}`
+              }
+            }}
+          >
+            <Icon fontSize='1.625rem' icon='tabler:bell' />
+          </Badge>
+        ) : (
+          <Badge
+            color='error'
+            variant='standard'
+            sx={{
+              '& .MuiBadge-badge': {
+                top: 4,
+                right: 4,
+                boxShadow: theme => `0 0 0 2px ${theme.palette.background.paper}`
+              }
+            }}
+          >
+            <Icon fontSize='1.625rem' icon='tabler:bell' />
+          </Badge>
+        )}
       </IconButton>
       <Menu
         anchorEl={anchorEl}
@@ -214,30 +236,41 @@ const NotificationDropdown = (props: Props) => {
             <Typography variant='h5' sx={{ cursor: 'text' }}>
               Notifications
             </Typography>
-            <CustomChip
-              skin='light'
-              size='small'
-              color='primary'
-              label={`${notifications?.outOfBudgetCategories?.length} New`}
-            />
+            {ability.cannot('manage', 'all') && notifications?.outOfBudgetCategories?.length > 0 ? (
+              <CustomChip
+                skin='light'
+                size='small'
+                color='primary'
+                label={`${notifications?.outOfBudgetCategories?.length} New`}
+              />
+            ) : (
+              <CustomChip skin='light' size='small' color='primary' label={`Nothing New`} />
+            )}
           </Box>
         </MenuItem>
         <ScrollWrapper hidden={hidden}>
-          {notifications?.outOfBudgetCategories?.map((notification: any, index: number) => (
-            <MenuItem key={index} disableRipple disableTouchRipple onClick={handleDropdownClose}>
-              <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
-                {/* <RenderAvatar notification={notification} /> */}
-                <Box sx={{ mr: 4, ml: 2.5, flex: '1 1', display: 'flex', overflow: 'hidden', flexDirection: 'column' }}>
-                  <MenuItemTitle variant='body1'>
-                    Category {handleUnderline(notification.nameCate)} has limit {handleFormatCost(notification.budget)}
-                  </MenuItemTitle>
-                  <MenuItemSubtitle variant='body2'>
-                    {handleFormatCost(notification.budgetUsed)} has spent
-                  </MenuItemSubtitle>
-                </Box>
-              </Box>
-            </MenuItem>
-          ))}
+          {ability.cannot('manage', 'all') && (
+            <>
+              {notifications?.outOfBudgetCategories?.map((notification: any, index: number) => (
+                <MenuItem key={index} disableRipple disableTouchRipple onClick={handleDropdownClose}>
+                  <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+                    {/* <RenderAvatar notification={notification} /> */}
+                    <Box
+                      sx={{ mr: 4, ml: 2.5, flex: '1 1', display: 'flex', overflow: 'hidden', flexDirection: 'column' }}
+                    >
+                      <MenuItemTitle variant='body1'>
+                        Category {handleUnderline(notification.nameCate)} has limit{' '}
+                        {handleFormatCost(notification.budget)}
+                      </MenuItemTitle>
+                      <MenuItemSubtitle variant='body2'>
+                        {handleFormatCost(notification.budgetUsed)} has spent
+                      </MenuItemSubtitle>
+                    </Box>
+                  </Box>
+                </MenuItem>
+              ))}
+            </>
+          )}
         </ScrollWrapper>
         <MenuItem
           disableRipple

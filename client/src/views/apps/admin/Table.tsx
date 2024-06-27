@@ -162,7 +162,8 @@ const AdminList = () => {
       return
     }
     setSelectedAdmin(admin)
-    console.log('admin: ', admin)
+    
+    // console.log('admin: ', admin)
     setOpenUpdateDialog(true)
   }
 

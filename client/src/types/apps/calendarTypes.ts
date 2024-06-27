@@ -28,10 +28,12 @@ export type EventType = {
     calendar?: string
     description?: string
     guests?: string[] | string | undefined
+    isEncrypted?: boolean
   }
 }
 
 export type EventTypes = {
+  isEncrypted: boolean | undefined
   title: string
   location: string
   isAllDay: boolean
@@ -129,6 +131,8 @@ export type AddEventSidebarType = {
   deleteEvent: (_id: string) => void
   addEvent: (event: AddEvent) => void
   updateEvent: (event: EventTypes) => void
+  encryptEvent: (scheduleId: string) => void
+  decryptEvent: (scheduleId: string) => void
   handleAddEventSidebarToggle: () => void
   handleSelectEvent: (event: null | EventType) => void
 }

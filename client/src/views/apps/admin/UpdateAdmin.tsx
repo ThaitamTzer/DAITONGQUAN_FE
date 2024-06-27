@@ -44,7 +44,6 @@ const UpdateAdminDialog = ({
   const [values, setValues] = React.useState({ showPassword: false })
 
   const onSubmit = (data: UpdateAdminsType) => {
-    console.log(data)
     onConfirm({
       ...data,
       id: adminData._id

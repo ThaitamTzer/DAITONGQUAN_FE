@@ -45,6 +45,7 @@ interface DefaultStateType {
   startDate: Date | string
   guests: string[] | string | undefined
   location: string
+  isEncrypted?: boolean
   _id: string
 }
 
@@ -68,6 +69,8 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
     dispatch,
     addEvent,
     updateEvent,
+    encryptEvent,
+    decryptEvent,
     drawerWidth,
     calendarApi,
     deleteEvent,
@@ -107,13 +110,25 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
       url: values.url
     }
 
+    // Check if it's a new event or updating an existing one
     if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
       dispatch(addEvent(modifiedEvent))
     } else {
+      // Update the event
       dispatch(
-        updateEvent({ id: store.selectedEvent.id, ...modifiedEvent }),
-        toast.success('Event Updated Successfully')
+        updateEvent({
+          id: store.selectedEvent.id,
+          isEncrypted: store.selectedEvent.extendedProps.isEncrypted,
+          ...modifiedEvent
+        })
       )
+
+      // Check the encryption state and apply encryption or decryption accordingly
+      if (values.isEncrypted) {
+        dispatch(encryptEvent(store.selectedEvent.id))
+      } else if (!values.isEncrypted) {
+        dispatch(decryptEvent(store.selectedEvent.id))
+      }
     }
     calendarApi.refetchEvents()
     handleSidebarClose()
@@ -149,7 +164,8 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
         calendar: event.extendedProps.calendar || 'Business',
         endDate: event.end !== null ? event.end : event.start,
         startDate: event.start !== null ? event.start : new Date(),
-        location: event.extendedProps.location || ''
+        location: event.extendedProps.location || '',
+        isEncrypted: event.extendedProps.isEncrypted || false
       })
     }
 
@@ -182,6 +198,7 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
     )
   })
 
+
   const RenderSidebarFooter = () => {
     if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
       return (
@@ -204,6 +221,26 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
             Reset
           </Button>
         </Fragment>
+      )
+    }
+  }
+
+  const RenderEncryptSwitch = () => {
+    if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
+      return null
+    } else {
+      return (
+        <FormControl sx={{ mb: 4 }}>
+          <FormControlLabel
+            label='Encrypt'
+            control={
+              <Switch
+                checked={values.isEncrypted}
+                onChange={e => setValues({ ...values, isEncrypted: e.target.checked })}
+              />
+            }
+          />
+        </FormControl>
       )
     }
   }
@@ -372,6 +409,16 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
               value={values.description}
               onChange={e => setValues({ ...values, description: e.target.value })}
             />
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mt: 6
+              }}
+            >
+              <RenderEncryptSwitch />
+            </Box>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <RenderSidebarFooter />
             </Box>

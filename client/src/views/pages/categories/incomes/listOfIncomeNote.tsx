@@ -202,7 +202,7 @@ const ListOfSpendNote = () => {
     { refreshInterval: 0 }
   )
 
-  console.log(incomeNoteByRangeDate)
+  // console.log(incomeNoteByRangeDate)
 
   useEffect(() => {
     let filteredNotes: any = notes?.incomeNotes || []

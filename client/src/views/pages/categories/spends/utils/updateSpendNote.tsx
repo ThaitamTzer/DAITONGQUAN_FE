@@ -52,7 +52,8 @@ const UpdateSpendNote = ({ spendCate }: any) => {
   const handleOpen = (cateId: any) => {
     setOpen(true)
     setCateId(cateId)
-    console.log(spendCate)
+
+    // console.log(spendCate)
   }
 
   const handleClose = () => {
