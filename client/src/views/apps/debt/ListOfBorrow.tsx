@@ -1,4 +1,4 @@
-import React, { Dispatch, useState } from 'react'
+import React, { Dispatch } from 'react'
 import { Card, Typography, CardHeader, IconButton } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import format from 'date-fns/format'
@@ -9,7 +9,7 @@ import UpdateDabt from './UpdateDebt'
 import ViewDebt from './ViewDebt'
 
 type DebtType = {
-  debts: GetDebt[]
+  borrow: GetDebt[]
 }
 
 type ListOfDebtType = {
@@ -26,9 +26,8 @@ interface CellType {
   row: GetDebt
 }
 
-const ListOfLeding = (props: ListOfDebtType) => {
+const ListOfBorrow = (props: ListOfDebtType) => {
   const { store, dispatch, addDebt, updateDebt, deleteDebt, encryptDebt, decryptDebt } = props
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
 
   const handleDate = (date: Date | string) => {
     return format(new Date(date), 'dd/MM/yyyy')
@@ -116,17 +115,14 @@ const ListOfLeding = (props: ListOfDebtType) => {
   return (
     <Card>
       <CardHeader
-        title={<Typography variant='h2'>List of Lend</Typography>}
-        action={<AddDebt dispatch={dispatch} addDebt={addDebt} type='lending_debt' />}
+        title={<Typography variant='h2'>List of Borrow</Typography>}
+        action={<AddDebt dispatch={dispatch} addDebt={addDebt} type='borrowing_debt' />}
       />
       <DataGrid
         autoHeight
-        rows={store.debts.map(debt => {
+        rows={store.borrow.map(debt => {
           return { ...debt, id: debt._id }
         })}
-        pageSizeOptions={[10, 25, 50]}
-        paginationModel={paginationModel}
-        onPaginationModelChange={setPaginationModel}
         columns={columns}
         disableRowSelectionOnClick
       />
@@ -134,4 +130,4 @@ const ListOfLeding = (props: ListOfDebtType) => {
   )
 }
 
-export default ListOfLeding
+export default ListOfBorrow

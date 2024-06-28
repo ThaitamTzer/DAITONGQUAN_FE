@@ -23,18 +23,14 @@ type AddDebt = {
   _id?: string
 }
 
-type AddDebtType = {
-  debts: AddDebt[]
-}
-
 type AddDebtTypes = {
-  store: AddDebtType
   dispatch: Dispatch<any>
   addDebt: (debt: AddDebt) => void
+  type: string
 }
 
 const AddDebt = (props: AddDebtTypes) => {
-  const { store, dispatch, addDebt } = props
+  const { dispatch, addDebt, type } = props
   const [openAddDebtDialog, setOpenAddDebtDialog] = useState(false)
 
   const handleOpenAddDebtDialog = () => setOpenAddDebtDialog(true)
@@ -47,7 +43,6 @@ const AddDebt = (props: AddDebtTypes) => {
     description: string
     status: string
     dueDate: Date | string
-    isEncrypted?: boolean
     _id?: string
   }
 
@@ -83,6 +78,7 @@ const AddDebt = (props: AddDebtTypes) => {
     const modifiedDebt = {
       ...values,
       creditor: data.creditor,
+      type: type,
       status: 'active'
     }
 
@@ -93,7 +89,7 @@ const AddDebt = (props: AddDebtTypes) => {
   return (
     <>
       <Button onClick={() => handleOpenAddDebtDialog()} variant='contained'>
-        Add Lend
+        Add Debt
       </Button>
       <Dialog
         fullWidth
@@ -132,18 +128,6 @@ const AddDebt = (props: AddDebtTypes) => {
                     value={values.amount}
                     onChange={e => setValues({ ...values, amount: Number(e.target.value) })}
                   />
-                </Grid>
-                <Grid item md={12}>
-                  <CustomTextField
-                    select
-                    fullWidth
-                    label='Type'
-                    value={values.type}
-                    onChange={e => setValues({ ...values, type: e.target.value as string })}
-                  >
-                    <MenuItem value='lending_debt'>Lend</MenuItem>
-                    <MenuItem value='borrow_debt'>Borrow</MenuItem>
-                  </CustomTextField>
                 </Grid>
                 <Grid item md={12}>
                   <DatePicker

@@ -7,7 +7,6 @@ import {
   FormControlLabel,
   Grid,
   IconButton,
-  MenuItem,
   Switch
 } from '@mui/material'
 import { Dispatch, useState, useEffect } from 'react'
@@ -34,12 +33,7 @@ type AddDebt = {
   _id?: string
 }
 
-type AddDebtType = {
-  debts: AddDebt[]
-}
-
 type UpdateDebt = {
-  store: AddDebtType
   dispatch: Dispatch<any>
   updateDebt: (debt: AddDebt) => void
   encryptDebt: (id: string) => void
@@ -47,15 +41,15 @@ type UpdateDebt = {
   selectedDebt: AddDebt
 }
 
-const UpdateDabt = (props: UpdateDebt) => {
-  const { store, dispatch, updateDebt, selectedDebt, decryptDebt, encryptDebt } = props
+const UpdateDebt = (props: UpdateDebt) => {
+  const { dispatch, updateDebt, selectedDebt, decryptDebt, encryptDebt } = props
   const [openAddDebtDialog, setOpenAddDebtDialog] = useState(false)
 
   const handleOpenAddDebtDialog = () => {
     setOpenAddDebtDialog(true)
     setValue('creditor', selectedDebt.creditor)
     setValues(selectedDebt)
-    console.log(selectedDebt)
+    setInitialEncrypted(selectedDebt.isEncrypted)
   }
 
   interface AddDebtInterFace {
@@ -77,10 +71,12 @@ const UpdateDabt = (props: UpdateDebt) => {
     type: '',
     description: '',
     status: '',
-    dueDate: new Date()
+    dueDate: new Date(),
+    isEncrypted: false
   }
 
   const [values, setValues] = useState<AddDebtInterFace>(defaultAddDebt)
+  const [initialEncrypted, setInitialEncrypted] = useState<boolean | undefined>(false)
 
   const {
     control,
@@ -95,7 +91,6 @@ const UpdateDabt = (props: UpdateDebt) => {
     setOpenAddDebtDialog(false)
     reset(defaultAddDebt)
     setValues(defaultAddDebt)
-
     clearErrors()
   }
 
@@ -103,22 +98,22 @@ const UpdateDabt = (props: UpdateDebt) => {
     const modifiedDebt = {
       ...values,
       creditor: data.creditor,
-      description: values.description, // Ensure the latest description is used
+      description: values.description,
       status: 'active'
     }
 
-    console.log(modifiedDebt)
-
     dispatch(updateDebt(modifiedDebt))
-    if (selectedDebt.isEncrypted) {
-      dispatch(encryptDebt(selectedDebt._id as string))
-    } else if (!selectedDebt.isEncrypted) {
-      dispatch(decryptDebt(selectedDebt._id as string))
+
+    if (values.isEncrypted !== initialEncrypted) {
+      if (values.isEncrypted) {
+        dispatch(encryptDebt(selectedDebt._id as string))
+      } else {
+        dispatch(decryptDebt(selectedDebt._id as string))
+      }
     }
+
     handleCloseAddDebtDialog()
   }
-
-  console.log(selectedDebt)
 
   return (
     <>
@@ -137,45 +132,35 @@ const UpdateDabt = (props: UpdateDebt) => {
             <DialogTitle>Update Debt</DialogTitle>
             <DialogWithCustomCloseButton handleClose={handleCloseAddDebtDialog}>
               <Grid container spacing={3}>
-                <Grid item md={12} sm={9}>
+                <Grid item md={12} sm={12} xs={12}>
                   <Controller
                     name='creditor'
                     control={control}
                     render={({ field: { value, onChange } }) => (
-                      <CustomTextField fullWidth label='Creditor' value={value} onChange={onChange} />
+                      <CustomTextField required fullWidth label='Creditor' value={value} onChange={onChange} />
                     )}
                   />{' '}
                 </Grid>
-                <Grid item md={12} sm={9}>
+                <Grid item md={12} sm={12} xs={12}>
                   <CustomTextField
                     fullWidth
+                    required
                     label='Debtor'
                     value={values.debtor}
                     onChange={e => setValues({ ...values, debtor: e.target.value })}
                   />
                 </Grid>
-                <Grid item md={12} sm={9}>
+                <Grid item md={12} sm={12} xs={12}>
                   <CustomTextField
                     type='number'
                     fullWidth
+                    required
                     label='Amount'
                     value={values.amount}
                     onChange={e => setValues({ ...values, amount: Number(e.target.value) })}
                   />
                 </Grid>
-                <Grid item md={12} sm={9}>
-                  <CustomTextField
-                    select
-                    fullWidth
-                    label='Type'
-                    value={values.type}
-                    onChange={e => setValues({ ...values, type: e.target.value as string })}
-                  >
-                    <MenuItem value='lending_debt'>Lend</MenuItem>
-                    <MenuItem value='borrow_debt'>Borrow</MenuItem>
-                  </CustomTextField>
-                </Grid>
-                <Grid item md={12} sm={9}>
+                <Grid item md={12} sm={12} xs={12}>
                   <DatePicker
                     id='min-date'
                     showYearDropdown
@@ -193,7 +178,7 @@ const UpdateDabt = (props: UpdateDebt) => {
                     customInput={<CustomTextField fullWidth label='Due Date' />}
                   />
                 </Grid>
-                <Grid item md={12} sm={9}>
+                <Grid item md={12} sm={12} xs={12}>
                   <CustomTextField
                     multiline
                     rows={3}
@@ -203,7 +188,7 @@ const UpdateDabt = (props: UpdateDebt) => {
                     onChange={e => setValues({ ...values, description: e.target.value })}
                   />
                 </Grid>
-                <Grid item md={12} sm={9}>
+                <Grid item md={12} sm={12} xs={12}>
                   <FormControl sx={{ mb: 4 }}>
                     <FormControlLabel
                       label='Encrypt'
@@ -233,4 +218,4 @@ const UpdateDabt = (props: UpdateDebt) => {
   )
 }
 
-export default UpdateDabt
+export default UpdateDebt
