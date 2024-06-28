@@ -1,4 +1,4 @@
-import React, { Dispatch } from 'react'
+import React, { Dispatch, useState } from 'react'
 import { Card, Typography, CardHeader, IconButton } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import format from 'date-fns/format'
@@ -28,6 +28,7 @@ interface CellType {
 
 const ListOfBorrow = (props: ListOfDebtType) => {
   const { store, dispatch, addDebt, updateDebt, deleteDebt, encryptDebt, decryptDebt } = props
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
 
   const handleDate = (date: Date | string) => {
     return format(new Date(date), 'dd/MM/yyyy')
@@ -124,6 +125,9 @@ const ListOfBorrow = (props: ListOfDebtType) => {
           return { ...debt, id: debt._id }
         })}
         columns={columns}
+        pageSizeOptions={[10, 25, 50]}
+        paginationModel={paginationModel}
+        onPaginationModelChange={setPaginationModel}
         disableRowSelectionOnClick
       />
     </Card>

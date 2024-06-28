@@ -75,17 +75,13 @@ export const addEvent = createAsyncThunk('appCalendar/addEvent', async (event: A
     toast.loading('Adding Event...') // Start loading toast
     const response = await axiosClient.post('/schedule', event)
     await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
-    if (response) {
-      toast.dismiss() // Dismiss the loading toast
-      toast.success('Event Added Successfully') // Show success toast
-    } else {
-      toast.dismiss() // Dismiss the loading toast
-      toast.error('Error Adding Event') // Show error toast
-    }
+    toast.dismiss() // Dismiss the loading toast
+    toast.success('Event Added Successfully') // Show success toast
 
     return response
   } catch (error) {
-    toast.error('Error Adding Event')
+    toast.dismiss() // Dismiss the loading toast
+    toast.error('Error Adding Event') // Show error toast
   }
 })
 
@@ -95,16 +91,14 @@ export const updateEvent = createAsyncThunk('appCalendar/updateEvent', async (ev
     toast.loading('Updating Event...') // Start loading toast
     const response = await axiosClient.put(`/schedule/${event.id}`, event)
     await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
-    if (response) {
-      toast.dismiss() // Dismiss the loading toast
-      toast.success('Event Updated Successfully') // Show success toast
-    } else {
-      toast.dismiss() // Dismiss the loading toast
-      toast.error('Error Updating Event') // Show error toast
-    }
+    toast.dismiss() // Dismiss the loading toast
+    toast.success('Event Updated Successfully') // Show success toast
 
     return response.data.event
-  } catch (error) {}
+  } catch (error) {
+    toast.dismiss() // Dismiss the loading toast
+    toast.error('Error Updating Event') // Show error toast
+  }
 })
 
 // ** Delete Event

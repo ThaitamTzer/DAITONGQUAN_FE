@@ -101,13 +101,15 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
       title: data.title,
       location: values.location,
       isAllDay: values.allDay,
-      startDateTime: values.startDate,
-      endDateTime: values.endDate,
+      startDateTime: new Date(values.startDate).toISOString(),
+      endDateTime: new Date(values.endDate).toISOString(),
       note: values.description,
       isLoop: false,
       calendars: values.calendar,
       url: values.url
     }
+
+    console.log(modifiedEvent)
 
     // Check if it's a new event or updating an existing one
     if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
@@ -144,7 +146,7 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
 
   const handleStartDate = (date: Date) => {
     if (date > values.endDate) {
-      setValues({ ...values, startDate: new Date(date), endDate: new Date(date) })
+      setValues({ ...values, startDate: new Date(date).toISOString(), endDate: new Date(date).toISOString() })
     }
   }
 
@@ -242,6 +244,8 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
       )
     }
   }
+
+  console.log(values)
 
   return (
     <Drawer

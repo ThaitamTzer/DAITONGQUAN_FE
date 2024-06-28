@@ -120,6 +120,7 @@ const ListOfLeding = (props: ListOfDebtType) => {
         action={<AddDebt dispatch={dispatch} addDebt={addDebt} type='lending_debt' />}
       />
       <DataGrid
+        sx={{ width: '100%' }}
         autoHeight
         rows={store.debts.map(debt => {
           return { ...debt, id: debt._id }
@@ -129,6 +130,9 @@ const ListOfLeding = (props: ListOfDebtType) => {
         onPaginationModelChange={setPaginationModel}
         columns={columns}
         disableRowSelectionOnClick
+        slots={{
+          noRowsOverlay: () => <Typography>No debts</Typography>
+        }}
       />
     </Card>
   )
