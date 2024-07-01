@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import toast from 'react-hot-toast'
-import axiosClient from 'src/lib/axios'
 import DebtService from 'src/service/debt.service'
 
 type AddDebt = {

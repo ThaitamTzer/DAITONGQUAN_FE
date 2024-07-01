@@ -198,6 +198,7 @@ const NotificationDropdown = (props: Props) => {
           <Badge
             color='error'
             variant='standard'
+            badgeContent={eventNotifications?.length > 9 ? '9+' : eventNotifications?.length}
             sx={{
               '& .MuiBadge-badge': {
                 top: 4,
@@ -234,7 +235,7 @@ const NotificationDropdown = (props: Props) => {
                 label={`${notifications?.outOfBudgetCategories?.length} New`}
               />
             ) : (
-              <CustomChip skin='light' size='small' color='primary' label={`Nothing New`} />
+              <CustomChip skin='light' size='small' color='primary' label={`${eventNotifications?.length} New`} />
             )}
           </Box>
         </MenuItem>

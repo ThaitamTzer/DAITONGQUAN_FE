@@ -90,11 +90,11 @@ export const updateEvent = createAsyncThunk('appCalendar/updateEvent', async (ev
   try {
     toast.loading('Updating Event...') // Start loading toast
     const response = await axiosClient.put(`/schedule/${event.id}`, event)
-    await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
     toast.dismiss() // Dismiss the loading toast
     toast.success('Event Updated Successfully') // Show success toast
+    await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
 
-    return response.data.event
+    return response
   } catch (error) {
     toast.dismiss() // Dismiss the loading toast
     toast.error('Error Updating Event') // Show error toast
