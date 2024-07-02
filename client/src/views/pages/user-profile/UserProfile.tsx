@@ -34,6 +34,7 @@ import Profile from 'src/views/pages/user-profile/profile'
 import Projects from 'src/views/pages/user-profile/projects'
 import Connections from 'src/views/pages/user-profile/connections'
 import UserProfileHeader from 'src/views/pages/user-profile/UserProfileHeader'
+import { useTheme } from '@mui/system'
 
 const TabList = styled(MuiTabList)<TabListProps>(({ theme }) => ({
   borderBottom: '0 !important',
@@ -97,85 +98,111 @@ const UserProfile = ({ tab, data }: { tab: string; data: UserProfileActiveTab })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab])
 
-  const tabContentList: { [key: string]: ReactElement } = {
-    profile: <Profile data={data as ProfileTabType} />,
-    teams: <Teams data={data as TeamsTabType[]} />,
-    projects: <Projects data={data as ProjectsTabType[]} />,
-    connections: <Connections data={data as ConnectionsTabType[]} />
-  }
+  // const tabContentList: { [key: string]: ReactElement } = {
+  //   profile: <Profile data={data as ProfileTabType} />,
+  //   teams: <Teams data={data as TeamsTabType[]} />,
+  //   projects: <Projects data={data as ProjectsTabType[]} />,
+  //   connections: <Connections data={data as ConnectionsTabType[]} />
+  // }
+
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')) // Adjust 'sm' to your desired breakpoint
 
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <UserProfileHeader />
       </Grid>
-      {activeTab === undefined ? null : (
-        <Grid item xs={12}>
-          <TabContext value={activeTab}>
-            <Grid container spacing={6}>
-              <Grid item xs={12}>
-                <TabList
-                  variant='scrollable'
-                  scrollButtons='auto'
-                  onChange={handleChange}
-                  aria-label='customized tabs example'
-                >
-                  <Tab
-                    value='profile'
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', ...(!hideText && { '& svg': { mr: 2 } }) }}>
-                        <Icon fontSize='1.125rem' icon='tabler:user-check' />
-                        {!hideText && 'Profile'}
-                      </Box>
-                    }
-                  />
-                  <Tab
-                    value='teams'
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', ...(!hideText && { '& svg': { mr: 2 } }) }}>
-                        <Icon fontSize='1.125rem' icon='tabler:users' />
-                        {!hideText && 'Teams'}
-                      </Box>
-                    }
-                  />
-                  <Tab
-                    value='projects'
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', ...(!hideText && { '& svg': { mr: 2 } }) }}>
-                        <Icon fontSize='1.125rem' icon='tabler:layout-grid' />
-                        {!hideText && 'Projects'}
-                      </Box>
-                    }
-                  />
-                  <Tab
-                    value='connections'
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', ...(!hideText && { '& svg': { mr: 2 } }) }}>
-                        <Icon fontSize='1.125rem' icon='tabler:link' />
-                        {!hideText && 'Connections'}
-                      </Box>
-                    }
-                  />
-                </TabList>
-              </Grid>
-              <Grid item xs={12}>
-                {isLoading ? (
-                  <Box sx={{ mt: 6, display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-                    <CircularProgress sx={{ mb: 4 }} />
-                    <Typography>Loading...</Typography>
-                  </Box>
-                ) : (
-                  <TabPanel sx={{ p: 0 }} value={activeTab}>
-                    {tabContentList[activeTab]}
-                  </TabPanel>
-                )}
-              </Grid>
-            </Grid>
-          </TabContext>
-        </Grid>
-      )}
+      <Grid
+        item
+        xs={12}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          position: isMobile ? 'none' : 'sticky',
+          top: isMobile ? 0 : 80
+        }}
+      >
+        <Profile data={data as ProfileTabType} />
+      </Grid>
     </Grid>
   )
+
+  //   return (
+  //     <Grid container spacing={6}>
+  //       <Grid item xs={12}>
+  //         <UserProfileHeader />
+  //       </Grid>
+
+  //       {activeTab === undefined ? null : (
+  //         <Grid item xs={12}>
+  //           <TabContext value={activeTab}>
+  //             <Grid container spacing={6}>
+  //               <Grid item xs={12}>
+  //                 <TabList
+  //                   variant='scrollable'
+  //                   scrollButtons='auto'
+  //                   onChange={handleChange}
+  //                   aria-label='customized tabs example'
+  //                 >
+  //                   <Tab
+  //                     value='profile'
+  //                     label={
+  //                       <Box sx={{ display: 'flex', alignItems: 'center', ...(!hideText && { '& svg': { mr: 2 } }) }}>
+  //                         <Icon fontSize='1.125rem' icon='tabler:user-check' />
+  //                         {!hideText && 'Profile'}
+  //                       </Box>
+  //                     }
+  //                   />
+  //                   <Tab
+  //                     value='teams'
+  //                     label={
+  //                       <Box sx={{ display: 'flex', alignItems: 'center', ...(!hideText && { '& svg': { mr: 2 } }) }}>
+  //                         <Icon fontSize='1.125rem' icon='tabler:users' />
+  //                         {!hideText && 'Teams'}
+  //                       </Box>
+  //                     }
+  //                   />
+  //                   <Tab
+  //                     value='projects'
+  //                     label={
+  //                       <Box sx={{ display: 'flex', alignItems: 'center', ...(!hideText && { '& svg': { mr: 2 } }) }}>
+  //                         <Icon fontSize='1.125rem' icon='tabler:layout-grid' />
+  //                         {!hideText && 'Projects'}
+  //                       </Box>
+  //                     }
+  //                   />
+  //                   <Tab
+  //                     value='connections'
+  //                     label={
+  //                       <Box sx={{ display: 'flex', alignItems: 'center', ...(!hideText && { '& svg': { mr: 2 } }) }}>
+  //                         <Icon fontSize='1.125rem' icon='tabler:link' />
+  //                         {!hideText && 'Connections'}
+  //                       </Box>
+  //                     }
+  //                   />
+  //                 </TabList>
+  //               </Grid>
+  //               <Grid item xs={12}>
+  //                 {isLoading ? (
+  //                   <Box sx={{ mt: 6, display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+  //                     <CircularProgress sx={{ mb: 4 }} />
+  //                     <Typography>Loading...</Typography>
+  //                   </Box>
+  //                 ) : (
+  //                   <TabPanel sx={{ p: 0 }} value={activeTab}>
+  //                     {tabContentList[activeTab]}
+  //                   </TabPanel>
+  //                 )}
+  //               </Grid>
+  //             </Grid>
+  //           </TabContext>
+  //         </Grid>
+  //       )}
+  //     </Grid>
+  //   )
 }
 
 export default UserProfile

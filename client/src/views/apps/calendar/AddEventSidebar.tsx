@@ -109,8 +109,6 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
       url: values.url
     }
 
-    console.log(modifiedEvent)
-
     // Check if it's a new event or updating an existing one
     if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
       dispatch(addEvent(modifiedEvent))
@@ -163,8 +161,8 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
         guests: event.extendedProps.guests || [],
         description: event.extendedProps.description || '',
         calendar: event.extendedProps.calendar || 'Business',
-        endDate: event.end !== null ? event.end : event.start,
-        startDate: event.start !== null ? event.start : new Date(),
+        endDate: event.end !== null ? new Date(event.end).toISOString() : new Date(event.start).toISOString(),
+        startDate: event.start !== null ? new Date(event.start).toISOString() : new Date().toISOString(),
         location: event.extendedProps.location || '',
         isEncrypted: event.extendedProps.isEncrypted || false
       })
@@ -172,6 +170,8 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
 
     // eslint-disable-next-line
   }, [setValue, store.selectedEvent])
+
+  console.log(new Date(values.startDate).toISOString(), new Date(values.endDate).toISOString())
 
   const resetToEmptyValues = useCallback(() => {
     setValue('title', '')
@@ -244,8 +244,6 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
       )
     }
   }
-
-  console.log(values)
 
   return (
     <Drawer
@@ -333,13 +331,13 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
               <DatePicker
                 selectsStart
                 id='event-start-date'
-                endDate={values.endDate as EventDateType}
-                selected={values.startDate as EventDateType}
-                startDate={values.startDate as EventDateType}
+                endDate={new Date(values.endDate)}
+                selected={values.startDate ? new Date(values.startDate) : null}
+                startDate={new Date(values.startDate)}
                 showTimeSelect={!values.allDay}
-                dateFormat={!values.allDay ? 'yyyy-MM-dd hh:mm' : 'yyyy-MM-dd'}
+                dateFormat={!values.allDay ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd'}
                 customInput={<PickersComponent label='Start Date' registername='startDate' />}
-                onChange={(date: Date) => setValues({ ...values, startDate: new Date(date) })}
+                onChange={(date: Date) => setValues({ ...values, startDate: date.toISOString() })}
                 onSelect={handleStartDate}
               />
             </Box>
@@ -347,14 +345,14 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
               <DatePicker
                 selectsEnd
                 id='event-end-date'
-                endDate={values.endDate as EventDateType}
-                selected={values.endDate as EventDateType}
-                minDate={values.startDate as EventDateType}
-                startDate={values.startDate as EventDateType}
+                endDate={new Date(values.endDate)}
+                selected={values.endDate ? new Date(values.endDate) : null}
+                minDate={new Date(values.startDate)}
+                startDate={new Date(values.startDate)}
                 showTimeSelect={!values.allDay}
-                dateFormat={!values.allDay ? 'yyyy-MM-dd hh:mm' : 'yyyy-MM-dd'}
+                dateFormat={!values.allDay ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd'}
                 customInput={<PickersComponent label='End Date' registername='endDate' />}
-                onChange={(date: Date) => setValues({ ...values, endDate: new Date(date) })}
+                onChange={(date: Date) => setValues({ ...values, endDate: date.toISOString() })}
               />
             </Box>
             <FormControl sx={{ mb: 4 }}>

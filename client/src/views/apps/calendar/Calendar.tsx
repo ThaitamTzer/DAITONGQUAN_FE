@@ -1,7 +1,7 @@
 // ** React Import
 import { useEffect, useRef } from 'react'
 
-// ** Full Calendar & it's Plugins
+// ** Full Calendar & its Plugins
 import FullCalendar from '@fullcalendar/react'
 import listPlugin from '@fullcalendar/list'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -27,6 +27,10 @@ const blankEvent = {
     location: '',
     description: ''
   }
+}
+
+const handleDateUTC = (date: string) => {
+  return new Date(date).toISOString()
 }
 
 const Calendar = (props: CalendarType) => {
@@ -100,6 +104,8 @@ const Calendar = (props: CalendarType) => {
       */
       navLinks: true,
 
+      timeZone: 'UTC',
+
       eventClassNames({ event: calendarEvent }: any) {
         // @ts-ignore
         const colorName = calendarsColor[calendarEvent._def.extendedProps.calendar]
@@ -109,15 +115,6 @@ const Calendar = (props: CalendarType) => {
           `bg-${colorName}`
         ]
       },
-
-      // eventClick({ event: clickedEvent }: any) {
-      //   if (clickedEvent.url) {
-      //     clickedEvent?.jsEvent?.preventDefault()
-      //   } else {
-      //     dispatch(handleSelectEvent(clickedEvent))
-      //     handleAddEventSidebarToggle()
-      //   }
-      // },
 
       eventClick: function (info: any) {
         if (info.event.url) {
@@ -142,8 +139,8 @@ const Calendar = (props: CalendarType) => {
 
       dateClick(info: any) {
         const ev = { ...blankEvent }
-        ev.start = info.date
-        ev.end = info.date
+        ev.start = info.dateStr
+        ev.end = info.dateStr
         ev.allDay = true
 
         // @ts-ignore
@@ -158,7 +155,13 @@ const Calendar = (props: CalendarType) => {
       */
       eventDrop({ event: droppedEvent }: any) {
         const { id, start: startDateTime, end: endDateTime } = droppedEvent
-        dispatch(updateEvent({ id, startDateTime, endDateTime }))
+        dispatch(
+          updateEvent({
+            id,
+            startDateTime: startDateTime.toISOString(),
+            endDateTime: endDateTime.toISOString()
+          })
+        )
       },
 
       /*
@@ -167,7 +170,13 @@ const Calendar = (props: CalendarType) => {
       */
       eventResize({ event: resizedEvent }: any) {
         const { id, start: startDateTime, end: endDateTime } = resizedEvent
-        dispatch(updateEvent({ id, startDateTime, endDateTime }))
+        dispatch(
+          updateEvent({
+            id,
+            startDateTime: startDateTime.toISOString(),
+            endDateTime: endDateTime.toISOString()
+          })
+        )
       },
       ref: calendarRef,
 
