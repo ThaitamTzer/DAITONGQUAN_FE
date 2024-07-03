@@ -1,58 +1,102 @@
 import axiosClient from 'src/lib/axios'
-import { GetPostType, GetPostBySeacrhType, AddPostType, UpdatePostType } from 'src/types/apps/postTypes'
+import { GetPostType, GetPostBySearchType, AddPostType, UpdatePostType } from 'src/types/apps/postTypes'
 
 const postService = {
   // ** GET ======================================
   // Get all user posts
-  getAllUserPosts: async (): Promise<GetPostType> => axiosClient.get('/post/view-my-posts'),
+  getAllUserPosts: async (): Promise<GetPostType[]> => {
+    const response: GetPostType[] = await axiosClient.get('/post/view-my-posts')
+
+    return response
+  },
 
   // Get all posts
-  getAllPosts: async (): Promise<any> => axiosClient.get('/post/view-all-posts'),
+  getAllPosts: async (): Promise<GetPostType[]> => {
+    const response: GetPostType[] = await axiosClient.get('/post/view-all-posts')
+
+    return response
+  },
 
   // Get a post by id
-  getPostById: async (_id: string): Promise<GetPostBySeacrhType> => axiosClient.get(`/post/${_id}`),
+  getPostById: async (_id: string): Promise<GetPostType> => {
+    const response: GetPostType = await axiosClient.get(`/post/${_id}`)
+
+    return response
+  },
 
   // Get a post by search
-  getPostBySearch: async (): Promise<GetPostBySeacrhType> => axiosClient.get('/post/search'),
+  getPostBySearch: async (query: string): Promise<GetPostBySearchType[]> => {
+    const response: GetPostBySearchType[] = await axiosClient.get('/post/search', { params: { query } })
+
+    return response
+  },
 
   // Get all posts favorited by user
-  getFavoritedPosts: async (): Promise<GetPostBySeacrhType> => axiosClient.get('/post/favorite'),
+  getFavoritedPosts: async (): Promise<GetPostBySearchType[]> => {
+    const response: GetPostBySearchType[] = await axiosClient.get('/post/favorite')
+
+    return response
+  },
 
   // Get list post (Admin)
-  getListPost: async (): Promise<GetPostBySeacrhType> => axiosClient.get('/post/view-list-post'),
+  getListPost: async (): Promise<GetPostBySearchType[]> => {
+    const response: GetPostBySearchType[] = await axiosClient.get('/post/view-list-post')
+
+    return response
+  },
 
   // ** POST ======================================
   // Add a new post
-  addPost: async (data: AddPostType): Promise<GetPostBySeacrhType> => axiosClient.post('/post/add-post', data),
+  addPost: async (data: AddPostType): Promise<GetPostType> => {
+    const response: GetPostType = await axiosClient.post('/post/add-post', data)
+
+    return response
+  },
 
   // Add post to favorite
-  addPostToFavorite: async (_id: string): Promise<any> => axiosClient.post(`/post/favorite/${_id}`),
+  addPostToFavorite: async (_id: string): Promise<void> => {
+    await axiosClient.post(`/post/favorite/${_id}`)
+  },
 
   // ** PUT ======================================
   // Update a post
-  updatePost: async (_id: string, data: UpdatePostType): Promise<GetPostBySeacrhType> =>
-    axiosClient.put(`/post/${_id}`, data),
+  updatePost: async (_id: string, data: UpdatePostType): Promise<GetPostType> => {
+    const response = await axiosClient.put(`/post/${_id}`, data)
+
+    return response.data
+  },
 
   // Reaction to a post
-  reactionToPost: async (_id: string, data: string): Promise<any> => axiosClient.put(`/post/${_id}`, data),
+  reactionToPost: async (_id: string, data: string): Promise<void> => {
+    await axiosClient.put(`/post/${_id}/reaction`, { reaction: data })
+  },
 
   // ** DELETE ======================================
   // Delete a post
-  deletePost: async (_id: string): Promise<any> => axiosClient.delete(`/post/${_id}`),
+  deletePost: async (_id: string): Promise<void> => {
+    await axiosClient.delete(`/post/${_id}`)
+  },
 
   // Delete many posts
-  deleteManyPosts: async (postIds: string[]): Promise<any> =>
-    axiosClient.delete(`/post/delete-many`, { data: { postIds } }),
+  deleteManyPosts: async (postIds: string[]): Promise<void> => {
+    await axiosClient.delete('/post/delete-many', { data: { postIds } })
+  },
 
   // Delete post from favorite
-  deletePostFromFavorite: async (_id: string): Promise<any> => axiosClient.delete(`/post/favorite/${_id}`),
+  deletePostFromFavorite: async (_id: string): Promise<void> => {
+    await axiosClient.delete(`/post/favorite/${_id}`)
+  },
 
   // Delete reaction to a post
-  deleteReactionToPost: async (_id: string): Promise<any> => axiosClient.delete(`/post/reaction/${_id}`),
+  deleteReactionToPost: async (_id: string): Promise<void> => {
+    await axiosClient.delete(`/post/reaction/${_id}`)
+  },
 
   // ** PATCH ======================================
   // Approve a post
-  approvePost: async (_id: string, data: boolean): Promise<any> => axiosClient.patch(`/post/approve/${_id}`, data)
+  approvePost: async (_id: string, data: boolean): Promise<void> => {
+    await axiosClient.patch(`/post/approve/${_id}`, { isApproved: data })
+  }
 }
 
 export default postService
