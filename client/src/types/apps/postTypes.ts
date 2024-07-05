@@ -1,6 +1,6 @@
 // Define types
 export type User = {
-  _id?: string
+  _id: string
   firstname: string
   lastname: string
   avatar: string
@@ -19,11 +19,13 @@ export type UpdatePostType = {
   postImage?: string
 }
 
-export type UserReactionType = {
-  userId: User
-  reaction?: string
-  _id?: string
-}
+export type UserReactionType = [
+  {
+    userId: User
+    reaction?: string
+    _id?: string
+  }
+]
 
 export type GetPostType = {
   _id: string
@@ -33,11 +35,12 @@ export type GetPostType = {
   reactionCount: number
   status: string
   isShow: boolean
-  isApproved?: boolean
-  userReaction?: UserReactionType[]
+  isApproved: boolean
+  userReaction: UserReactionType
   postImage?: string
   createdAt: string | Date
   updatedAt: string | Date
+  [key: string]: any
 }
 
 export type GetPostState = {

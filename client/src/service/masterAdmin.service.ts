@@ -2,7 +2,7 @@ import axiosClient from 'src/lib/axios'
 
 const masterAdminService = {
   // ** Get All Admin
-  getAllAdmin: async () => axiosClient.get('/admin'),
+  getAllAdmin: async (): Promise<any> => axiosClient.get('/admin'),
 
   // ** Create New Admin
   createAdmin: async (data: any) => axiosClient.post('/admin', data),

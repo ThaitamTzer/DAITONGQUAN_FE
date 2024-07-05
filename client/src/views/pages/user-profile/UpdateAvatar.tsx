@@ -92,6 +92,7 @@ const ChangeAvatarDialog: React.FC<AvatarDialogProps> = ({ open, onClose, avatar
     try {
       const croppedImage = await handleCrop()
       if (croppedImage) {
+        console.log('Cropped image:', croppedImage)
         setSelectedImage(croppedImage)
         const formData = new FormData()
         formData.append('avatar', croppedImage)

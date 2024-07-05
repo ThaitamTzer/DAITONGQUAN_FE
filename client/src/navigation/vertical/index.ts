@@ -110,6 +110,13 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
+      title: 'Post Management',
+      icon: 'tabler:file-text',
+      action: 'read',
+      subject: 'post',
+      path: '/apps/post-list'
+    },
+    {
       title: 'Pages',
       icon: 'tabler:file',
       children: [

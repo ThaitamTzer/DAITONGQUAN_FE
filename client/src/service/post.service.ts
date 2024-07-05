@@ -39,8 +39,8 @@ const postService = {
   },
 
   // Get list post (Admin)
-  getListPost: async (): Promise<GetPostBySearchType[]> => {
-    const response: GetPostBySearchType[] = await axiosClient.get('/post/view-list-post')
+  getListPost: async (): Promise<GetPostType[]> => {
+    const response: GetPostType[] = await axiosClient.get('/post/view-list-post')
 
     return response
   },
@@ -68,7 +68,7 @@ const postService = {
 
   // Reaction to a post
   reactionToPost: async (_id: string, data: string): Promise<void> => {
-    await axiosClient.put(`/post/${_id}/reaction`, { reaction: data })
+    await axiosClient.put(`/post/reaction/${_id}?action=${data}`)
   },
 
   // ** DELETE ======================================
@@ -93,9 +93,9 @@ const postService = {
   },
 
   // ** PATCH ======================================
-  // Approve a post
-  approvePost: async (_id: string, data: boolean): Promise<void> => {
-    await axiosClient.patch(`/post/approve/${_id}`, { isApproved: data })
+  // Approve a post as parameter
+  approvePost: async (_id: string, isApproved: boolean): Promise<void> => {
+    await axiosClient.patch(`/post/approve/${_id}?isApproved=${isApproved}`)
   }
 }
 

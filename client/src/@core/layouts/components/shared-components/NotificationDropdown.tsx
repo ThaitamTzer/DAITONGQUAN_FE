@@ -20,19 +20,17 @@ import PerfectScrollbarComponent from 'react-perfect-scrollbar'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 
 // ** Type Imports
-import { ThemeColor } from 'src/@core/layouts/types'
 import { Settings } from 'src/@core/context/settingsContext'
 
 // ** Custom Components Imports
 import CustomChip from 'src/@core/components/mui/chip'
-import CustomAvatar from 'src/@core/components/mui/avatar'
 
 // ** Services Imports
 import spendNoteService from 'src/service/spendNote.service'
 import ScheduleService from 'src/service/schedule.service'
 
 // ** Util Import
-import useSWR, { mutate } from 'swr'
+import useSWR from 'swr'
 
 interface Props {
   settings: Settings
@@ -101,15 +99,19 @@ const ScrollWrapper = ({ children, hidden }: { children: ReactNode; hidden: bool
 }
 
 const NotificationDropdown = (props: Props) => {
-  const { data: notifications, mutate: mutateNotifications } = useSWR(
-    'GET_ALL_NOTIFICATIONS',
-    spendNoteService.getNotificationOutOfMoney
-  )
+  const ability = useContext(AbilityContext)
+
+  const { data: notifications } = useSWR('GET_ALL_NOTIFICATIONS', spendNoteService.getNotificationOutOfMoney, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateOnMount: false,
+    refreshInterval: 0
+  })
   const { data: eventNotifications, mutate: mutateEventNotifications } = useSWR(
     'GET_ALL_EVENT_NOTIFICATIONS',
-    ScheduleService.notifySchedule
+    ScheduleService.notifySchedule,
+    { revalidateOnFocus: false, revalidateOnReconnect: false, refreshInterval: 0, revalidateOnMount: false }
   )
-  const ability = useContext(AbilityContext)
 
   // ** Props
   const { settings } = props
@@ -125,34 +127,39 @@ const NotificationDropdown = (props: Props) => {
 
   // ** Socket setup
   useEffect(() => {
-    const access_token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
+    const role: any = localStorage.getItem('userData')
+    if (role?.role === 'member') {
+      const access_token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
 
-    const socket = io('https://daitongquan.onrender.com', {
-      extraHeaders: {
-        Authorization: `Bearer ${access_token}`
+      const socket = io('https://daitongquan.onrender.com', {
+        extraHeaders: {
+          Authorization: `Bearer ${access_token}`
+        }
+      }) // replace with your socket server URL
+
+      socket.on('connect', function () {
+        console.log('connected')
+        socket.emit('getSchedule')
+      })
+
+      socket.on('schedules', data => {
+        // Update event notifications list
+        console.log('Event notifications:', data)
+
+        mutateEventNotifications()
+      })
+
+      socket.on('disconnect', () => {
+        console.log('Disconnected from socket server')
+      })
+
+      return () => {
+        socket.disconnect()
       }
-    }) // replace with your socket server URL
-
-    socket.on('connect', function () {
-      console.log('connected')
-      socket.emit('getSchedule')
-    })
-
-    socket.on('schedules', data => {
-      // Update event notifications list
-      console.log('Event notifications:', data)
-
-      mutateEventNotifications()
-    })
-
-    socket.on('disconnect', () => {
-      console.log('Disconnected from socket server')
-    })
-
-    return () => {
-      socket.disconnect()
+    } else {
+      return
     }
-  }, [mutateEventNotifications])
+  }, [])
 
   const handleDropdownOpen = (event: SyntheticEvent) => {
     setAnchorEl(event.currentTarget)
@@ -294,6 +301,11 @@ const NotificationDropdown = (props: Props) => {
       </Menu>
     </Fragment>
   )
+}
+
+NotificationDropdown.acl = {
+  action: 'read',
+  subject: 'member-page'
 }
 
 export default NotificationDropdown
