@@ -11,7 +11,8 @@ import {
   Typography,
   DialogActions,
   Button,
-  IconButton
+  IconButton,
+  DialogTitle
 } from '@mui/material'
 import { CommentPostState } from 'src/store/apps/posts'
 import { renderContent, RenderUser } from './posts'
@@ -27,9 +28,10 @@ import { Theme } from 'emoji-picker-react'
 import themeConfig from 'src/configs/themeConfig'
 import { useSettings } from 'src/@core/hooks/useSettings'
 import useDebounce from 'src/utils/debounce'
+import toast from 'react-hot-toast'
 
 const CommentPost = (props: CommentPostState) => {
-  const { post, openCommentModal, closeCommentModalPost, scroll } = props
+  const { post, openCommentModal, closeCommentModalPost, scroll, commentPost } = props
   const [open, setOpen] = React.useState<boolean>(false)
   const [comment, setComment] = React.useState('')
   const debouncedComment = useDebounce(comment, 500)
@@ -43,10 +45,10 @@ const CommentPost = (props: CommentPostState) => {
     }
   }
 
-
   const handleCloseModal = () => {
     closeCommentModalPost()
     setOpen(false)
+    setComment('')
   }
 
   const handleTheme = () => {
@@ -88,8 +90,21 @@ const CommentPost = (props: CommentPostState) => {
     setComment(comment + emojiObject.emoji)
   }
 
-  const onSubmit = () => {
-    
+  const data = {
+    postId: post._id,
+    content: debouncedComment as string
+  }
+
+  const commentPostHandler = async () => {
+    if (commentPost) {
+      toast.promise(commentPost(data), {
+        loading: 'Commenting...',
+        success: 'Commented!',
+        error: 'Error commenting post'
+      })
+    }
+
+    handleCloseModal()
   }
 
   return (
@@ -103,6 +118,23 @@ const CommentPost = (props: CommentPostState) => {
         onClose={closeCommentModalPost}
         PaperProps={{ sx: { borderRadius: 2 } }}
       >
+        {fullScreen ? (
+          <DialogTitle>
+            <Grid container>
+              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography variant='h6' fontWeight={'bold'}>
+                  Comment Post
+                </Typography>
+                <IconButton onClick={handleCloseModal}>
+                  <Icon icon='eva:close-fill' />
+                </IconButton>
+              </Grid>
+              <Grid item xs={12}>
+                <Divider />
+              </Grid>
+            </Grid>
+          </DialogTitle>
+        ) : null}
         <DialogContent>
           <Grid container spacing={3}>
             <Grid
@@ -247,8 +279,8 @@ const CommentPost = (props: CommentPostState) => {
                     }}
                   />
                 </Grid>
-                <Grid item xs={12} sx={{ paddingTop: '7px !important' }}>
-                  {/* {post.postImage ? (
+                {/* <Grid item xs={12} sx={{ paddingTop: '7px !important' }}>
+                  {post.postImage ? (
                     <Box
                       sx={{
                         width: 'fit-content'
@@ -267,16 +299,18 @@ const CommentPost = (props: CommentPostState) => {
                         alt='post image'
                       />
                     </Box>
-                  ) : null} */}
-                </Grid>
-                <Grid item sx={{ paddingLeft: '0px !important' }}></Grid>
+                  ) : null}
+                </Grid> */}
+                {/* <Grid item sx={{ paddingLeft: '0px !important' }}></Grid> */}
               </Grid>
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseModal}>Close</Button>
-          <Button onClick={closeCommentModalPost}>Comment</Button>
+          <Button variant='contained' onClick={() => commentPostHandler()}>
+            Comment
+          </Button>
         </DialogActions>
       </Dialog>
     </Grid>

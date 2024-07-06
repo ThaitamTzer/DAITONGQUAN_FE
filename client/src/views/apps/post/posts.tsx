@@ -1,9 +1,9 @@
-import { Card, Typography, CardMedia, Divider, Grid, IconButton, Button } from '@mui/material'
+import { Card, Typography, CardMedia, Divider, Grid, IconButton, Button, Menu, MenuItem } from '@mui/material'
 import { Box } from '@mui/system'
 import Avatar from 'src/@core/components/mui/avatar'
 import Icon from 'src/@core/components/icon'
 import { GetPostType } from 'src/types/apps/postTypes'
-import { Fragment, useContext } from 'react'
+import React, { Fragment, useContext } from 'react'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import toast from 'react-hot-toast'
 
@@ -86,6 +86,8 @@ export const renderContent = (content: string) => {
 
 const PostsPage = (props: UserPostsPageProps) => {
   const { posts, children, approvePost, reactionPost, deleteReactionPost, openCommentModalPost } = props
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [selectedPostId, setSelectedPostId] = React.useState<string | null>(null)
   const ability = useContext(AbilityContext)
 
   const RenderButtonReaction = ({ isLiked, post }: { isLiked: boolean; post: any }) => {
@@ -130,6 +132,16 @@ const PostsPage = (props: UserPostsPageProps) => {
     if (deleteReactionPost) {
       await deleteReactionPost(_id)
     }
+  }
+
+  const handleMoreOptions = (event: React.MouseEvent<HTMLElement>, postId: string) => {
+    setAnchorEl(event.currentTarget)
+    setSelectedPostId(postId)
+  }
+
+  const handleCloseOptions = () => {
+    setAnchorEl(null)
+    setSelectedPostId(null)
   }
 
   const userAvatar = (userId: any) => {
@@ -183,23 +195,83 @@ const PostsPage = (props: UserPostsPageProps) => {
                 display: 'grid',
                 placeItems: 'center',
                 alignContent: 'space-between',
-                marginTop: 2
+                marginTop: 2,
+                ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
               }}
             >
               {userAvatar(post.userId)}
             </Grid>
             <Grid item lg={11} md={10} xs={10} sm={11}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '-6px' }}>
-                  {RenderUser(post.userId, post.updatedAt, post.isShow, post.isApproved)}
-                  <IconButton size='small'>
+              <Grid
+                container
+                spacing={2}
+
+                // onClick={() => console.log('jahjdhajs')}
+                // sx={{ ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {}) }}
+              >
+                <Grid
+                  item
+                  xs={12}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginBottom: '-6px',
+                    ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
+                  }}
+                >
+                  {RenderUser(post.userId, post.createdAt, post.isShow, post.isApproved)}
+                  <IconButton onClick={event => handleMoreOptions(event, post._id)} size='small'>
                     <Icon icon='ri:more-fill' />
                   </IconButton>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl) && selectedPostId === post._id}
+                    onClose={handleCloseOptions}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        handleApprove(post._id, true)
+                        handleCloseOptions()
+                      }}
+                    >
+                      Approve
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        handleApprove(post._id, false)
+                        handleCloseOptions()
+                      }}
+                    >
+                      Disapprove
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        handleDeleteReaction(post._id)
+                        handleCloseOptions()
+                      }}
+                    >
+                      Delete Reaction
+                    </MenuItem>
+                  </Menu>
                 </Grid>
-                <Grid item xs={12} sx={{ paddingTop: '0px !important' }}>
+                <Grid
+                  item
+                  xs={12}
+                  sx={{
+                    paddingTop: '0px !important',
+                    ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
+                  }}
+                >
                   {renderContent(post.content)}
                 </Grid>
-                <Grid item xs={12} sx={{ paddingTop: '7px !important' }}>
+                <Grid
+                  item
+                  xs={12}
+                  sx={{
+                    paddingTop: '7px !important',
+                    ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
+                  }}
+                >
                   {post.postImage ? (
                     <Box
                       sx={{
@@ -214,6 +286,7 @@ const PostsPage = (props: UserPostsPageProps) => {
                           objectPosition: 'left top',
                           borderRadius: 1
                         }}
+                        onClick={() => window.open(post.postImage, '_blank')}
                         component='img'
                         image={post.postImage}
                         alt='post image'

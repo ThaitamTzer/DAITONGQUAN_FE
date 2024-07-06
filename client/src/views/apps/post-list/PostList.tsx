@@ -58,7 +58,7 @@ type PostListProps = {
 }
 
 const PostList = (props: PostListProps) => {
-  const { listPost, loading, openModalPost, closeModalPost } = props
+  const { listPost, loading, openModalPost } = props
 
   const [page, setPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(5)

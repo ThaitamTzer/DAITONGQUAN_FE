@@ -82,8 +82,8 @@ export const approvePostStore = create<PostListState>(set => ({
   },
   approvePost: async (_id: string, isApproved: boolean) => {
     set({ loading: true })
-    await postService.approvePost(_id, isApproved)
-    await approvePostStore.getState().getListPost()
+    postService.approvePost(_id, isApproved)
+    approvePostStore.getState().getListPost()
   },
   openModalPost: (data: GetPostType) => set({ openModal: true, modalPost: data }),
   closeModalPost: () => {
