@@ -1,6 +1,7 @@
 import { create } from 'zustand'
-import { GetPostType, AddPostType, UpdatePostType } from 'src/types/apps/postTypes'
+import { GetPostType, AddPostType, UpdatePostType, UserCommentType } from 'src/types/apps/postTypes'
 import postService from 'src/service/post.service'
+import { DialogProps } from '@mui/material'
 
 type UserPostState = {
   posts: GetPostType[]
@@ -22,6 +23,16 @@ type PostListState = {
   modalPost: GetPostType
   openModalPost: (data: GetPostType) => void
   closeModalPost: () => void
+}
+
+export type CommentPostState = {
+  post: GetPostType
+  scroll: DialogProps['scroll']
+  setScroll: (scroll: DialogProps['scroll']) => void
+  commentPost: (data: UserCommentType) => Promise<void>
+  openCommentModal: boolean
+  openCommentModalPost?: (data: GetPostType) => void
+  closeCommentModalPost: () => void
 }
 
 export const usePostStore = create<UserPostState>(set => ({
@@ -77,5 +88,22 @@ export const approvePostStore = create<PostListState>(set => ({
   openModalPost: (data: GetPostType) => set({ openModal: true, modalPost: data }),
   closeModalPost: () => {
     set(state => ({ openModal: false, modalPost: state.modalPost }))
+  }
+}))
+
+export const commentPostState = create<CommentPostState>(set => ({
+  post: {} as GetPostType,
+  scroll: 'paper',
+  setScroll: (scroll: DialogProps['scroll']) => set({ scroll }),
+  openCommentModal: false,
+  openCommentModalPost: (data: GetPostType) =>
+    set(state => ({ openCommentModal: true, post: data, scroll: state.scroll })),
+  closeCommentModalPost: () => {
+    set(state => ({ openCommentModal: false, post: state.post }))
+  },
+  commentPost: async (data: UserCommentType) => {
+    set({ post: {} as GetPostType })
+    await postService.commentToPost(data)
+    await usePostStore.getState().getAllUserPosts()
   }
 }))

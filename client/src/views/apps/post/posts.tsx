@@ -3,7 +3,7 @@ import { Box } from '@mui/system'
 import Avatar from 'src/@core/components/mui/avatar'
 import Icon from 'src/@core/components/icon'
 import { GetPostType } from 'src/types/apps/postTypes'
-import { useContext } from 'react'
+import { Fragment, useContext } from 'react'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import toast from 'react-hot-toast'
 
@@ -13,49 +13,80 @@ type UserPostsPageProps = {
   approvePost?: (_id: string, isApproved: boolean) => Promise<void>
   reactionPost?: (_id: string, action: string) => Promise<void>
   deleteReactionPost?: (_id: string) => Promise<void>
+  openCommentModalPost?: (data: GetPostType) => void
+}
+
+const renderRelativeTime = (date: Date | string) => {
+  const currentDate = new Date()
+  const postDate = new Date(date)
+  const diff = currentDate.getTime() - postDate.getTime()
+  const seconds = diff / 1000
+  const minutes = seconds / 60
+  const hours = minutes / 60
+  const days = hours / 24
+  const months = days / 30
+  const years = months / 12
+
+  if (years >= 1) {
+    return `${postDate.getDate()}/${postDate.getMonth() + 1}/${postDate.getFullYear()}`
+  }
+  if (months >= 1) {
+    return `${Math.floor(months)} months ago`
+  }
+  if (days >= 1) {
+    return `${Math.floor(days)} days ago`
+  }
+  if (hours >= 1) {
+    return `${Math.floor(hours)} hours ago`
+  }
+  if (minutes >= 1) {
+    return `${Math.floor(minutes)} minutes ago`
+  }
+
+  return `${Math.floor(seconds)} seconds ago`
+}
+
+const renderHidePost = (isShow: boolean) => {
+  return !isShow ? <Icon icon='ic:outline-lock' color='GrayText' /> : null
+}
+
+const renderIsApproved = (isApproved: boolean) => {
+  return !isApproved ? <Icon icon='iconamoon:clock-thin' color='#ffcc00' /> : null
+}
+
+export const RenderUser = (userId: any, updatedAt: Date | string, isShow: boolean, isApproved: boolean) => {
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <Typography variant='subtitle1' fontWeight={'bold'} marginRight={2}>
+        {userId?.firstname} {userId?.lastname}
+      </Typography>
+      <Typography fontSize={'14px'} color='GrayText' marginRight={2} mt={0.6}>
+        {renderRelativeTime(updatedAt)}
+      </Typography>
+      {renderHidePost(isShow)}
+      {renderIsApproved(isApproved)}
+    </Box>
+  )
+}
+
+export const renderContent = (content: string) => {
+  return content ? (
+    <Typography
+      variant='body1'
+      sx={{
+        wordWrap: 'break-word',
+        whiteSpace: 'pre-wrap',
+        minWidth: '100%'
+      }}
+    >
+      {content}
+    </Typography>
+  ) : null
 }
 
 const PostsPage = (props: UserPostsPageProps) => {
-  const { posts, children, approvePost, reactionPost, deleteReactionPost } = props
+  const { posts, children, approvePost, reactionPost, deleteReactionPost, openCommentModalPost } = props
   const ability = useContext(AbilityContext)
-
-  const renderRelativeTime = (date: Date | string) => {
-    const currentDate = new Date()
-    const postDate = new Date(date)
-    const diff = currentDate.getTime() - postDate.getTime()
-    const seconds = diff / 1000
-    const minutes = seconds / 60
-    const hours = minutes / 60
-    const days = hours / 24
-    const months = days / 30
-    const years = months / 12
-
-    if (years >= 1) {
-      return `${postDate.getDate()}/${postDate.getMonth() + 1}/${postDate.getFullYear()}`
-    }
-    if (months >= 1) {
-      return `${Math.floor(months)} months ago`
-    }
-    if (days >= 1) {
-      return `${Math.floor(days)} days ago`
-    }
-    if (hours >= 1) {
-      return `${Math.floor(hours)} hours ago`
-    }
-    if (minutes >= 1) {
-      return `${Math.floor(minutes)} minutes ago`
-    }
-
-    return `${Math.floor(seconds)} seconds ago`
-  }
-
-  const renderHidePost = (isShow: boolean) => {
-    return !isShow ? <Icon icon='ic:outline-lock' color='GrayText' /> : null
-  }
-
-  const renderIsApproved = (isApproved: boolean) => {
-    return !isApproved ? <Icon icon='iconamoon:clock-thin' color='#ffcc00' /> : null
-  }
 
   const RenderButtonReaction = ({ isLiked, post }: { isLiked: boolean; post: any }) => {
     return isLiked ? (
@@ -76,21 +107,6 @@ const PostsPage = (props: UserPostsPageProps) => {
       >
         {post.reactionCount}
       </Button>
-    )
-  }
-
-  const renderUser = (userId: any, updatedAt: Date | string, isShow: boolean, isApproved: boolean) => {
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Typography variant='subtitle1' fontWeight={'bold'} marginRight={2}>
-          {userId?.firstname} {userId?.lastname}
-        </Typography>
-        <Typography fontSize={'14px'} color='GrayText' marginRight={2} mt={0.6}>
-          {renderRelativeTime(updatedAt)}
-        </Typography>
-        {renderHidePost(isShow)}
-        {renderIsApproved(isApproved)}
-      </Box>
     )
   }
 
@@ -118,21 +134,6 @@ const PostsPage = (props: UserPostsPageProps) => {
 
   const userAvatar = (userId: any) => {
     return <Avatar src={userId?.avatar} alt={`${userId?.firstname} ${userId?.lastname}`} />
-  }
-
-  const renderContent = (content: string) => {
-    return content ? (
-      <Typography
-        variant='body1'
-        sx={{
-          wordWrap: 'break-word',
-          whiteSpace: 'pre-wrap',
-          minWidth: '100%'
-        }}
-      >
-        {content}
-      </Typography>
-    ) : null
   }
 
   const ButtonApprove = ({ isApproved, _id }: { isApproved: boolean; _id: string }) => {
@@ -170,7 +171,7 @@ const PostsPage = (props: UserPostsPageProps) => {
   return (
     <Card>
       {posts.map(post => (
-        <div key={post._id}>
+        <Fragment key={post._id}>
           <Grid container sx={{ padding: 3 }}>
             <Grid
               item
@@ -182,7 +183,7 @@ const PostsPage = (props: UserPostsPageProps) => {
                 display: 'grid',
                 placeItems: 'center',
                 alignContent: 'space-between',
-                marginTop: 1
+                marginTop: 2
               }}
             >
               {userAvatar(post.userId)}
@@ -190,12 +191,12 @@ const PostsPage = (props: UserPostsPageProps) => {
             <Grid item lg={11} md={10} xs={10} sm={11}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '-6px' }}>
-                  {renderUser(post.userId, post.updatedAt, post.isShow, post.isApproved)}
+                  {RenderUser(post.userId, post.updatedAt, post.isShow, post.isApproved)}
                   <IconButton size='small'>
                     <Icon icon='ri:more-fill' />
                   </IconButton>
                 </Grid>
-                <Grid item xs={11} sx={{ paddingTop: '0px !important' }}>
+                <Grid item xs={12} sx={{ paddingTop: '0px !important' }}>
                   {renderContent(post.content)}
                 </Grid>
                 <Grid item xs={12} sx={{ paddingTop: '7px !important' }}>
@@ -222,20 +223,12 @@ const PostsPage = (props: UserPostsPageProps) => {
                 </Grid>
                 {ability.can('read', 'member-page') && (
                   <Grid item sx={{ paddingLeft: '0px !important' }}>
-                    {/* <Button
-                      color='inherit'
-                      sx={{ borderRadius: '40%' }}
-                      startIcon={
-                        <RenderLiked isLiked={post.userReaction.some(reaction => reaction.userId._id === idUser)} />
-                      }
-                    >
-                      {post.reactionCount}
-                    </Button> */}
                     <RenderButtonReaction
                       isLiked={post.userReaction.some(reaction => reaction.userId._id === idUser)}
                       post={post}
                     />
                     <Button
+                      onClick={() => openCommentModalPost && openCommentModalPost(post)}
                       color='inherit'
                       sx={{ borderRadius: '40%' }}
                       startIcon={<Icon icon='teenyicons:chat-outline' />}
@@ -250,7 +243,7 @@ const PostsPage = (props: UserPostsPageProps) => {
             </Grid>
           </Grid>
           <Divider />
-        </div>
+        </Fragment>
       ))}
     </Card>
   )

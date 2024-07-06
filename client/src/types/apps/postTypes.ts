@@ -27,6 +27,11 @@ export type UserReactionType = [
   }
 ]
 
+export type UserCommentType = {
+  content: string
+  postId: string
+}
+
 export type GetPostType = {
   _id: string
   userId: User

@@ -1,5 +1,5 @@
 import axiosClient from 'src/lib/axios'
-import { GetPostType, GetPostBySearchType, AddPostType, UpdatePostType } from 'src/types/apps/postTypes'
+import { GetPostType, GetPostBySearchType, AddPostType, UpdatePostType, UserCommentType } from 'src/types/apps/postTypes'
 
 const postService = {
   // ** GET ======================================
@@ -56,6 +56,10 @@ const postService = {
   // Add post to favorite
   addPostToFavorite: async (_id: string): Promise<void> => {
     await axiosClient.post(`/post/favorite/${_id}`)
+  },
+
+  commentToPost: async (data: UserCommentType): Promise<void> => {
+    await axiosClient.post(`/post/comment/`,data)
   },
 
   // ** PUT ======================================
