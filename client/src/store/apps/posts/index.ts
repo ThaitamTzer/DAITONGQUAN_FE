@@ -8,11 +8,18 @@ type UserPostState = {
   loading: boolean
   addPost: (data: AddPostType) => Promise<void>
   getAllUserPosts: () => Promise<void>
-  updateUserPost: (data: UpdatePostType) => Promise<void>
+  updateUserPost: (_id: string, data: UpdatePostType) => Promise<void>
   deletePost: (_id: string) => Promise<void>
   reactionPost: (_id: string, action: string) => Promise<void>
   deleteReactionPost: (_id: string) => Promise<void>
   addPostToFavorite: (_id: string) => Promise<void>
+}
+
+export type EditPostState = {
+  openEditModal: boolean
+  editPost: GetPostType
+  openEditPost?: (data: GetPostType) => void
+  closeEditPost: () => void
 }
 
 type PostListState = {
@@ -48,10 +55,11 @@ export const usePostStore = create<UserPostState>(set => ({
     set({ loading: true })
     await postService.addPost(data)
     await usePostStore.getState().getAllUserPosts()
+    set({ loading: false })
   },
-  updateUserPost: async (data: UpdatePostType) => {
+  updateUserPost: async (_id: string, data: UpdatePostType) => {
     set({ loading: true })
-    await postService.updatePost(data._id, data)
+    await postService.updatePost(_id, data)
     await usePostStore.getState().getAllUserPosts()
   },
   deletePost: async (_id: string) => {
@@ -111,5 +119,14 @@ export const commentPostState = create<CommentPostState>(set => ({
     set({ post: {} as GetPostType })
     await postService.commentToPost(data)
     await usePostStore.getState().getAllUserPosts()
+  }
+}))
+
+export const editPostState = create<EditPostState>(set => ({
+  openEditModal: false,
+  editPost: {} as GetPostType,
+  openEditPost: (data: GetPostType) => set({ openEditModal: true, editPost: data }),
+  closeEditPost: () => {
+    set(state => ({ openEditModal: false, post: state.editPost }))
   }
 }))

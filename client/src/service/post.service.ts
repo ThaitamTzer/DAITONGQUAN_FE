@@ -54,9 +54,19 @@ const postService = {
   // ** POST ======================================
   // Add a new post
   addPost: async (data: AddPostType): Promise<GetPostType> => {
-    const response: GetPostType = await axiosClient.post('/post/add-post', data)
+    const formData = new FormData()
+    formData.append('content', data.content)
+    if (data.file) {
+      formData.append('file', data.file)
+    }
 
-    return response
+    const response = await axiosClient.post('/post', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+
+    return response.data
   },
 
   // Add post to favorite
@@ -70,8 +80,17 @@ const postService = {
 
   // ** PUT ======================================
   // Update a post
-  updatePost: async (_id: string, data: UpdatePostType): Promise<GetPostType> => {
-    const response = await axiosClient.put(`/post/${_id}`, data)
+  updatePost: async (_id: string, data: UpdatePostType) => {
+    const formData = new FormData()
+    formData.append('content', data.content || '')
+    formData.append('postImage', data.postImage || '')
+    formData.append('isShow', data.isShow?.toString() || 'true')
+
+    const response = await axiosClient.put(`/post/${_id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
 
     return response.data
   },

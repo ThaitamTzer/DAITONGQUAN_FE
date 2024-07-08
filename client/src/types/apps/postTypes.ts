@@ -9,14 +9,18 @@ export type User = {
 
 export type AddPostType = {
   content: string
-  postImage?: string
+  file?: File
 }
 
 export type UpdatePostType = {
-  _id: string
   content?: string
   isShow?: boolean
   postImage?: string
+}
+
+export type UserHidePostType = {
+  postId: string
+  isShow: boolean
 }
 
 export type UserReactionType = [

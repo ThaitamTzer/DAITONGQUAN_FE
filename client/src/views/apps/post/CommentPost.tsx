@@ -63,7 +63,6 @@ const CommentPost = (props: CommentPostState) => {
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'))
 
-
   const onChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value
     setComment(value)
@@ -100,6 +99,13 @@ const CommentPost = (props: CommentPostState) => {
         open={openCommentModal}
         onClose={closeCommentModalPost}
         PaperProps={{ sx: { borderRadius: 2 } }}
+        sx={{
+          '.MuiDialog-paper': {
+            borderRadius: 2,
+            boxShadow: 0,
+            overflow: 'visible'
+          }
+        }}
       >
         {fullScreen ? (
           <DialogTitle>

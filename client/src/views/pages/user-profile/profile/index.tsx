@@ -14,18 +14,23 @@ import AboutOverivew from 'src/views/pages/user-profile/profile/AboutOverivew'
 import { ProfileTabType } from 'src/types/apps/profileType'
 import Posts from 'src/views/apps/post/posts'
 
-import { usePostStore, commentPostState } from 'src/store/apps/posts' // Adjust the path to your store file
+import { usePostStore, commentPostState, editPostState } from 'src/store/apps/posts' // Adjust the path to your store file
 import { useEffect } from 'react'
 import CommentPost from 'src/views/apps/post/CommentPost'
+import EditPost from 'src/views/apps/post/EditPost'
 
 const ProfileTab = ({ data }: { data: ProfileTabType }) => {
   const getAllUserPosts = usePostStore(state => state.getAllUserPosts)
   const posts = usePostStore(state => state.posts)
   const reactionPost = usePostStore(state => state.reactionPost)
   const deleteReactionPost = usePostStore(state => state.deleteReactionPost)
+  const deletePost = usePostStore(state => state.deletePost)
   const addPostToFavorite = usePostStore(state => state.addPostToFavorite)
+  const updatePost = usePostStore(state => state.updateUserPost)
   const { post, commentPost, openCommentModal, closeCommentModalPost, openCommentModalPost, scroll, setScroll } =
     commentPostState(state => state)
+
+  const { openEditModal, editPost, openEditPost, closeEditPost } = editPostState(state => state)
 
   useEffect(() => {
     getAllUserPosts()
@@ -45,6 +50,9 @@ const ProfileTab = ({ data }: { data: ProfileTabType }) => {
               deleteReactionPost={deleteReactionPost}
               openCommentModalPost={openCommentModalPost}
               addPostToFavorite={addPostToFavorite}
+              openEditPost={openEditPost}
+              updatePost={updatePost}
+              deletePost={deletePost}
             />
             <CommentPost
               post={post}
@@ -53,6 +61,11 @@ const ProfileTab = ({ data }: { data: ProfileTabType }) => {
               closeCommentModalPost={closeCommentModalPost}
               openCommentModal={openCommentModal}
               commentPost={commentPost}
+            />
+            <EditPost
+              editPost={editPost}
+              openEditModal={openEditModal}
+              closeEditPost={closeEditPost}
             />
           </Grid>
           {/* <ConnectionsTeams connections={data.connections} teams={data.teamsTech} /> */}
