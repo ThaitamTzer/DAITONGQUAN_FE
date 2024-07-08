@@ -7,7 +7,6 @@ import {
   useMediaQuery,
   Divider,
   TextField,
-  TextFieldProps,
   Typography,
   DialogActions,
   Button,
@@ -18,7 +17,7 @@ import { CommentPostState } from 'src/store/apps/posts'
 import { renderContent, RenderUser } from './posts'
 import Icon from 'src/@core/components/icon'
 import { Box } from '@mui/system'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useTheme } from '@mui/material/styles'
 import EmojiPicker from 'emoji-picker-react'
 import { EmojiStyle } from 'emoji-picker-react'

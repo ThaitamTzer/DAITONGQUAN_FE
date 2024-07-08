@@ -30,7 +30,7 @@ const ProfileTab = ({ data }: { data: ProfileTabType }) => {
   const { post, commentPost, openCommentModal, closeCommentModalPost, openCommentModalPost, scroll, setScroll } =
     commentPostState(state => state)
 
-  const { openEditModal, editPost, openEditPost, closeEditPost } = editPostState(state => state)
+  const { openEditModal, editPost, openEditPost, closeEditPost, loading } = editPostState(state => state)
 
   useEffect(() => {
     getAllUserPosts()
@@ -64,8 +64,10 @@ const ProfileTab = ({ data }: { data: ProfileTabType }) => {
             />
             <EditPost
               editPost={editPost}
+              loading={loading}
               openEditModal={openEditModal}
               closeEditPost={closeEditPost}
+              updateUserPost={updatePost}
             />
           </Grid>
           {/* <ConnectionsTeams connections={data.connections} teams={data.teamsTech} /> */}

@@ -16,10 +16,12 @@ type UserPostState = {
 }
 
 export type EditPostState = {
+  loading: boolean
   openEditModal: boolean
   editPost: GetPostType
   openEditPost?: (data: GetPostType) => void
   closeEditPost: () => void
+  updateUserPost: (_id: string, data: UpdatePostType) => Promise<void>
 }
 
 type PostListState = {
@@ -124,9 +126,15 @@ export const commentPostState = create<CommentPostState>(set => ({
 
 export const editPostState = create<EditPostState>(set => ({
   openEditModal: false,
+  loading: false,
   editPost: {} as GetPostType,
   openEditPost: (data: GetPostType) => set({ openEditModal: true, editPost: data }),
   closeEditPost: () => {
     set(state => ({ openEditModal: false, post: state.editPost }))
+  },
+  updateUserPost: async (_id: string, data: UpdatePostType) => {
+    set({ loading: true })
+    await postService.updatePost(_id, data)
+    await usePostStore.getState().getAllUserPosts()
   }
 }))

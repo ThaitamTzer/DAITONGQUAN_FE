@@ -17,9 +17,9 @@ export const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme })
   }
 }))
 
-const DialogWithCustomCloseButton = ({ children, handleClose }: any) => {
+const DialogWithCustomCloseButton = ({ children, handleClose, style }: any) => {
   return (
-    <DialogContent>
+    <DialogContent sx={style}>
       <CustomCloseButton onClick={handleClose}>
         <Icon icon='tabler:x' fontSize='1.25rem' />
       </CustomCloseButton>
