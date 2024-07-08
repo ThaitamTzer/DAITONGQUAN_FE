@@ -63,23 +63,6 @@ const CommentPost = (props: CommentPostState) => {
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'))
 
-  // const CustomTextFieldNoBorder = styled(TextField)<TextFieldProps>(() => ({
-  //   borderWidth: '0px !important',
-  //   '.MuiOutlinedInput-notchedOutline': {
-  //     borderWidth: '0px !important'
-  //   },
-
-  //   // '.Mui-focused': {
-  //   //   outline: 'none !important',
-  //   //   boxShadow: 'none !important'
-  //   // },
-  //   '.MuiOutlinedInput-input': {
-  //     padding: '0px !important'
-  //   },
-  //   '.MuiInputBase-multiline': {
-  //     padding: '0px !important'
-  //   }
-  // }))
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value

@@ -1,4 +1,16 @@
-import { Card, Typography, CardMedia, Divider, Grid, IconButton, Button, Menu, MenuItem } from '@mui/material'
+import {
+  Card,
+  Typography,
+  CardMedia,
+  Divider,
+  Grid,
+  IconButton,
+  Button,
+  Menu,
+  MenuItem,
+  Dialog,
+  DialogContent
+} from '@mui/material'
 import { Box } from '@mui/system'
 import Avatar from 'src/@core/components/mui/avatar'
 import Icon from 'src/@core/components/icon'
@@ -14,6 +26,7 @@ type UserPostsPageProps = {
   reactionPost?: (_id: string, action: string) => Promise<void>
   deleteReactionPost?: (_id: string) => Promise<void>
   openCommentModalPost?: (data: GetPostType) => void
+  addPostToFavorite?: (_id: string) => Promise<void>
 }
 
 const renderRelativeTime = (date: Date | string) => {
@@ -85,8 +98,10 @@ export const renderContent = (content: string) => {
 }
 
 const PostsPage = (props: UserPostsPageProps) => {
-  const { posts, children, approvePost, reactionPost, deleteReactionPost, openCommentModalPost } = props
+  const { posts, children, approvePost, reactionPost, deleteReactionPost, openCommentModalPost, addPostToFavorite } =
+    props
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [openImage, setOpenImage] = React.useState<string>('')
   const [selectedPostId, setSelectedPostId] = React.useState<string | null>(null)
   const ability = useContext(AbilityContext)
 
@@ -144,8 +159,64 @@ const PostsPage = (props: UserPostsPageProps) => {
     setSelectedPostId(null)
   }
 
+  const handleAddPostToFavorite = async (_id: string) => {
+    if (addPostToFavorite) {
+      toast.promise(addPostToFavorite(_id), {
+        loading: 'Adding to favorite...',
+        success: 'Added to favorite!',
+        error: 'Error adding to favorite'
+      })
+    }
+  }
+
   const userAvatar = (userId: any) => {
     return <Avatar src={userId?.avatar} alt={`${userId?.firstname} ${userId?.lastname}`} />
+  }
+
+  const handleOpenImage = (id: string) => {
+    setOpenImage(id)
+  }
+
+  const handleCloseImage = () => {
+    setOpenImage('')
+  }
+
+  const ImageDialog = (post: any) => {
+    // Assuming handleCloseImage is defined to set openImage to null or false
+    return (
+      <Dialog
+        fullScreen
+        key={post._id}
+        open={openImage === post._id}
+        onClose={handleCloseImage} // This will trigger on clicking outside or pressing escape
+      >
+        <DialogContent sx={{ py: '0px !important', px: '60px !important' }} onClick={() => handleCloseImage()}>
+          {/* Close Button */}
+          <IconButton
+            onClick={handleCloseImage}
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              margin: 1
+            }}
+          >
+            <Icon icon='eva:close-fill' width={40} height={40} />
+          </IconButton>
+          {/* Image */}
+          <CardMedia
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain'
+            }}
+            component='img'
+            image={post.postImage}
+            alt='post image'
+          />
+        </DialogContent>
+      </Dialog>
+    )
   }
 
   const ButtonApprove = ({ isApproved, _id }: { isApproved: boolean; _id: string }) => {
@@ -220,39 +291,54 @@ const PostsPage = (props: UserPostsPageProps) => {
                   }}
                 >
                   {RenderUser(post.userId, post.createdAt, post.isShow, post.isApproved)}
-                  <IconButton onClick={event => handleMoreOptions(event, post._id)} size='small'>
-                    <Icon icon='ri:more-fill' />
-                  </IconButton>
-                  <Menu
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl) && selectedPostId === post._id}
-                    onClose={handleCloseOptions}
-                  >
-                    <MenuItem
-                      onClick={() => {
-                        handleApprove(post._id, true)
-                        handleCloseOptions()
-                      }}
-                    >
-                      Approve
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        handleApprove(post._id, false)
-                        handleCloseOptions()
-                      }}
-                    >
-                      Disapprove
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        handleDeleteReaction(post._id)
-                        handleCloseOptions()
-                      }}
-                    >
-                      Delete Reaction
-                    </MenuItem>
-                  </Menu>
+                  {ability.can('read', 'member-page') && (
+                    <>
+                      <IconButton onClick={event => handleMoreOptions(event, post._id)} size='small'>
+                        <Icon icon='ri:more-fill' />
+                      </IconButton>
+                      <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl) && selectedPostId === post._id}
+                        onClose={handleCloseOptions}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'right'
+                        }}
+                        transformOrigin={{
+                          vertical: 'top',
+                          horizontal: 'right'
+                        }}
+                      >
+                        <MenuItem
+                          onClick={() => {
+                            handleAddPostToFavorite(post._id)
+                            handleCloseOptions()
+                          }}
+                        >
+                          <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                            <Typography variant='body1'>Favorite</Typography>
+                            <Icon icon='mdi:star' color='yellow' />
+                          </Box>
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            handleApprove(post._id, false)
+                            handleCloseOptions()
+                          }}
+                        >
+                          Disapprove
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            handleDeleteReaction(post._id)
+                            handleCloseOptions()
+                          }}
+                        >
+                          Delete Reaction
+                        </MenuItem>
+                      </Menu>
+                    </>
+                  )}
                 </Grid>
                 <Grid
                   item
@@ -286,13 +372,14 @@ const PostsPage = (props: UserPostsPageProps) => {
                           objectPosition: 'left top',
                           borderRadius: 1
                         }}
-                        onClick={() => window.open(post.postImage, '_blank')}
+                        onClick={() => handleOpenImage(post._id)}
                         component='img'
                         image={post.postImage}
                         alt='post image'
                       />
                     </Box>
                   ) : null}
+                  {ImageDialog(post)}
                 </Grid>
                 {ability.can('read', 'member-page') && (
                   <Grid item sx={{ paddingLeft: '0px !important' }}>

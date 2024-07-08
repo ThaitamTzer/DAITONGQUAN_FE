@@ -12,6 +12,7 @@ type UserPostState = {
   deletePost: (_id: string) => Promise<void>
   reactionPost: (_id: string, action: string) => Promise<void>
   deleteReactionPost: (_id: string) => Promise<void>
+  addPostToFavorite: (_id: string) => Promise<void>
 }
 
 type PostListState = {
@@ -66,6 +67,11 @@ export const usePostStore = create<UserPostState>(set => ({
   deleteReactionPost: async (_id: string) => {
     set({ loading: true })
     await postService.deleteReactionToPost(_id)
+    await usePostStore.getState().getAllUserPosts()
+  },
+  addPostToFavorite: async (_id: string) => {
+    set({ loading: true })
+    await postService.addPostToFavorite(_id)
     await usePostStore.getState().getAllUserPosts()
   }
 }))

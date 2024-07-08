@@ -23,6 +23,7 @@ const ProfileTab = ({ data }: { data: ProfileTabType }) => {
   const posts = usePostStore(state => state.posts)
   const reactionPost = usePostStore(state => state.reactionPost)
   const deleteReactionPost = usePostStore(state => state.deleteReactionPost)
+  const addPostToFavorite = usePostStore(state => state.addPostToFavorite)
   const { post, commentPost, openCommentModal, closeCommentModalPost, openCommentModalPost, scroll, setScroll } =
     commentPostState(state => state)
 
@@ -43,6 +44,7 @@ const ProfileTab = ({ data }: { data: ProfileTabType }) => {
               reactionPost={reactionPost}
               deleteReactionPost={deleteReactionPost}
               openCommentModalPost={openCommentModalPost}
+              addPostToFavorite={addPostToFavorite}
             />
             <CommentPost
               post={post}
