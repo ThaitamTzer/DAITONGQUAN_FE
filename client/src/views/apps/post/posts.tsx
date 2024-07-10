@@ -19,9 +19,11 @@ import React, { Fragment, useContext } from 'react'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import toast from 'react-hot-toast'
 import AddPost from './AddPost'
+import { useRouter } from 'next/router'
 
 type UserPostsPageProps = {
   posts: GetPostType[]
+  post?: GetPostType
   children?: React.ReactNode
   approvePost?: (_id: string, isApproved: boolean) => Promise<void>
   reactionPost?: (_id: string, action: string) => Promise<void>
@@ -118,6 +120,7 @@ const PostsPage = (props: UserPostsPageProps) => {
   const [openImage, setOpenImage] = React.useState<string>('')
   const [selectedPostId, setSelectedPostId] = React.useState<string | null>(null)
   const ability = useContext(AbilityContext)
+  const router = useRouter()
 
   const RenderButtonReaction = ({ isLiked, post }: { isLiked: boolean; post: any }) => {
     return isLiked ? (
@@ -314,8 +317,7 @@ const PostsPage = (props: UserPostsPageProps) => {
                   display: 'grid',
                   placeItems: 'center',
                   alignContent: 'space-between',
-                  marginTop: 2,
-                  ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
+                  marginTop: 2
                 }}
               >
                 {userAvatar(post.userId)}
@@ -425,6 +427,7 @@ const PostsPage = (props: UserPostsPageProps) => {
                       paddingTop: '0px !important',
                       ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
                     }}
+                    onClick={() => router.push(`/pages/user-profile/profile/${post._id}`)}
                   >
                     {renderContent(post.content)}
                   </Grid>

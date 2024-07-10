@@ -12,9 +12,9 @@ import { useSettings } from 'src/@core/hooks/useSettings'
 import toast from 'react-hot-toast'
 
 type PostProps = {
-  post: GetPostType
-  updateUserPost: (_id: string, data: UpdatePostType) => Promise<void>
-  closeEditPost: () => void
+  post: GetPostType | any
+  updateUserPost?: (_id: string, data: UpdatePostType) => Promise<void>
+  closeEditPost?: () => void
 }
 
 const Post = (props: PostProps) => {
@@ -62,12 +62,13 @@ const Post = (props: PostProps) => {
   }
 
   const handleSubmit = async (_id: string, content: string) => {
+    if (!updateUserPost) return
     toast.promise(updateUserPost(_id, { content: content }), {
       loading: 'Updating post...',
       success: 'Post updated successfully',
       error: 'Error updating post'
     })
-    closeEditPost()
+    if (closeEditPost) closeEditPost()
   }
 
   const ImageDialog = (post: any) => {

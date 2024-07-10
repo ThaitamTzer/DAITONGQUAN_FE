@@ -1,0 +1,57 @@
+import { useRouter } from 'next/router'
+import { postIdStore, usePostStore } from 'src/store/apps/posts'
+import { useEffect } from 'react'
+import { Card, Dialog, Grid } from '@mui/material'
+import ViewPost from 'src/views/apps/post/viewPost'
+
+const PostPage = () => {
+  const getPostById = usePostStore(state => state.getPostById)
+  const clearPostData = usePostStore(state => state.clearPostData)
+  const getAllComments = usePostStore(state => state.getAllComments)
+  const { setPostId } = postIdStore(state => state)
+  const comments = usePostStore(state => state.allComments)
+  const post = usePostStore(state => state.post)
+  const router = useRouter()
+  const { postId } = router.query
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      clearPostData() // Xóa dữ liệu bài viết
+    }
+
+    router.beforePopState(() => {
+      handleRouteChange()
+
+      return true
+    })
+
+    return () => {
+      router.beforePopState(() => true) // Cleanup function
+    }
+  }, [router, clearPostData])
+
+  useEffect(() => {
+    if (postId) {
+      getPostById(postId as string)
+      getAllComments(postId as string)
+      setPostId(postId as string)
+    }
+  }, [postId])
+
+  console.log(post)
+
+  return (
+    <Grid container justifyContent={'center'}>
+      <Grid item xs={12} md={9} sm={12} lg={7}>
+        <ViewPost post={post} postId={postId as string} comments={comments} />
+      </Grid>
+    </Grid>
+  )
+}
+
+PostPage.acl = {
+  action: 'read',
+  subject: 'member-page'
+}
+
+export default PostPage

@@ -4,7 +4,9 @@ import {
   GetPostBySearchType,
   AddPostType,
   UpdatePostType,
-  UserCommentType
+  UserCommentType,
+  CommentType,
+  ReplyComment
 } from 'src/types/apps/postTypes'
 
 const postService = {
@@ -51,6 +53,12 @@ const postService = {
     return response
   },
 
+  getCommentByPostId: async (_id: string): Promise<CommentType[]> => {
+    const response: any = await axiosClient.get(`/comment/${_id}`)
+
+    return response.comments
+  },
+
   // ** POST ======================================
   // Add a new post
   addPost: async (data: AddPostType): Promise<GetPostType> => {
@@ -76,6 +84,10 @@ const postService = {
 
   commentToPost: async (data: UserCommentType): Promise<void> => {
     await axiosClient.post(`/comment`, data)
+  },
+
+  replyComment: async (_id: string, comment: string): Promise<void> => {
+    await axiosClient.post(`/comment/reply/${_id}`, comment)
   },
 
   // ** PUT ======================================

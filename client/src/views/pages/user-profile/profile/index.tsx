@@ -11,15 +11,14 @@ import AboutOverivew from 'src/views/pages/user-profile/profile/AboutOverivew'
 // import ConnectionsTeams from 'src/views/pages/user-profile/profile/ConnectionsTeams'
 
 // ** Types
-import { ProfileTabType } from 'src/types/apps/profileType'
 import Posts from 'src/views/apps/post/posts'
-
 import { usePostStore, commentPostState, editPostState } from 'src/store/apps/posts' // Adjust the path to your store file
-import { useEffect } from 'react'
+import React, { ReactNode, useEffect } from 'react'
 import CommentPost from 'src/views/apps/post/CommentPost'
 import EditPost from 'src/views/apps/post/EditPost'
+import { useRouter } from 'next/router'
 
-const ProfileTab = ({ data }: { data: ProfileTabType }) => {
+const Profile = () => {
   const getAllUserPosts = usePostStore(state => state.getAllUserPosts)
   const posts = usePostStore(state => state.posts)
   const reactionPost = usePostStore(state => state.reactionPost)
@@ -36,7 +35,10 @@ const ProfileTab = ({ data }: { data: ProfileTabType }) => {
     getAllUserPosts()
   }, [])
 
-  return data && Object.values(data).length ? (
+  const router = useRouter()
+  const { postId } = router.query
+
+  return (
     <Grid container spacing={6}>
       <Grid item lg={4} md={5} xs={12}>
         <AboutOverivew />
@@ -77,7 +79,7 @@ const ProfileTab = ({ data }: { data: ProfileTabType }) => {
         </Grid>
       </Grid>
     </Grid>
-  ) : null
+  )
 }
 
-export default ProfileTab
+export default Profile

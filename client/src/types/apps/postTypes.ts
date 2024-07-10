@@ -7,6 +7,18 @@ export type User = {
   rankID: null
 }
 
+export type ReplyComment = {
+  commentId: string
+  content: string
+}
+
+type RepliesComment = {
+  _id: string
+  userId: string
+  content: string
+  createdAt: Date | string
+}
+
 export type AddPostType = {
   content: string
   file?: File
@@ -92,4 +104,20 @@ export type PostType = {
   addPost?: AddPostType
   getPost?: GetPostType
   getPostBySearch?: GetPostBySearchType
+}
+
+export type CommentType = {
+  _id: string
+  userId: {
+    _id: string
+    firstname: string
+    lastname: string
+    avatar: string
+  }
+  postId: string
+  content: string
+  repliesComment: RepliesComment[]
+  createdAt: Date | string
+  updatedAt: Date | string
+  __v: 0
 }

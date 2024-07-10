@@ -1,11 +1,20 @@
 import { create } from 'zustand'
-import { GetPostType, AddPostType, UpdatePostType, UserCommentType } from 'src/types/apps/postTypes'
+import {
+  GetPostType,
+  AddPostType,
+  UpdatePostType,
+  UserCommentType,
+  CommentType,
+  ReplyComment
+} from 'src/types/apps/postTypes'
 import postService from 'src/service/post.service'
 import { DialogProps } from '@mui/material'
 
 type UserPostState = {
   posts: GetPostType[]
+  post: GetPostType
   loading: boolean
+  allComments: CommentType[]
   addPost: (data: AddPostType) => Promise<void>
   getAllUserPosts: () => Promise<void>
   updateUserPost: (_id: string, data: UpdatePostType) => Promise<void>
@@ -13,6 +22,9 @@ type UserPostState = {
   reactionPost: (_id: string, action: string) => Promise<void>
   deleteReactionPost: (_id: string) => Promise<void>
   addPostToFavorite: (_id: string) => Promise<void>
+  getPostById: (_id: string) => Promise<void>
+  clearPostData: () => void
+  getAllComments: (postId: string) => Promise<void>
 }
 
 export type EditPostState = {
@@ -44,10 +56,45 @@ export type CommentPostState = {
   openCommentModalPost?: (data: GetPostType) => void
   closeCommentModalPost: () => void
 }
+type SetPostId = {
+  postId: string
+  setPostId: (postId: string) => void
+}
+export type UserData = {
+  address: string
+  avatar: string
+  dateOfBirth?: Date | string
+  description?: string
+  email?: string
+  firstname?: string
+  gender?: string
+  lastname?: string
+  nickname?: string
+  phone?: number
+  role?: string
+  _id: string
+}
+type UserObj = {
+  userLocal: UserData
+}
+
+export type RepliesCommentState = {
+  handleOpenReplies: (comment: CommentType) => void
+  handleCloseReplies: () => void
+  handleReplyComment: (_id: string, comment: string) => Promise<void>
+  openReplies: boolean
+  comment: CommentType
+}
+
+export const userDataStore = create<UserObj>(() => ({
+  userLocal: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('userData') || '{}') : {}
+}))
 
 export const usePostStore = create<UserPostState>(set => ({
   posts: [],
+  post: {} as GetPostType,
   loading: false,
+  allComments: [],
   getAllUserPosts: async () => {
     set({ loading: true })
     const response = await postService.getAllUserPosts()
@@ -70,19 +117,40 @@ export const usePostStore = create<UserPostState>(set => ({
     await usePostStore.getState().getAllUserPosts()
   },
   reactionPost: async (_id: string, action: string) => {
+    const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.reactionToPost(_id, action)
-    await usePostStore.getState().getAllUserPosts()
+    if (postId) {
+      usePostStore.getState().getPostById(postId)
+    } else {
+      usePostStore.getState().getAllUserPosts()
+    }
   },
   deleteReactionPost: async (_id: string) => {
+    const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.deleteReactionToPost(_id)
-    await usePostStore.getState().getAllUserPosts()
+    if (postId) {
+      usePostStore.getState().getPostById(postId)
+    } else {
+      usePostStore.getState().getAllUserPosts()
+    }
   },
   addPostToFavorite: async (_id: string) => {
     set({ loading: true })
     await postService.addPostToFavorite(_id)
     await usePostStore.getState().getAllUserPosts()
+  },
+  getPostById: async (_id: string) => {
+    set({ loading: true })
+    const response = await postService.getPostById(_id)
+    set({ post: response, loading: false })
+  },
+  clearPostData: () => set({ post: {} as GetPostType }),
+  getAllComments: async (postId: string) => {
+    set({ loading: true })
+    const response = await postService.getCommentByPostId(postId)
+    set({ allComments: response, loading: false })
   }
 }))
 
@@ -120,7 +188,10 @@ export const commentPostState = create<CommentPostState>(set => ({
   commentPost: async (data: UserCommentType) => {
     set({ post: {} as GetPostType })
     await postService.commentToPost(data)
-    await usePostStore.getState().getAllUserPosts()
+    usePostStore.getState().getAllUserPosts()
+    const postId = postIdStore.getState().postId
+    usePostStore.getState().getPostById(postId)
+    usePostStore.getState().getAllComments(postId)
   }
 }))
 
@@ -136,5 +207,20 @@ export const editPostState = create<EditPostState>(set => ({
     set({ loading: true })
     await postService.updatePost(_id, data)
     await usePostStore.getState().getAllUserPosts()
+  }
+}))
+
+export const postIdStore = create<SetPostId>(set => ({
+  postId: '',
+  setPostId: (postId: string) => set({ postId })
+}))
+
+export const repliesCommentState = create<RepliesCommentState>(set => ({
+  openReplies: false,
+  comment: {} as CommentType,
+  handleOpenReplies: (comment: CommentType) => set({ openReplies: true, comment: comment }),
+  handleCloseReplies: () => set({ openReplies: false, comment: {} as CommentType }),
+  handleReplyComment: async (_id: string, comment: string) => {
+    await postService.replyComment(_id, comment)
   }
 }))

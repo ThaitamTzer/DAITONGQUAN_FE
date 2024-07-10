@@ -35,6 +35,8 @@ const CommentPost = (props: CommentPostState) => {
   const [comment, setComment] = React.useState('')
   const debouncedComment = useDebounce(comment, 500)
 
+  const userData = JSON.parse(localStorage.getItem('userData') || '{}')
+  const user: any = userData
   const { settings } = useSettings()
   const handleClickOpen = () => {
     if (open && openCommentModal) {
@@ -200,7 +202,7 @@ const CommentPost = (props: CommentPostState) => {
                   marginTop: 1
                 }}
               >
-                <Avatar src={post.userId?.avatar} alt='user avatar' sx={{ mr: 2 }} />
+                <Avatar src={user?.avatar} alt='user avatar' sx={{ mr: 2 }} />
               </Grid>
               <Grid item xs={12} lg={12}>
                 <Divider orientation='vertical' sx={{ mr: 2, mt: 2, borderWidth: '1.5px' }} />
@@ -211,7 +213,7 @@ const CommentPost = (props: CommentPostState) => {
                 <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '-6px' }}>
                   {/* {RenderUser(post.userId, post.updatedAt, post.isShow, post.isApproved)} */}
                   <Typography variant='subtitle1' fontWeight={'bold'} marginRight={2}>
-                    {post.userId?.firstname} {post.userId?.lastname}
+                    {user?.firstname} {user?.lastname}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} sx={{ paddingTop: '0px !important' }}>
