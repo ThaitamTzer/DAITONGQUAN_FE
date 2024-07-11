@@ -1,8 +1,9 @@
 import { useRouter } from 'next/router'
 import { postIdStore, usePostStore } from 'src/store/apps/posts'
 import { useEffect } from 'react'
-import { Card, Dialog, Grid } from '@mui/material'
+import { Grid, IconButton } from '@mui/material'
 import ViewPost from 'src/views/apps/post/viewPost'
+import Icon from 'src/@core/components/icon'
 
 const PostPage = () => {
   const getPostById = usePostStore(state => state.getPostById)
@@ -38,11 +39,12 @@ const PostPage = () => {
     }
   }, [postId])
 
-  console.log(post)
-
   return (
-    <Grid container justifyContent={'center'}>
+    <Grid container justifyContent={'center'} pt={'0px !important'}>
       <Grid item xs={12} md={9} sm={12} lg={7}>
+        <IconButton onClick={() => router.back()} sx={{ mb: 2 }}>
+          <Icon icon='ep:back' />
+        </IconButton>
         <ViewPost post={post} postId={postId as string} comments={comments} />
       </Grid>
     </Grid>

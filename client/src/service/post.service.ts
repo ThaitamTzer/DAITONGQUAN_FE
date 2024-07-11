@@ -112,6 +112,14 @@ const postService = {
     await axiosClient.put(`/post/reaction/${_id}?action=${data}`)
   },
 
+  editComment: async (_id: string, comment: string): Promise<void> => {
+    await axiosClient.put(`/comment/${_id}`, { content: comment })
+  },
+
+  editReplyComment: async (commentId: string, replyId: string, content: string): Promise<void> => {
+    await axiosClient.put(`/api/comment/${commentId}/reply/${replyId}`, { content: content })
+  },
+
   // ** DELETE ======================================
   // Delete a post
   deletePost: async (_id: string): Promise<void> => {
@@ -131,6 +139,10 @@ const postService = {
   // Delete reaction to a post
   deleteReactionToPost: async (_id: string): Promise<void> => {
     await axiosClient.delete(`/post/reaction/${_id}`)
+  },
+
+  deleteComment: async (commentId: string): Promise<void> => {
+    await axiosClient.delete(`/comment/${commentId}`)
   },
 
   // ** PATCH ======================================

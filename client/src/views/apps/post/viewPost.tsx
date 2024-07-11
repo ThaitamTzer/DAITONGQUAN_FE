@@ -282,6 +282,9 @@ const ViewPost = (props: PostProps) => {
           </Grid>
         </Grid>
         <Grid item xs={12}>
+          <Typography variant='body2'>Comments</Typography>
+        </Grid>
+        <Grid item xs={12}>
           <AllComment comments={comments} />
         </Grid>
       </Grid>

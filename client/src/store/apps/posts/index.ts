@@ -1,12 +1,5 @@
 import { create } from 'zustand'
-import {
-  GetPostType,
-  AddPostType,
-  UpdatePostType,
-  UserCommentType,
-  CommentType,
-  ReplyComment
-} from 'src/types/apps/postTypes'
+import { GetPostType, AddPostType, UpdatePostType, UserCommentType, CommentType } from 'src/types/apps/postTypes'
 import postService from 'src/service/post.service'
 import { DialogProps } from '@mui/material'
 
@@ -36,6 +29,14 @@ export type EditPostState = {
   updateUserPost: (_id: string, data: UpdatePostType) => Promise<void>
 }
 
+export type EditCommentState = {
+  openEditComment: boolean
+  selectedComment: string
+  openEditCommentModal: (selectedComment: string) => void
+  closeEditCommentModal: () => void
+  updateComment: (_id: string, selectedComment: string) => Promise<void>
+}
+
 type PostListState = {
   listposts: GetPostType[]
   loading: boolean
@@ -55,6 +56,7 @@ export type CommentPostState = {
   openCommentModal: boolean
   openCommentModalPost?: (data: GetPostType) => void
   closeCommentModalPost: () => void
+  handleDeleteComment?: (_id: string) => Promise<void>
 }
 type SetPostId = {
   postId: string
@@ -192,6 +194,26 @@ export const commentPostState = create<CommentPostState>(set => ({
     const postId = postIdStore.getState().postId
     usePostStore.getState().getPostById(postId)
     usePostStore.getState().getAllComments(postId)
+  },
+  handleDeleteComment: async (_id: string) => {
+    await postService.deleteComment(_id)
+    const postId = postIdStore.getState().postId
+    usePostStore.getState().getPostById(postId)
+    usePostStore.getState().getAllComments(postId)
+  }
+}))
+
+export const editCommentState = create<EditCommentState>(set => ({
+  openEditComment: false,
+  selectedComment: '',
+  openEditCommentModal: (selectedComment: string) => set({ openEditComment: true, selectedComment }),
+  closeEditCommentModal: () => {
+    set(state => ({ openEditComment: false, comment: state.selectedComment }))
+  },
+  updateComment: async (_id: string, comment: string) => {
+    await postService.editComment(_id, comment)
+    const postId = postIdStore.getState().postId
+    usePostStore.getState().getAllComments(postId)
   }
 }))
 
@@ -225,4 +247,10 @@ export const repliesCommentState = create<RepliesCommentState>(set => ({
     const postId = postIdStore.getState().postId
     usePostStore.getState().getAllComments(postId)
   }
+
+  // handleDeleteReply: async (_id: string) => {
+  //   await postService.deleteReply(_id)
+  //   const postId = postIdStore.getState().postId
+  //   usePostStore.getState().getAllComments(postId)
+  // }
 }))

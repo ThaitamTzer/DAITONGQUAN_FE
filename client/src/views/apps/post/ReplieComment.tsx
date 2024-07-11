@@ -11,17 +11,18 @@ import {
   Typography
 } from '@mui/material'
 import { Box } from '@mui/system'
-import { repliesCommentState } from 'src/store/apps/posts'
+import { editCommentState, repliesCommentState } from 'src/store/apps/posts'
 import { CommentType, ReplyComment } from 'src/types/apps/postTypes'
 import DialogWithCustomCloseButton from 'src/views/components/dialog/customDialog'
-import { renderRelativeTime } from './AllComment'
-import React from 'react'
+import { RenderRelativeTime } from './AllComment'
+import React, { useEffect } from 'react'
 import Icon from 'src/@core/components/icon'
 import { useSettings } from 'src/@core/hooks/useSettings'
 import themeConfig from 'src/configs/themeConfig'
 import { useTheme } from '@mui/material/styles'
 import EmojiPicker, { EmojiClickData, EmojiStyle, SuggestionMode, Theme } from 'emoji-picker-react'
 import toast from 'react-hot-toast'
+import { userDataStore } from 'src/store/apps/posts'
 
 type RepliesCommentProps = {
   handleCloseReplies: () => void
@@ -32,9 +33,12 @@ type RepliesCommentProps = {
 
 const ReplyCommentModal = (props: RepliesCommentProps) => {
   const { openReplies, handleCloseReplies, handleReplyComment, comment } = props
+  const selectedComment = editCommentState(state => state.selectedComment)
+  const updateComment = editCommentState(state => state.updateComment)
   const [scroll] = React.useState<DialogProps['scroll']>('paper')
   const [open, setOpen] = React.useState<boolean>(false)
   const [replyComment, setReplyComment] = React.useState('')
+  const userLocal = userDataStore(state => state.userLocal)
 
   const theme = useTheme()
   const { settings } = useSettings()
@@ -70,12 +74,30 @@ const ReplyCommentModal = (props: RepliesCommentProps) => {
     setReplyComment(replyComment + emojiObject.emoji)
   }
 
+  const handleContent = () => {
+    if (selectedComment) {
+      setReplyComment(selectedComment)
+    }
+  }
+
+  useEffect(() => {
+    handleContent()
+  }, [selectedComment])
+
   const handleSubmit = (_id: string, content: string) => {
-    toast.promise(handleReplyComment(_id, content), {
-      loading: 'Replying...',
-      success: 'Reply Success',
-      error: 'Reply Failed'
-    })
+    if (!selectedComment) {
+      toast.promise(handleReplyComment(_id, content), {
+        loading: 'Replying...',
+        success: 'Reply Success',
+        error: 'Reply Failed'
+      })
+    } else {
+      toast.promise(updateComment(_id, content), {
+        loading: 'Updating...',
+        success: 'Update Success',
+        error: 'Update Failed'
+      })
+    }
     handleCloseReplies()
     setReplyComment('')
     setOpen(false)
@@ -97,46 +119,48 @@ const ReplyCommentModal = (props: RepliesCommentProps) => {
       }}
     >
       <DialogWithCustomCloseButton handleClose={handleCloseReplies}>
-        <Grid container spacing={3} mb={7}>
-          <Grid container xs={1}>
-            <Grid
-              item
-              xs={12}
-              sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
-            >
-              <Grid item>
-                <Avatar src={comment.userId?.avatar} />
-              </Grid>
-              <Grid item xs={11}>
-                <Divider orientation='vertical' sx={{ mt: 2, borderWidth: '1.5px' }} />
+        {comment && !selectedComment ? (
+          <Grid container spacing={3} mb={7}>
+            <Grid container xs={1}>
+              <Grid
+                item
+                xs={12}
+                sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
+              >
+                <Grid item>
+                  <Avatar src={comment.userId?.avatar} />
+                </Grid>
+                <Grid item xs={11}>
+                  <Divider orientation='vertical' sx={{ mt: 2, borderWidth: '1.5px' }} />
+                </Grid>
               </Grid>
             </Grid>
-          </Grid>
-          <Grid container xs={11}>
-            <Grid item xs={11} sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Typography variant='subtitle1' mr={2}>
-                {comment.userId?.firstname + ' ' + comment.userId?.lastname + ' '}
-              </Typography>
-              <Typography variant='subtitle1' color='GrayText'>
-                {renderRelativeTime(comment.createdAt)}
-              </Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Box width='100%' display='flex' flexWrap={'wrap'}>
-                <Typography
-                  variant='subtitle1'
-                  sx={{
-                    wordWrap: 'break-word',
-                    whiteSpace: 'pre-wrap',
-                    minWidth: '100%'
-                  }}
-                >
-                  {comment.content}
+            <Grid container xs={11}>
+              <Grid item xs={11} sx={{ display: 'flex', flexDirection: 'row' }}>
+                <Typography variant='subtitle1' mr={2}>
+                  {comment.userId?.firstname + ' ' + comment.userId?.lastname + ' '}
                 </Typography>
-              </Box>
+                <Typography variant='subtitle1' color='GrayText'>
+                  {RenderRelativeTime(comment.createdAt)}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Box width='100%' display='flex' flexWrap={'wrap'}>
+                  <Typography
+                    variant='subtitle1'
+                    sx={{
+                      wordWrap: 'break-word',
+                      whiteSpace: 'pre-wrap',
+                      minWidth: '100%'
+                    }}
+                  >
+                    {comment.content}
+                  </Typography>
+                </Box>
+              </Grid>
             </Grid>
           </Grid>
-        </Grid>
+        ) : null}
         <Grid container spacing={3}>
           <Grid
             container
@@ -144,16 +168,13 @@ const ReplyCommentModal = (props: RepliesCommentProps) => {
             sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
           >
             <Grid item xs={12}>
-              <Avatar src={comment.userId?.avatar} />
+              <Avatar src={userLocal.avatar} />
             </Grid>
           </Grid>
           <Grid container xs={11}>
             <Grid item xs={11} sx={{ display: 'flex', flexDirection: 'row' }}>
               <Typography variant='subtitle1' mr={2}>
-                {comment.userId?.firstname + ' ' + comment.userId?.lastname + ' '}
-              </Typography>
-              <Typography variant='subtitle1' color='GrayText'>
-                {renderRelativeTime(comment.createdAt)}
+                {userLocal.firstname + ' ' + userLocal.lastname + ' '}
               </Typography>
             </Grid>
             <Grid item xs={12}>

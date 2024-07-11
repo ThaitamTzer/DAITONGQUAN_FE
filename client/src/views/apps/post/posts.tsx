@@ -166,11 +166,11 @@ const PostsPage = (props: UserPostsPageProps) => {
     }
   }
 
-  const handleMoreOptions = (event: React.MouseEvent<HTMLElement>, postId: string) => {
+ const handleMoreOptions = (event: React.MouseEvent<HTMLElement>, postId: string) => {
     setAnchorEl(event.currentTarget)
     setSelectedPostId(postId)
   }
-
+ 
   const handleCloseOptions = () => {
     setAnchorEl(null)
     setSelectedPostId(null)

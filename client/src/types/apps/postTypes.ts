@@ -14,7 +14,7 @@ export type ReplyComment = {
 
 type RepliesComment = {
   _id: string
-  userId: string
+  userId: User
   content: string
   createdAt: Date | string
 }
