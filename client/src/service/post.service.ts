@@ -87,7 +87,7 @@ const postService = {
   },
 
   replyComment: async (_id: string, comment: string): Promise<void> => {
-    await axiosClient.post(`/comment/reply/${_id}`, comment)
+    await axiosClient.post(`/comment/reply/${_id}`, { content: comment })
   },
 
   // ** PUT ======================================

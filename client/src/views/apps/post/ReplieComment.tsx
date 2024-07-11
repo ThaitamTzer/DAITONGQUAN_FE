@@ -21,6 +21,7 @@ import { useSettings } from 'src/@core/hooks/useSettings'
 import themeConfig from 'src/configs/themeConfig'
 import { useTheme } from '@mui/material/styles'
 import EmojiPicker, { EmojiClickData, EmojiStyle, SuggestionMode, Theme } from 'emoji-picker-react'
+import toast from 'react-hot-toast'
 
 type RepliesCommentProps = {
   handleCloseReplies: () => void
@@ -67,6 +68,17 @@ const ReplyCommentModal = (props: RepliesCommentProps) => {
 
   const handleEmojiClick = (emojiObject: EmojiClickData) => {
     setReplyComment(replyComment + emojiObject.emoji)
+  }
+
+  const handleSubmit = (_id: string, content: string) => {
+    toast.promise(handleReplyComment(_id, content), {
+      loading: 'Replying...',
+      success: 'Reply Success',
+      error: 'Reply Failed'
+    })
+    handleCloseReplies()
+    setReplyComment('')
+    setOpen(false)
   }
 
   return (
@@ -204,7 +216,7 @@ const ReplyCommentModal = (props: RepliesCommentProps) => {
       </DialogWithCustomCloseButton>
       <DialogActions>
         <Button onClick={handleCloseModal}>Cancel</Button>
-        <Button onClick={() => handleReplyComment(comment._id, replyComment)}>Reply</Button>
+        <Button onClick={() => handleSubmit(comment._id, replyComment)}>Reply</Button>
       </DialogActions>
     </Dialog>
   )

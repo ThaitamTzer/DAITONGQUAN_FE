@@ -222,5 +222,7 @@ export const repliesCommentState = create<RepliesCommentState>(set => ({
   handleCloseReplies: () => set({ openReplies: false, comment: {} as CommentType }),
   handleReplyComment: async (_id: string, comment: string) => {
     await postService.replyComment(_id, comment)
+    const postId = postIdStore.getState().postId
+    usePostStore.getState().getAllComments(postId)
   }
 }))
