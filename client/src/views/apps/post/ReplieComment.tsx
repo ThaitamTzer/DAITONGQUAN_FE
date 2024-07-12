@@ -11,8 +11,8 @@ import {
   Typography
 } from '@mui/material'
 import { Box } from '@mui/system'
-import { editCommentState, repliesCommentState } from 'src/store/apps/posts'
-import { CommentType, ReplyComment } from 'src/types/apps/postTypes'
+import { editCommentState } from 'src/store/apps/posts'
+import { CommentType, RepliesComment } from 'src/types/apps/postTypes'
 import DialogWithCustomCloseButton from 'src/views/components/dialog/customDialog'
 import { RenderRelativeTime } from './AllComment'
 import React, { useEffect } from 'react'
@@ -28,13 +28,14 @@ type RepliesCommentProps = {
   handleCloseReplies: () => void
   handleReplyComment: (_id: string, comment: string) => Promise<void>
   openReplies: boolean
-  comment: CommentType
+  comment: CommentType | RepliesComment
 }
 
 const ReplyCommentModal = (props: RepliesCommentProps) => {
   const { openReplies, handleCloseReplies, handleReplyComment, comment } = props
-  const selectedComment = editCommentState(state => state.selectedComment)
-  const updateComment = editCommentState(state => state.updateComment)
+  console.log('component: ', comment)
+  const { updateComment, updateReplyComment, replyId, commentId, closeEditReplyModal, closeEditCommentModal } =
+    editCommentState(state => state)
   const [scroll] = React.useState<DialogProps['scroll']>('paper')
   const [open, setOpen] = React.useState<boolean>(false)
   const [replyComment, setReplyComment] = React.useState('')
@@ -74,30 +75,12 @@ const ReplyCommentModal = (props: RepliesCommentProps) => {
     setReplyComment(replyComment + emojiObject.emoji)
   }
 
-  const handleContent = () => {
-    if (selectedComment) {
-      setReplyComment(selectedComment)
-    }
-  }
-
-  useEffect(() => {
-    handleContent()
-  }, [selectedComment])
-
   const handleSubmit = (_id: string, content: string) => {
-    if (!selectedComment) {
-      toast.promise(handleReplyComment(_id, content), {
-        loading: 'Replying...',
-        success: 'Reply Success',
-        error: 'Reply Failed'
-      })
-    } else {
-      toast.promise(updateComment(_id, content), {
-        loading: 'Updating...',
-        success: 'Update Success',
-        error: 'Update Failed'
-      })
-    }
+    toast.promise(handleReplyComment(_id, content), {
+      loading: 'Replying...',
+      success: 'Reply Success',
+      error: 'Reply Failed'
+    })
     handleCloseReplies()
     setReplyComment('')
     setOpen(false)
@@ -119,7 +102,7 @@ const ReplyCommentModal = (props: RepliesCommentProps) => {
       }}
     >
       <DialogWithCustomCloseButton handleClose={handleCloseReplies}>
-        {comment && !selectedComment ? (
+        {comment && (
           <Grid container spacing={3} mb={7}>
             <Grid container xs={1}>
               <Grid
@@ -160,7 +143,7 @@ const ReplyCommentModal = (props: RepliesCommentProps) => {
               </Grid>
             </Grid>
           </Grid>
-        ) : null}
+        )}
         <Grid container spacing={3}>
           <Grid
             container

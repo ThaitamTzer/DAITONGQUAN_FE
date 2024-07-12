@@ -1,5 +1,12 @@
 import { create } from 'zustand'
-import { GetPostType, AddPostType, UpdatePostType, UserCommentType, CommentType } from 'src/types/apps/postTypes'
+import {
+  GetPostType,
+  AddPostType,
+  UpdatePostType,
+  UserCommentType,
+  CommentType,
+  RepliesComment
+} from 'src/types/apps/postTypes'
 import postService from 'src/service/post.service'
 import { DialogProps } from '@mui/material'
 
@@ -31,10 +38,18 @@ export type EditPostState = {
 
 export type EditCommentState = {
   openEditComment: boolean
+  opentEditReply: boolean
+  replyId: string
+  commentId: string
   selectedComment: string
-  openEditCommentModal: (selectedComment: string) => void
+  selectedReplyComment: string
+  openEditCommentModal: (selectedComment: string, commentId: string) => void
+  openEditReplyModal: (selectedReplyComment: string, replyId: string, commentId: string) => void
   closeEditCommentModal: () => void
+  closeEditReplyModal: () => void
   updateComment: (_id: string, selectedComment: string) => Promise<void>
+  updateReplyComment: (commentId: string, replyId: string, selectedReplyComment: string) => Promise<void>
+  deleteReplyComment?: (commentId: string, replyId: string) => Promise<void>
 }
 
 type PostListState = {
@@ -81,11 +96,11 @@ type UserObj = {
 }
 
 export type RepliesCommentState = {
-  handleOpenReplies: (comment: CommentType) => void
+  handleOpenReplies: (comment: CommentType | RepliesComment) => void
   handleCloseReplies: () => void
   handleReplyComment: (_id: string, comment: string) => Promise<void>
   openReplies: boolean
-  comment: CommentType
+  comment: CommentType | RepliesComment
 }
 
 export const userDataStore = create<UserObj>(() => ({
@@ -205,13 +220,33 @@ export const commentPostState = create<CommentPostState>(set => ({
 
 export const editCommentState = create<EditCommentState>(set => ({
   openEditComment: false,
+  opentEditReply: false,
   selectedComment: '',
-  openEditCommentModal: (selectedComment: string) => set({ openEditComment: true, selectedComment }),
+  selectedReplyComment: '',
+  replyId: '',
+  commentId: '',
+  openEditCommentModal: (selectedComment: string, commentId: string) =>
+    set({ selectedComment, openEditComment: true, commentId }),
+  openEditReplyModal: (selectedReplyComment: string, replyId: string, commentId: string) =>
+    set({ opentEditReply: true, selectedReplyComment, replyId, commentId }),
   closeEditCommentModal: () => {
-    set(state => ({ openEditComment: false, comment: state.selectedComment }))
+    set(state => ({ openEditComment: false, selectedComment: state.selectedComment }))
+  },
+  closeEditReplyModal: () => {
+    set(state => ({ opentEditReply: false, comment: state.selectedReplyComment }))
   },
   updateComment: async (_id: string, comment: string) => {
     await postService.editComment(_id, comment)
+    const postId = postIdStore.getState().postId
+    usePostStore.getState().getAllComments(postId)
+  },
+  updateReplyComment: async (commentId: string, replyId: string, content: string) => {
+    await postService.editReplyComment(commentId, replyId, content)
+    const postId = postIdStore.getState().postId
+    usePostStore.getState().getAllComments(postId)
+  },
+  deleteReplyComment: async (commentId: string, replyId: string) => {
+    await postService.deleteReplyComment(commentId, replyId)
     const postId = postIdStore.getState().postId
     usePostStore.getState().getAllComments(postId)
   }
@@ -239,8 +274,8 @@ export const postIdStore = create<SetPostId>(set => ({
 
 export const repliesCommentState = create<RepliesCommentState>(set => ({
   openReplies: false,
-  comment: {} as CommentType,
-  handleOpenReplies: (comment: CommentType) => set({ openReplies: true, comment: comment }),
+  comment: {} as CommentType | RepliesComment,
+  handleOpenReplies: (comment: CommentType | RepliesComment) => set({ openReplies: true, comment: comment }),
   handleCloseReplies: () => set({ openReplies: false, comment: {} as CommentType }),
   handleReplyComment: async (_id: string, comment: string) => {
     await postService.replyComment(_id, comment)

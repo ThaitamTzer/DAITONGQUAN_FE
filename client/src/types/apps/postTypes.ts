@@ -12,7 +12,7 @@ export type ReplyComment = {
   content: string
 }
 
-type RepliesComment = {
+export type RepliesComment = {
   _id: string
   userId: User
   content: string

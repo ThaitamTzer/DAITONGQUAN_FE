@@ -5,8 +5,7 @@ import {
   AddPostType,
   UpdatePostType,
   UserCommentType,
-  CommentType,
-  ReplyComment
+  CommentType
 } from 'src/types/apps/postTypes'
 
 const postService = {
@@ -117,7 +116,7 @@ const postService = {
   },
 
   editReplyComment: async (commentId: string, replyId: string, content: string): Promise<void> => {
-    await axiosClient.put(`/api/comment/${commentId}/reply/${replyId}`, { content: content })
+    await axiosClient.put(`/comment/${commentId}/reply/${replyId}`, { content: content })
   },
 
   // ** DELETE ======================================
@@ -143,6 +142,10 @@ const postService = {
 
   deleteComment: async (commentId: string): Promise<void> => {
     await axiosClient.delete(`/comment/${commentId}`)
+  },
+
+  deleteReplyComment: async (commentId: string, replyId: string): Promise<void> => {
+    await axiosClient.delete(`/comment/${commentId}/reply/${replyId}`)
   },
 
   // ** PATCH ======================================

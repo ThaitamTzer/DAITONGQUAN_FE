@@ -1,4 +1,4 @@
-import { CommentType } from 'src/types/apps/postTypes'
+import { CommentType, RepliesComment } from 'src/types/apps/postTypes'
 import React from 'react'
 import { Avatar, Box, Button, Divider, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material'
 import { renderContent } from './posts'
@@ -7,6 +7,7 @@ import { userDataStore } from 'src/store/apps/posts'
 import ReplyCommentModal from './ReplieComment'
 import { repliesCommentState, commentPostState, editCommentState } from 'src/store/apps/posts'
 import toast from 'react-hot-toast'
+import EditComment from './EditComment'
 
 type CommentProps = {
   comments: CommentType[]
@@ -48,30 +49,76 @@ const AllComment = (props: CommentProps) => {
   const { openReplies, comment, handleOpenReplies, handleCloseReplies, handleReplyComment } = repliesCommentState(
     state => state
   )
-  const { openEditCommentModal } = editCommentState(state => state)
+  const {
+    openEditCommentModal,
+    openEditReplyModal,
+    updateComment,
+    updateReplyComment,
+    closeEditCommentModal,
+    closeEditReplyModal,
+    deleteReplyComment
+  } = editCommentState(state => state)
   const handleDeleteComment = commentPostState(state => state.handleDeleteComment)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [selectedCommentId, setSelectedCommentId] = React.useState<string | null>(null)
+  const [selectedReplyId, setSelectedReplyId] = React.useState<string | null>(null)
 
-  const handleMoreOptions = (event: React.MouseEvent<HTMLElement>, CommentId: string) => {
+  const handleMoreOptions = (event: React.MouseEvent<HTMLElement>, _id: string) => {
     setAnchorEl(event.currentTarget)
-    setSelectedCommentId(CommentId)
+    setSelectedCommentId(_id)
+    setSelectedReplyId(_id)
   }
 
   const handleCloseOptions = () => {
     setAnchorEl(null)
     setSelectedCommentId(null)
+    setSelectedReplyId(null)
   }
 
-  const handleOpenEditComment = (content: string, comment: CommentType) => {
-    openEditCommentModal(content)
-    handleOpenReplies(comment)
+  const handleOpenEditComment = (content: string, _id: string) => {
+    openEditCommentModal(content, _id)
     setAnchorEl(null)
+  }
+
+  const handleOpenEditReply = (content: string, _id: string, commentId: string) => {
+    openEditReplyModal(content, _id, commentId)
+    setAnchorEl(null)
+  }
+
+  const handleSubmitEditComment = async (_id: string, comment: string) => {
+    toast.promise(updateComment(_id, comment), {
+      loading: 'Updating...',
+      success: 'Comment updated successfully',
+      error: 'Failed to update comment'
+    })
+    setAnchorEl(null)
+    closeEditCommentModal()
+  }
+
+  const handleSubmitEditReplyComment = async (commentId: string, replyId: string, selectedReplyComment: string) => {
+    toast.promise(updateReplyComment(commentId, replyId, selectedReplyComment), {
+      loading: 'Updating...',
+      success: 'Comment updated successfully',
+      error: 'Failed to update comment'
+    })
+    setAnchorEl(null)
+    closeEditReplyModal()
   }
 
   const handleDelete = (commentId: string) => {
     if (handleDeleteComment) {
       toast.promise(handleDeleteComment(commentId), {
+        loading: 'Deleting...',
+        success: 'Comment deleted successfully',
+        error: 'Failed to delete comment'
+      })
+      setAnchorEl(null)
+    }
+  }
+
+  const handleDeleteReply = (commentId: string, replyId: string) => {
+    if (deleteReplyComment) {
+      toast.promise(deleteReplyComment(commentId, replyId), {
         loading: 'Deleting...',
         success: 'Comment deleted successfully',
         error: 'Failed to delete comment'
@@ -187,7 +234,7 @@ const AllComment = (props: CommentProps) => {
                         horizontal: 'right'
                       }}
                     >
-                      <MenuItem onClick={() => handleOpenEditComment(comment.content, comment)}>
+                      <MenuItem onClick={() => handleOpenEditComment(comment.content, comment._id)}>
                         <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
                           <Typography variant='body1'>Edit</Typography>
                           <Icon icon='eva:edit-2-fill' />
@@ -268,9 +315,9 @@ const AllComment = (props: CommentProps) => {
                           alignItems: 'start'
                         }}
                       >
-                        {currentUser === comment.userId._id ? (
+                        {currentUser === reply.userId._id ? (
                           <>
-                            <IconButton onClick={event => handleMoreOptions(event, comment._id)}>
+                            <IconButton onClick={event => handleMoreOptions(event, reply._id)}>
                               <Icon icon='ri:more-fill' />
                             </IconButton>
                             <Menu
@@ -278,7 +325,7 @@ const AllComment = (props: CommentProps) => {
                                 sx: { width: '200px' }
                               }}
                               anchorEl={anchorEl}
-                              open={Boolean(anchorEl) && selectedCommentId === comment._id}
+                              open={Boolean(anchorEl) && selectedReplyId === reply._id}
                               onClose={handleCloseOptions}
                               anchorOrigin={{
                                 vertical: 'bottom',
@@ -289,13 +336,13 @@ const AllComment = (props: CommentProps) => {
                                 horizontal: 'right'
                               }}
                             >
-                              <MenuItem onClick={() => handleOpenEditComment(comment.content, comment)}>
+                              <MenuItem onClick={() => handleOpenEditReply(reply.content, reply._id, comment._id)}>
                                 <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
                                   <Typography variant='body1'>Edit</Typography>
                                   <Icon icon='eva:edit-2-fill' />
                                 </Box>
                               </MenuItem>
-                              <MenuItem onClick={() => handleDelete(comment._id)}>
+                              <MenuItem onClick={() => handleDeleteReply(comment._id, reply._id)}>
                                 <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
                                   <Typography variant='body1'>Delete Comment</Typography>
                                   <Icon icon='gg:trash' color='red' />
@@ -326,6 +373,18 @@ const AllComment = (props: CommentProps) => {
         handleCloseReplies={handleCloseReplies}
         handleReplyComment={handleReplyComment}
         comment={comment}
+      />
+      <EditComment
+        openEditCommentModal={editCommentState(state => state.openEditComment)}
+        onCloseEditCommentModal={editCommentState(state => state.closeEditCommentModal)}
+        selectedReplyComment={editCommentState(state => state.selectedComment)}
+        onSubmiteditComment={handleSubmitEditComment}
+      />
+      <EditComment
+        openEditCommentModal={editCommentState(state => state.opentEditReply)}
+        selectedReplyComment={editCommentState(state => state.selectedReplyComment)}
+        onCloseEditCommentModal={editCommentState(state => state.closeEditReplyModal)}
+        onSubmiteditReplyComment={handleSubmitEditReplyComment}
       />
     </>
   )
