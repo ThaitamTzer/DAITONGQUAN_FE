@@ -19,7 +19,7 @@ const postService = {
 
   // Get all posts
   getAllPosts: async (): Promise<GetPostType[]> => {
-    const response: GetPostType[] = await axiosClient.get('/post/view-all-posts')
+    const response: GetPostType[] = await axiosClient.get('/post/view-all-post')
 
     return response
   },

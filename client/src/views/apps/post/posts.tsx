@@ -15,10 +15,9 @@ import { Box } from '@mui/system'
 import Avatar from 'src/@core/components/mui/avatar'
 import Icon from 'src/@core/components/icon'
 import { GetPostType, UpdatePostType } from 'src/types/apps/postTypes'
-import React, { Fragment, useContext } from 'react'
+import React, { Fragment, useContext, useEffect } from 'react'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import toast from 'react-hot-toast'
-import AddPost from './AddPost'
 import { useRouter } from 'next/router'
 
 type UserPostsPageProps = {
@@ -226,6 +225,33 @@ const PostsPage = (props: UserPostsPageProps) => {
     }
   }
 
+  const handleClickNavigate = (post: any) => {
+    const scrollPosition = window.scrollY.toString()
+    localStorage.setItem('scrollPosition', scrollPosition)
+    const currentPath = router.pathname
+    const newPath = `${currentPath}/${post._id}`
+    router.push(newPath)
+  }
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      // Lấy vị trí cuộn đã lưu
+      const scrollPosition = localStorage.getItem('scrollPosition')
+      if (scrollPosition) {
+        window.scrollTo(0, parseInt(scrollPosition, 10))
+        localStorage.removeItem('scrollPosition')
+      }
+    }
+
+    // Lắng nghe sự kiện route change
+    router.events.on('routeChangeComplete', handleRouteChange)
+
+    // Cleanup khi component unmount
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange)
+    }
+  }, [router.events])
+
   const ImageDialog = (post: any) => {
     // Assuming handleCloseImage is defined to set openImage to null or false
     return (
@@ -298,15 +324,11 @@ const PostsPage = (props: UserPostsPageProps) => {
 
   return (
     <>
-      {ability.can('read', 'member-page') && (
-        <Card sx={{ mb: '20px' }}>
-          <AddPost />
-        </Card>
-      )}
+      {ability.can('read', 'member-page') && <Card sx={{ mb: '20px' }}>{children}</Card>}
       <Card>
         {posts.map(post => (
           <Fragment key={post._id}>
-            <Grid container sx={{ padding: 3 }}>
+            <Grid id={post._id} container sx={{ padding: 3 }}>
               <Grid
                 item
                 lg={1}
@@ -427,7 +449,7 @@ const PostsPage = (props: UserPostsPageProps) => {
                       paddingTop: '0px !important',
                       ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
                     }}
-                    onClick={() => router.push(`/pages/user-profile/profile/${post._id}`)}
+                    onClick={() => handleClickNavigate(post)}
                   >
                     {renderContent(post.content)}
                   </Grid>
@@ -479,7 +501,6 @@ const PostsPage = (props: UserPostsPageProps) => {
                     </Grid>
                   )}
                   {ability.can('approve', 'post') && <ButtonApprove isApproved={post.isApproved} _id={post._id} />}
-                  {children}
                 </Grid>
               </Grid>
             </Grid>

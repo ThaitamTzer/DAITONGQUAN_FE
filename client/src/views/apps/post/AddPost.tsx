@@ -103,7 +103,7 @@ const AddPost = () => {
   }
 
   return (
-    <Grid container sx={{ padding: 3 }}>
+    <Grid container xs={12} sx={{ padding: 3 }}>
       <Grid container xs={11} sx={{ display: 'flex', alignItems: 'center' }}>
         <Grid
           item

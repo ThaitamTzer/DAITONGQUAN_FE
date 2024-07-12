@@ -582,6 +582,13 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'tabler:home'
     },
     {
+      path: '/posts',
+      action: 'read',
+      subject: 'member-page',
+      title: 'Posts',
+      icon: 'iconoir:post'
+    },
+    {
       title: 'Categories',
       icon: 'tabler:grid',
       children: [

@@ -17,6 +17,7 @@ import React, { ReactNode, useEffect } from 'react'
 import CommentPost from 'src/views/apps/post/CommentPost'
 import EditPost from 'src/views/apps/post/EditPost'
 import { useRouter } from 'next/router'
+import AddPost from 'src/views/apps/post/AddPost'
 
 const Profile = () => {
   const getAllUserPosts = usePostStore(state => state.getAllUserPosts)
@@ -55,7 +56,9 @@ const Profile = () => {
               openEditPost={openEditPost}
               updatePost={updatePost}
               deletePost={deletePost}
-            />
+            >
+              <AddPost />
+            </Posts>
             <CommentPost
               post={post}
               scroll={scroll}

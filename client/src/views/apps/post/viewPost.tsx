@@ -153,7 +153,7 @@ const ViewPost = (props: PostProps) => {
   }
 
   return (
-    <Card>
+    <Card id={post._id}>
       <Grid container sx={{ padding: 3 }}>
         <Grid
           item

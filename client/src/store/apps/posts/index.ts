@@ -103,6 +103,11 @@ export type RepliesCommentState = {
   comment: CommentType | RepliesComment
 }
 
+type ViewAllPostState = {
+  posts: GetPostType[]
+  getAllPosts: () => Promise<void>
+}
+
 export const userDataStore = create<UserObj>(() => ({
   userLocal: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('userData') || '{}') : {}
 }))
@@ -282,10 +287,12 @@ export const repliesCommentState = create<RepliesCommentState>(set => ({
     const postId = postIdStore.getState().postId
     usePostStore.getState().getAllComments(postId)
   }
+}))
 
-  // handleDeleteReply: async (_id: string) => {
-  //   await postService.deleteReply(_id)
-  //   const postId = postIdStore.getState().postId
-  //   usePostStore.getState().getAllComments(postId)
-  // }
+export const viewAllPostStore = create<ViewAllPostState>(set => ({
+  posts: [],
+  getAllPosts: async () => {
+    const response = await postService.getAllPosts()
+    set({ posts: response })
+  }
 }))
