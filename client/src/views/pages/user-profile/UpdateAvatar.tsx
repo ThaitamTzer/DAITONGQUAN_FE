@@ -5,6 +5,7 @@ import Icon from 'src/@core/components/icon'
 import { useTranslation } from 'react-i18next'
 import Cropper from 'cropperjs'
 import userProfileService from 'src/service/userProfileService.service'
+import toast from 'react-hot-toast'
 
 interface AvatarDialogProps {
   open: boolean
@@ -96,9 +97,14 @@ const ChangeAvatarDialog: React.FC<AvatarDialogProps> = ({ open, onClose, avatar
         setSelectedImage(croppedImage)
         const formData = new FormData()
         formData.append('avatar', croppedImage)
-        await userProfileService.uploadProfileAvatar(formData)
-        onClose()
+        toast.promise(userProfileService.uploadProfileAvatar(formData), {
+          loading: 'Uploading avatar...',
+          success: 'Avatar updated successfully',
+          error: 'Failed to update avatar'
+        })
+        userProfileService.getUserProfile()
       }
+      onClose()
     } catch (error) {
       console.error('Error uploading avatar:', error)
     }

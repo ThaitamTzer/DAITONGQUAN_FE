@@ -7,7 +7,7 @@ import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material'
-import { debounce } from 'src/utils/debounce'
+import useDebounce from 'src/utils/debounce'
 import Icon from 'src/@core/components/icon'
 import CustomChip from 'src/@core/components/mui/chip'
 import CustomAvatar from 'src/@core/components/mui/avatar'
@@ -254,26 +254,9 @@ const UserList = ({ apiData }: InferGetStaticPropsType<typeof getStaticProps>) =
 
   const { data } = useSWR('GET_ALL_USERS', userAdminService.getAllUser)
 
-  const debouncedSearch = useMemo(
-    () =>
-      debounce(async (query: string) => {
-        try {
-          const dataSearch = await userAdminService.searchUser(query)
-          setUserData(dataSearch.data.user)
-        } catch (error) {
-          console.log(error)
-        }
-      }, 200),
-    []
-  )
-
-  const handleSearch = useCallback(
-    (query: string) => {
-      setSearchQuery(query)
-      debouncedSearch(query)
-    },
-    [debouncedSearch]
-  )
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query)
+  }, [])
 
   useMemo(() => {
     if (data) {

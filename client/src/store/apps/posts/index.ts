@@ -128,12 +128,14 @@ export const usePostStore = create<UserPostState>(set => ({
   updateUserPost: async (_id: string, data: UpdatePostType) => {
     set({ loading: true })
     await postService.updatePost(_id, data)
-    await usePostStore.getState().getAllUserPosts()
+    usePostStore.getState().getAllUserPosts()
+    viewAllPostStore.getState().getAllPosts()
   },
   deletePost: async (_id: string) => {
     set({ loading: true })
     await postService.deletePost(_id)
-    await usePostStore.getState().getAllUserPosts()
+    usePostStore.getState().getAllUserPosts()
+    viewAllPostStore.getState().getAllPosts()
   },
   reactionPost: async (_id: string, action: string) => {
     const postId = postIdStore.getState().postId
@@ -143,6 +145,7 @@ export const usePostStore = create<UserPostState>(set => ({
       usePostStore.getState().getPostById(postId)
     } else {
       usePostStore.getState().getAllUserPosts()
+      viewAllPostStore.getState().getAllPosts()
     }
   },
   deleteReactionPost: async (_id: string) => {
@@ -153,12 +156,14 @@ export const usePostStore = create<UserPostState>(set => ({
       usePostStore.getState().getPostById(postId)
     } else {
       usePostStore.getState().getAllUserPosts()
+      viewAllPostStore.getState().getAllPosts()
     }
   },
   addPostToFavorite: async (_id: string) => {
     set({ loading: true })
     await postService.addPostToFavorite(_id)
-    await usePostStore.getState().getAllUserPosts()
+    usePostStore.getState().getAllUserPosts()
+    viewAllPostStore.getState().getAllPosts()
   },
   getPostById: async (_id: string) => {
     set({ loading: true })
@@ -185,7 +190,7 @@ export const approvePostStore = create<PostListState>(set => ({
   },
   approvePost: async (_id: string, isApproved: boolean) => {
     set({ loading: true })
-    postService.approvePost(_id, isApproved)
+    await postService.approvePost(_id, isApproved)
     approvePostStore.getState().getListPost()
   },
   openModalPost: (data: GetPostType) => set({ openModal: true, modalPost: data }),
@@ -205,6 +210,7 @@ export const commentPostState = create<CommentPostState>(set => ({
     set({ post: {} as GetPostType })
     await postService.commentToPost(data)
     usePostStore.getState().getAllUserPosts()
+    viewAllPostStore.getState().getAllPosts()
     const postId = postIdStore.getState().postId
     if (postId) {
       usePostStore.getState().getPostById(postId)

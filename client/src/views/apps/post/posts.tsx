@@ -442,17 +442,29 @@ const PostsPage = (props: UserPostsPageProps) => {
                       </>
                     )}
                   </Grid>
-                  <Grid
-                    item
-                    xs={12}
-                    sx={{
-                      paddingTop: '0px !important',
-                      ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
-                    }}
-                    onClick={() => handleClickNavigate(post)}
-                  >
-                    {renderContent(post.content)}
-                  </Grid>
+                  {ability.can('read', 'member-page') ? (
+                    <Grid
+                      item
+                      xs={12}
+                      sx={{
+                        paddingTop: '0px !important',
+                        ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
+                      }}
+                      onClick={() => handleClickNavigate(post)}
+                    >
+                      {renderContent(post.content)}
+                    </Grid>
+                  ) : (
+                    <Grid
+                      item
+                      xs={12}
+                      sx={{
+                        paddingTop: '0px !important'
+                      }}
+                    >
+                      {renderContent(post.content)}
+                    </Grid>
+                  )}
                   <Grid
                     item
                     xs={12}
