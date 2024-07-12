@@ -8,7 +8,7 @@ import UserProfileHeader from 'src/views/pages/user-profile/UserProfileHeader'
 import { useTheme } from '@mui/system'
 import Profile from 'src/views/pages/user-profile/profile'
 
-const UserProfile = ({ children }: { children: React.ReactNode }) => {
+const UserProfile = () => {
   // ** Hooks
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md')) // Adjust 'sm' to your desired breakpoint

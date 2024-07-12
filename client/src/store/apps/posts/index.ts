@@ -8,7 +8,6 @@ import {
   RepliesComment
 } from 'src/types/apps/postTypes'
 import postService from 'src/service/post.service'
-import { DialogProps } from '@mui/material'
 
 type UserPostState = {
   posts: GetPostType[]
@@ -65,8 +64,6 @@ type PostListState = {
 
 export type CommentPostState = {
   post: GetPostType
-  scroll: DialogProps['scroll']
-  setScroll: (scroll: DialogProps['scroll']) => void
   commentPost: (data: UserCommentType) => Promise<void>
   openCommentModal: boolean
   openCommentModalPost?: (data: GetPostType) => void
@@ -199,11 +196,8 @@ export const approvePostStore = create<PostListState>(set => ({
 
 export const commentPostState = create<CommentPostState>(set => ({
   post: {} as GetPostType,
-  scroll: 'paper',
-  setScroll: (scroll: DialogProps['scroll']) => set({ scroll }),
   openCommentModal: false,
-  openCommentModalPost: (data: GetPostType) =>
-    set(state => ({ openCommentModal: true, post: data, scroll: state.scroll })),
+  openCommentModalPost: (data: GetPostType) => set(() => ({ openCommentModal: true, post: data })),
   closeCommentModalPost: () => {
     set(state => ({ openCommentModal: false, post: state.post }))
   },
@@ -212,8 +206,10 @@ export const commentPostState = create<CommentPostState>(set => ({
     await postService.commentToPost(data)
     usePostStore.getState().getAllUserPosts()
     const postId = postIdStore.getState().postId
-    usePostStore.getState().getPostById(postId)
-    usePostStore.getState().getAllComments(postId)
+    if (postId) {
+      usePostStore.getState().getPostById(postId)
+      usePostStore.getState().getAllComments(postId)
+    }
   },
   handleDeleteComment: async (_id: string) => {
     await postService.deleteComment(_id)

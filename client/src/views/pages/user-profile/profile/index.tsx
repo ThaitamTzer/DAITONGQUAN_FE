@@ -4,19 +4,12 @@ import Grid from '@mui/material/Grid'
 // ** Demo Components
 import AboutOverivew from 'src/views/pages/user-profile/profile/AboutOverivew'
 
-// import ProjectsTable from 'src/views/pages/user-profile/profile/ProjectsTable'
-
-// import ActivityTimeline from 'src/views/pages/user-profile/profile/ActivityTimeline'
-
-// import ConnectionsTeams from 'src/views/pages/user-profile/profile/ConnectionsTeams'
-
 // ** Types
 import Posts from 'src/views/apps/post/posts'
 import { usePostStore, commentPostState, editPostState } from 'src/store/apps/posts' // Adjust the path to your store file
-import React, { ReactNode, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import CommentPost from 'src/views/apps/post/CommentPost'
 import EditPost from 'src/views/apps/post/EditPost'
-import { useRouter } from 'next/router'
 import AddPost from 'src/views/apps/post/AddPost'
 
 const Profile = () => {
@@ -27,17 +20,15 @@ const Profile = () => {
   const deletePost = usePostStore(state => state.deletePost)
   const addPostToFavorite = usePostStore(state => state.addPostToFavorite)
   const updatePost = usePostStore(state => state.updateUserPost)
-  const { post, commentPost, openCommentModal, closeCommentModalPost, openCommentModalPost, scroll, setScroll } =
-    commentPostState(state => state)
+  const { post, commentPost, openCommentModal, closeCommentModalPost, openCommentModalPost } = commentPostState(
+    state => state
+  )
 
   const { openEditModal, editPost, openEditPost, closeEditPost, loading } = editPostState(state => state)
 
   useEffect(() => {
     getAllUserPosts()
-  }, [])
-
-  const router = useRouter()
-  const { postId } = router.query
+  }, [getAllUserPosts])
 
   return (
     <Grid container spacing={6}>
@@ -61,8 +52,6 @@ const Profile = () => {
             </Posts>
             <CommentPost
               post={post}
-              scroll={scroll}
-              setScroll={setScroll}
               closeCommentModalPost={closeCommentModalPost}
               openCommentModal={openCommentModal}
               commentPost={commentPost}

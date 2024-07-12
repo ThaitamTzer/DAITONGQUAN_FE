@@ -37,7 +37,7 @@ const PostPage = () => {
       getAllComments(postId as string)
       setPostId(postId as string)
     }
-  }, [postId])
+  }, [postId, getPostById, getAllComments, setPostId])
 
   return (
     <Grid container justifyContent={'center'} pt={'0px !important'}>

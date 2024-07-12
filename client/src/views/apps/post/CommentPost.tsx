@@ -11,7 +11,8 @@ import {
   DialogActions,
   Button,
   IconButton,
-  DialogTitle
+  DialogTitle,
+  DialogProps
 } from '@mui/material'
 import { CommentPostState } from 'src/store/apps/posts'
 import { renderContent, RenderUser } from './posts'
@@ -30,10 +31,11 @@ import useDebounce from 'src/utils/debounce'
 import toast from 'react-hot-toast'
 
 const CommentPost = (props: CommentPostState) => {
-  const { post, openCommentModal, closeCommentModalPost, scroll, commentPost } = props
+  const { post, openCommentModal, closeCommentModalPost, commentPost } = props
   const [open, setOpen] = React.useState<boolean>(false)
   const [comment, setComment] = React.useState('')
   const debouncedComment = useDebounce(comment, 500)
+  const [scroll] = React.useState<DialogProps['scroll']>('paper')
 
   const userData = JSON.parse(localStorage.getItem('userData') || '{}')
   const user: any = userData
