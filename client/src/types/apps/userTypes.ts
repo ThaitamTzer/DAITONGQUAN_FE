@@ -1,6 +1,14 @@
 // ** Types
 import { ThemeColor } from 'src/@core/layouts/types'
 
+export type User = {
+  _id: string
+  firstname: string
+  lastname: string
+  avatar: string
+  rankID: null
+}
+
 export type UsersType = {
   id: number
   role: string

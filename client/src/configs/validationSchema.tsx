@@ -349,6 +349,6 @@ export const getCreateReportPostValidationSchema = (t: (arg0: string) => any) =>
 
   return yup.object().shape({
     reportType: yup.string().required(messages.reportType.required),
-    reportContent: yup.string().max(MAX_DESCRIPTINO_LENGTH, messages.reportContent.max)
+    reportContent: yup.string().max(200, messages.reportContent.max)
   })
 }
