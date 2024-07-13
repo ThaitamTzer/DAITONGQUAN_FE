@@ -1,15 +1,13 @@
 import { Card, Grid } from '@mui/material'
-import AddPost from 'src/views/apps/post/AddPost'
 import PostsPage from 'src/views/apps/post/posts'
-import { commentPostState, editPostState, usePostStore, viewAllPostStore } from 'src/store/apps/posts'
+import { commentPostState, editPostState, usePostStore, viewFavoritePostStore } from 'src/store/apps/posts'
 import { useEffect } from 'react'
 import CommentPost from 'src/views/apps/post/CommentPost'
 import EditPost from 'src/views/apps/post/EditPost'
-import ReportPost from 'src/views/apps/post/ReportPost'
 
-const Posts = () => {
-  const posts = viewAllPostStore(state => state.posts)
-  const getAllPosts = viewAllPostStore(state => state.getAllPosts)
+const FavoritePosts = () => {
+  const posts = viewFavoritePostStore(state => state.posts)
+  const getFavoritePosts = viewFavoritePostStore(state => state.getFavoritePosts)
   const { post, commentPost, openCommentModal, closeCommentModalPost, openCommentModalPost } = commentPostState(
     state => state
   )
@@ -21,16 +19,11 @@ const Posts = () => {
   const updatePost = usePostStore(state => state.updateUserPost)
 
   useEffect(() => {
-    getAllPosts()
-  }, [getAllPosts])
+    getFavoritePosts()
+  }, [getFavoritePosts])
 
   return (
     <Grid container spacing={3} justifyContent={'center'}>
-      <Grid item xs={12} md={9} sm={12} lg={8}>
-        <Card>
-          <AddPost />
-        </Card>
-      </Grid>
       <Grid item xs={12} md={9} sm={12} lg={8}>
         <Card>
           <PostsPage
@@ -58,13 +51,12 @@ const Posts = () => {
         closeEditPost={closeEditPost}
         updateUserPost={updatePost}
       />
-      <ReportPost />
     </Grid>
   )
 }
 
-Posts.acl = {
+FavoritePosts.acl = {
   action: 'read',
   subject: 'member-page'
 }
-export default Posts
+export default FavoritePosts

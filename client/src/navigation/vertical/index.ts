@@ -575,6 +575,13 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
+      path: '/report-list',
+      action: 'read',
+      subject: 'report',
+      title: 'Report List',
+      icon: 'tabler:file-text'
+    },
+    {
       path: '/homepage',
       action: 'read',
       subject: 'member-page',
@@ -587,6 +594,13 @@ const navigation = (): VerticalNavItemsType => {
       subject: 'member-page',
       title: 'Posts',
       icon: 'iconoir:post'
+    },
+    {
+      path: '/posts/favorite',
+      action: 'read',
+      subject: 'member-page',
+      title: 'Favorite Posts',
+      icon: 'uit:favorite'
     },
     {
       title: 'Categories',

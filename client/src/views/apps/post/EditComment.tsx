@@ -12,7 +12,6 @@ import {
 import { Box } from '@mui/system'
 import { useTheme } from '@mui/material/styles'
 import React, { useEffect } from 'react'
-import { userDataStore } from 'src/store/apps/posts'
 import DialogWithCustomCloseButton from 'src/views/components/dialog/customDialog'
 import Icon from 'src/@core/components/icon'
 import EmojiPicker, { EmojiClickData, EmojiStyle, SuggestionMode, Theme } from 'emoji-picker-react'
@@ -40,14 +39,13 @@ const EditComment = (props: EditCommentProps) => {
   } = props
   const [scroll] = React.useState<DialogProps['scroll']>('paper')
   const [open, setOpen] = React.useState<boolean>(false)
-  const userLocal = userDataStore(state => state.userLocal)
   const commentId = editCommentState(state => state.commentId)
-  const selectedComment = editCommentState.getState().selectedComment
   const [replyComment, setReplyComment] = React.useState(selectedReplyComment)
   const { settings } = useSettings()
   const theme = useTheme()
 
-  console.log(selectedReplyComment)
+  const userData = JSON.parse(localStorage.getItem('userData') || '{}')
+  const userLocal = userData
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value
@@ -80,7 +78,16 @@ const EditComment = (props: EditCommentProps) => {
   const handleSubmit = async () => {
     if (onSubmiteditComment && commentId && replyComment) {
       await onSubmiteditComment(commentId, replyComment)
-    } else if (onSubmiteditReplyComment && commentId && replyId && replyComment) {
+    }
+    handleCloseModal()
+  }
+
+  const handleSubmitReply = async () => {
+    if (onSubmiteditReplyComment && commentId && replyId && replyComment) {
+      console.log('commentId', commentId)
+      console.log('replyId', replyId)
+      console.log('replyComment', replyComment)
+
       await onSubmiteditReplyComment(commentId, replyId, replyComment)
     }
     handleCloseModal()
@@ -88,9 +95,9 @@ const EditComment = (props: EditCommentProps) => {
 
   useEffect(() => {
     if (openEditCommentModal) {
-      setReplyComment(selectedComment)
+      setReplyComment(selectedReplyComment)
     }
-  }, [openEditCommentModal, selectedComment])
+  }, [openEditCommentModal, selectedReplyComment])
 
   return (
     <Dialog
@@ -183,8 +190,16 @@ const EditComment = (props: EditCommentProps) => {
       </DialogWithCustomCloseButton>
       <DialogActions>
         <Button onClick={handleCloseModal}>Cancel</Button>
-        {onSubmiteditComment && <Button onClick={handleSubmit}>Change</Button>}
-        {onSubmiteditReplyComment && <Button onClick={handleSubmit}>Change</Button>}
+        {onSubmiteditComment && (
+          <Button variant='contained' onClick={handleSubmit}>
+            Change
+          </Button>
+        )}
+        {onSubmiteditReplyComment && (
+          <Button variant='contained' onClick={handleSubmitReply}>
+            Change
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   )

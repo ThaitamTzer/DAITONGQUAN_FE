@@ -1,47 +1,29 @@
-import { useRouter } from 'next/router'
-import { editPostState, postIdStore, usePostStore } from 'src/store/apps/posts'
-import { useEffect } from 'react'
 import { Grid, IconButton } from '@mui/material'
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
+import { editPostState, postIdStore, usePostStore } from 'src/store/apps/posts'
 import ViewPost from 'src/views/apps/post/viewPost'
 import Icon from 'src/@core/components/icon'
 import ReportPost from 'src/views/apps/post/ReportPost'
 import EditPost from 'src/views/apps/post/EditPost'
 
-const PostPage = () => {
+const PostDetail = () => {
   const getPostById = usePostStore(state => state.getPostById)
-  const clearPostData = usePostStore(state => state.clearPostData)
   const getAllComments = usePostStore(state => state.getAllComments)
-  const { setPostId } = postIdStore(state => state)
   const comments = usePostStore(state => state.allComments)
-  const { openEditModal, editPost, closeEditPost, loading } = editPostState(state => state)
-  const updatePost = usePostStore(state => state.updateUserPost)
   const post = usePostStore(state => state.post)
+  const { openEditModal, editPost, openEditPost, closeEditPost, loading } = editPostState(state => state)
   const router = useRouter()
+  const updatePost = usePostStore(state => state.updateUserPost)
+  const { setPostId } = postIdStore(state => state)
   const { postId } = router.query
-
-  useEffect(() => {
-    const handleRouteChange = () => {
-      clearPostData() // Xóa dữ liệu bài viết
-    }
-
-    router.beforePopState(() => {
-      handleRouteChange()
-
-      return true
-    })
-
-    return () => {
-      router.beforePopState(() => true) // Cleanup function
-    }
-  }, [router, clearPostData])
-
   useEffect(() => {
     if (postId) {
       getPostById(postId as string)
       getAllComments(postId as string)
       setPostId(postId as string)
     }
-  }, [postId])
+  }, [postId, getPostById, getAllComments, setPostId])
 
   return (
     <Grid container justifyContent={'center'} pt={'0px !important'}>
@@ -63,9 +45,8 @@ const PostPage = () => {
   )
 }
 
-PostPage.acl = {
+PostDetail.acl = {
   action: 'read',
   subject: 'member-page'
 }
-
-export default PostPage
+export default PostDetail

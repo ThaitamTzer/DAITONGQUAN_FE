@@ -1,24 +1,29 @@
 import { Grid, IconButton } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
-import { usePostStore } from 'src/store/apps/posts'
+import { editPostState, postIdStore, usePostStore } from 'src/store/apps/posts'
 import ViewPost from 'src/views/apps/post/viewPost'
 import Icon from 'src/@core/components/icon'
+import ReportPost from 'src/views/apps/post/ReportPost'
+import EditPost from 'src/views/apps/post/EditPost'
 
 const PostDetail = () => {
   const getPostById = usePostStore(state => state.getPostById)
   const getAllComments = usePostStore(state => state.getAllComments)
   const comments = usePostStore(state => state.allComments)
+  const { openEditModal, editPost, openEditPost, closeEditPost, loading } = editPostState(state => state)
+  const updatePost = usePostStore(state => state.updateUserPost)
   const post = usePostStore(state => state.post)
   const router = useRouter()
+  const { setPostId } = postIdStore(state => state)
   const { postId } = router.query
-
   useEffect(() => {
     if (postId) {
       getPostById(postId as string)
       getAllComments(postId as string)
+      setPostId(postId as string)
     }
-  }, [postId, getPostById, getAllComments])
+  }, [postId, getPostById, getAllComments, setPostId])
 
   return (
     <Grid container justifyContent={'center'} pt={'0px !important'}>
@@ -28,6 +33,14 @@ const PostDetail = () => {
         </IconButton>
         <ViewPost post={post} postId={postId as string} comments={comments} />
       </Grid>
+      <ReportPost />
+      <EditPost
+        editPost={editPost}
+        loading={loading}
+        openEditModal={openEditModal}
+        closeEditPost={closeEditPost}
+        updateUserPost={updatePost}
+      />
     </Grid>
   )
 }

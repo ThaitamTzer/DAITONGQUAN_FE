@@ -8,6 +8,7 @@ import {
   RepliesComment
 } from 'src/types/apps/postTypes'
 import postService from 'src/service/post.service'
+import toast from 'react-hot-toast'
 
 type UserPostState = {
   posts: GetPostType[]
@@ -105,6 +106,11 @@ type ViewAllPostState = {
   getAllPosts: () => Promise<void>
 }
 
+type viewFavoritePostState = {
+  posts: GetPostType[]
+  getFavoritePosts: () => Promise<void>
+}
+
 export const userDataStore = create<UserObj>(() => ({
   userLocal: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('userData') || '{}') : {}
 }))
@@ -126,24 +132,33 @@ export const usePostStore = create<UserPostState>(set => ({
     set({ loading: false })
   },
   updateUserPost: async (_id: string, data: UpdatePostType) => {
+    const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.updatePost(_id, data)
     usePostStore.getState().getAllUserPosts()
     viewAllPostStore.getState().getAllPosts()
+    if (postId) {
+      usePostStore.getState().getPostById(postId)
+    }
   },
   deletePost: async (_id: string) => {
+    const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.deletePost(_id)
     usePostStore.getState().getAllUserPosts()
     viewAllPostStore.getState().getAllPosts()
+    if (postId) {
+      usePostStore.getState().getPostById(postId)
+    }
   },
   reactionPost: async (_id: string, action: string) => {
     const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.reactionToPost(_id, action)
+    usePostStore.getState().getAllUserPosts()
+    viewAllPostStore.getState().getAllPosts()
     if (postId) {
       usePostStore.getState().getPostById(postId)
-    } else {
       usePostStore.getState().getAllUserPosts()
       viewAllPostStore.getState().getAllPosts()
     }
@@ -211,6 +226,7 @@ export const commentPostState = create<CommentPostState>(set => ({
     await postService.commentToPost(data)
     usePostStore.getState().getAllUserPosts()
     viewAllPostStore.getState().getAllPosts()
+    viewFavoritePostStore.getState().getFavoritePosts()
     const postId = postIdStore.getState().postId
     if (postId) {
       usePostStore.getState().getPostById(postId)
@@ -295,6 +311,14 @@ export const viewAllPostStore = create<ViewAllPostState>(set => ({
   posts: [],
   getAllPosts: async () => {
     const response = await postService.getAllPosts()
+    set({ posts: response })
+  }
+}))
+
+export const viewFavoritePostStore = create<viewFavoritePostState>(set => ({
+  posts: [],
+  getFavoritePosts: async () => {
+    const response = await postService.getFavoritedPosts()
     set({ posts: response })
   }
 }))

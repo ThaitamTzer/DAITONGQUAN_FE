@@ -1,9 +1,8 @@
-import { CommentType, RepliesComment } from 'src/types/apps/postTypes'
+import { CommentType } from 'src/types/apps/postTypes'
 import React from 'react'
 import { Avatar, Box, Button, Divider, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material'
 import { renderContent } from './posts'
 import Icon from 'src/@core/components/icon'
-import { userDataStore } from 'src/store/apps/posts'
 import ReplyCommentModal from './ReplieComment'
 import { repliesCommentState, commentPostState, editCommentState } from 'src/store/apps/posts'
 import toast from 'react-hot-toast'
@@ -134,10 +133,9 @@ const AllComment = (props: CommentProps) => {
     }))
   }
 
-  const userLocal = userDataStore(state => state.userLocal)
-  const currentUser = userLocal._id
-
-  console.log(comments)
+  const userData = localStorage.getItem('userData')
+  const user = userData && JSON.parse(userData)
+  const currentUser = user._id
 
   return (
     <>
@@ -384,6 +382,7 @@ const AllComment = (props: CommentProps) => {
         openEditCommentModal={editCommentState(state => state.opentEditReply)}
         selectedReplyComment={editCommentState(state => state.selectedReplyComment)}
         onCloseEditCommentModal={editCommentState(state => state.closeEditReplyModal)}
+        replyId={editCommentState(state => state.replyId)}
         onSubmiteditReplyComment={handleSubmitEditReplyComment}
       />
     </>

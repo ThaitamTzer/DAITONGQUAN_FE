@@ -120,6 +120,12 @@ export const getValidationMessages = (t: (arg0: string) => any) => ({
   amount: {
     required: t('Số tiền không được để trống'),
     number: t('Số tiền không hợp lệ')
+  },
+  reportType: {
+    required: t('Loại báo cáo không được để trống')
+  },
+  reportContent: {
+    max: t(`Nội dung báo cáo không được quá 200 ký tự`)
   }
 })
 
@@ -335,5 +341,14 @@ export const getCreateSpendNoteValidationSchema = (t: (arg0: string) => any) => 
   return yup.object().shape({
     title: yup.string().required(messages.title.required),
     amount: yup.number().required(messages.amount.required)
+  })
+}
+
+export const getCreateReportPostValidationSchema = (t: (arg0: string) => any) => {
+  const messages = getValidationMessages(t)
+
+  return yup.object().shape({
+    reportType: yup.string().required(messages.reportType.required),
+    reportContent: yup.string().max(MAX_DESCRIPTINO_LENGTH, messages.reportContent.max)
   })
 }

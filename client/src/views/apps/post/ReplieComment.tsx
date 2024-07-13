@@ -15,7 +15,7 @@ import { editCommentState } from 'src/store/apps/posts'
 import { CommentType, RepliesComment } from 'src/types/apps/postTypes'
 import DialogWithCustomCloseButton from 'src/views/components/dialog/customDialog'
 import { RenderRelativeTime } from './AllComment'
-import React, { useEffect } from 'react'
+import React from 'react'
 import Icon from 'src/@core/components/icon'
 import { useSettings } from 'src/@core/hooks/useSettings'
 import themeConfig from 'src/configs/themeConfig'
@@ -39,7 +39,9 @@ const ReplyCommentModal = (props: RepliesCommentProps) => {
   const [scroll] = React.useState<DialogProps['scroll']>('paper')
   const [open, setOpen] = React.useState<boolean>(false)
   const [replyComment, setReplyComment] = React.useState('')
-  const userLocal = userDataStore(state => state.userLocal)
+
+  const userData = JSON.parse(localStorage.getItem('userData') || '{}')
+  const userLocal = userData
 
   const theme = useTheme()
   const { settings } = useSettings()

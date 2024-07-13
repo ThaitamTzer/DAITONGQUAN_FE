@@ -20,9 +20,13 @@ import { AbilityContext } from 'src/layouts/components/acl/Can'
 import AllComment from './AllComment'
 import { commentPostState, usePostStore } from 'src/store/apps/posts'
 import CommentPost from './CommentPost'
+import { useReportStore } from 'src/store/apps/posts/report'
+import { editPostState } from 'src/store/apps/posts'
+import toast from 'react-hot-toast'
+import { useRouter } from 'next/router'
 
 type PostProps = {
-  post: GetPostType | any
+  post: GetPostType
   updateUserPost?: (_id: string, data: UpdatePostType) => Promise<void>
   closeEditPost?: () => void
   postId: string
@@ -36,11 +40,16 @@ const ViewPost = (props: PostProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const reactionPost = usePostStore(state => state.reactionPost)
   const deleteReactionPost = usePostStore(state => state.deleteReactionPost)
-  const { openCommentModalPost, closeCommentModalPost, commentPost, setScroll, scroll, openCommentModal } =
-    commentPostState(state => state)
+  const updatePost = usePostStore(state => state.updateUserPost)
+  const openEditPost = editPostState(state => state).openEditPost
+  const deletePost = usePostStore(state => state.deletePost)
+  const { openCommentModalPost, closeCommentModalPost, commentPost, openCommentModal } = commentPostState(
+    state => state
+  )
   const addPostToFavorite = usePostStore(state => state.addPostToFavorite)
-
+  const { handleOpenReportModal } = useReportStore(state => state)
   const ability = useContext(AbilityContext)
+  const router = useRouter()
 
   const userData = JSON.parse(localStorage.getItem('userData') || '{}')
   const idUser: string = userData._id
@@ -51,6 +60,29 @@ const ViewPost = (props: PostProps) => {
 
   const handleCloseImage = () => {
     setOpenImage(null)
+  }
+
+  const handleHidePost = async (_id: string, data: UpdatePostType) => {
+    if (updatePost) {
+      toast.promise(updatePost(_id, data), {
+        loading: 'Hiding post...',
+        success: 'Post hidden!',
+        error: 'Error hiding post'
+      })
+      handleCloseOptions()
+    }
+  }
+
+  const handleDeletePost = async (_id: string) => {
+    if (deletePost) {
+      toast.promise(deletePost(_id), {
+        loading: 'Deleting post...',
+        success: 'Post deleted!',
+        error: 'Error deleting post'
+      })
+      handleCloseOptions()
+      router.back()
+    }
   }
 
   const RenderButtonReaction = ({ isLiked, post }: { isLiked: boolean; post: any }) => {
@@ -115,14 +147,8 @@ const ViewPost = (props: PostProps) => {
   }
 
   const ImageDialog = (post: any) => {
-    // Assuming handleCloseImage is defined to set openImage to null or false
     return (
-      <Dialog
-        fullScreen
-        key={post._id}
-        open={openImage === post._id}
-        onClose={handleCloseImage} // This will trigger on clicking outside or pressing escape
-      >
+      <Dialog fullScreen key={post._id} open={openImage === post._id} onClose={handleCloseImage}>
         <DialogContent sx={{ py: '0px !important', px: '60px !important' }} onClick={() => handleCloseImage()}>
           {/* Close Button */}
           <IconButton
@@ -187,8 +213,6 @@ const ViewPost = (props: PostProps) => {
                 <Typography fontSize={'14px'} color='GrayText' marginRight={2} mt={0.6}>
                   {renderRelativeTime(post.createdAt)}
                 </Typography>
-                {/* {renderHidePost(isShow)}
-                {renderIsApproved(isApproved)} */}
               </Box>
               <>
                 <IconButton onClick={event => handleMoreOptions(event, post._id)} size='small'>
@@ -221,6 +245,71 @@ const ViewPost = (props: PostProps) => {
                       <Icon icon='mdi:star' color='yellow' />
                     </Box>
                   </MenuItem>
+                  {post.userId?._id !== idUser && (
+                    <MenuItem
+                      onClick={() => {
+                        handleOpenReportModal(post._id)
+                        handleCloseOptions()
+                      }}
+                    >
+                      <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                        <Typography variant='body1'>Report</Typography>
+                        <Icon icon='fxemoji:loudspeaker' />
+                      </Box>
+                    </MenuItem>
+                  )}
+                  {post.userId?._id === idUser && (
+                    <>
+                      <MenuItem
+                        onClick={() => {
+                          openEditPost && openEditPost(post)
+                          handleCloseOptions()
+                        }}
+                      >
+                        <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                          <Typography variant='body1'>Edit</Typography>
+                          <Icon icon='eva:edit-2-fill' />
+                        </Box>
+                      </MenuItem>
+                      {post.isShow ? (
+                        <MenuItem
+                          onClick={() => {
+                            handleHidePost(post._id, {
+                              isShow: false
+                            })
+                          }}
+                        >
+                          <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                            <Typography variant='body1'>Hide Post</Typography>
+                            <Icon icon='eva:eye-off-fill' />
+                          </Box>
+                        </MenuItem>
+                      ) : (
+                        <MenuItem
+                          onClick={() => {
+                            handleHidePost(post._id, {
+                              isShow: true
+                            })
+                          }}
+                        >
+                          <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                            <Typography variant='body1'>Show Post</Typography>
+                            <Icon icon='eva:eye-fill' />
+                          </Box>
+                        </MenuItem>
+                      )}
+                      <MenuItem
+                        onClick={() => {
+                          handleDeletePost(post._id)
+                        }}
+                      >
+                        <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                          <Typography variant='body1'>Delete Post</Typography>
+                          <Icon icon='gg:trash' color='red' />
+                        </Box>
+                      </MenuItem>
+                    </>
+                  )}
                 </Menu>
               </>
             </Grid>
@@ -267,7 +356,7 @@ const ViewPost = (props: PostProps) => {
             </Grid>
             <Grid item sx={{ paddingLeft: '0px !important' }}>
               <RenderButtonReaction
-                isLiked={post.userReaction?.some((reaction: any) => reaction.userId === idUser)}
+                isLiked={post.userReaction?.some((reaction: any) => reaction.userId._id === idUser)}
                 post={post}
               />
               <Button
@@ -290,8 +379,6 @@ const ViewPost = (props: PostProps) => {
       </Grid>
       <CommentPost
         post={post}
-        scroll={scroll}
-        setScroll={setScroll}
         closeCommentModalPost={closeCommentModalPost}
         openCommentModal={openCommentModal}
         commentPost={commentPost}

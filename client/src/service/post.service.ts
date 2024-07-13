@@ -39,8 +39,8 @@ const postService = {
   },
 
   // Get all posts favorited by user
-  getFavoritedPosts: async (): Promise<GetPostBySearchType[]> => {
-    const response: GetPostBySearchType[] = await axiosClient.get('/post/favorite')
+  getFavoritedPosts: async (): Promise<GetPostType[]> => {
+    const response: GetPostType[] = await axiosClient.get('/post/favorite')
 
     return response
   },
@@ -87,6 +87,10 @@ const postService = {
 
   replyComment: async (_id: string, comment: string): Promise<void> => {
     await axiosClient.post(`/comment/reply/${_id}`, { content: comment })
+  },
+
+  reportPost: async (postId: string, reportType: string, reportContent: string): Promise<void> => {
+    await axiosClient.post(`/report/${postId}`, { reportType, reportContent })
   },
 
   // ** PUT ======================================

@@ -15,6 +15,7 @@ import { Box } from '@mui/system'
 import Avatar from 'src/@core/components/mui/avatar'
 import Icon from 'src/@core/components/icon'
 import { GetPostType, UpdatePostType } from 'src/types/apps/postTypes'
+import { useReportStore } from 'src/store/apps/posts/report'
 import React, { Fragment, useContext, useEffect } from 'react'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import toast from 'react-hot-toast'
@@ -118,6 +119,7 @@ const PostsPage = (props: UserPostsPageProps) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [openImage, setOpenImage] = React.useState<string>('')
   const [selectedPostId, setSelectedPostId] = React.useState<string | null>(null)
+  const { handleOpenReportModal } = useReportStore(state => state)
   const ability = useContext(AbilityContext)
   const router = useRouter()
 
@@ -321,6 +323,7 @@ const PostsPage = (props: UserPostsPageProps) => {
 
   const userData = JSON.parse(localStorage.getItem('userData') || '{}')
   const idUser: string = userData._id
+  console.log(posts)
 
   return (
     <>
@@ -389,55 +392,85 @@ const PostsPage = (props: UserPostsPageProps) => {
                               <Icon icon='mdi:star' color='yellow' />
                             </Box>
                           </MenuItem>
-                          <MenuItem
-                            onClick={() => {
-                              handleOpenEditPost(post)
-                              handleCloseOptions()
-                            }}
-                          >
-                            <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                              <Typography variant='body1'>Edit</Typography>
-                              <Icon icon='eva:edit-2-fill' />
-                            </Box>
-                          </MenuItem>
-                          {post.isShow ? (
+                          {post.userId._id !== idUser && (
                             <MenuItem
-                              onClick={() =>
-                                handleHidePost(post._id, {
-                                  isShow: false
-                                })
-                              }
+                              onClick={() => {
+                                handleOpenReportModal(post._id)
+                                handleCloseOptions()
+                              }}
                             >
                               <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                                <Typography variant='body1'>Hide Post</Typography>
-                                <Icon icon='eva:eye-off-fill' />
-                              </Box>
-                            </MenuItem>
-                          ) : (
-                            <MenuItem
-                              onClick={() =>
-                                handleHidePost(post._id, {
-                                  isShow: true
-                                })
-                              }
-                            >
-                              <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                                <Typography variant='body1'>Show Post</Typography>
-                                <Icon icon='eva:eye-fill' />
+                                <Typography variant='body1'>Report</Typography>
+                                <Icon icon='fxemoji:loudspeaker' />
                               </Box>
                             </MenuItem>
                           )}
-                          <MenuItem
-                            onClick={() => {
-                              handleDeletePost(post._id)
-                              handleCloseOptions()
-                            }}
-                          >
-                            <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                              <Typography variant='body1'>Delete post</Typography>
-                              <Icon icon='gg:trash' color='red' />
-                            </Box>
-                          </MenuItem>
+                          {post.userId._id === idUser && (
+                            <>
+                              {/* Edit */}
+                              <MenuItem
+                                onClick={() => {
+                                  handleOpenEditPost(post)
+                                  handleCloseOptions()
+                                }}
+                              >
+                                <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                                  <Typography variant='body1'>Edit</Typography>
+                                  <Icon icon='eva:edit-2-fill' />
+                                </Box>
+                              </MenuItem>
+                              {/* Hide Post */}
+                              {post.isShow ? (
+                                <MenuItem
+                                  onClick={() =>
+                                    handleHidePost(post._id, {
+                                      isShow: false
+                                    })
+                                  }
+                                >
+                                  <Box
+                                    width={'100%'}
+                                    display='flex'
+                                    justifyContent='space-between'
+                                    alignItems={'center'}
+                                  >
+                                    <Typography variant='body1'>Hide Post</Typography>
+                                    <Icon icon='eva:eye-off-fill' />
+                                  </Box>
+                                </MenuItem>
+                              ) : (
+                                <MenuItem
+                                  onClick={() =>
+                                    handleHidePost(post._id, {
+                                      isShow: true
+                                    })
+                                  }
+                                >
+                                  <Box
+                                    width={'100%'}
+                                    display='flex'
+                                    justifyContent='space-between'
+                                    alignItems={'center'}
+                                  >
+                                    <Typography variant='body1'>Show Post</Typography>
+                                    <Icon icon='eva:eye-fill' />
+                                  </Box>
+                                </MenuItem>
+                              )}
+                              {/* Delete Post */}
+                              <MenuItem
+                                onClick={() => {
+                                  handleDeletePost(post._id)
+                                  handleCloseOptions()
+                                }}
+                              >
+                                <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                                  <Typography variant='body1'>Delete post</Typography>
+                                  <Icon icon='gg:trash' color='red' />
+                                </Box>
+                              </MenuItem>
+                            </>
+                          )}
                         </Menu>
                       </>
                     )}
