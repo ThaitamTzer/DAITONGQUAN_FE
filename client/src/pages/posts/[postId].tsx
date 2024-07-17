@@ -11,19 +11,20 @@ const PostDetail = () => {
   const getPostById = usePostStore(state => state.getPostById)
   const getAllComments = usePostStore(state => state.getAllComments)
   const comments = usePostStore(state => state.allComments)
-  const { openEditModal, editPost, openEditPost, closeEditPost, loading } = editPostState(state => state)
+  const { openEditModal, editPost, closeEditPost, loading } = editPostState(state => state)
   const updatePost = usePostStore(state => state.updateUserPost)
   const post = usePostStore(state => state.post)
   const router = useRouter()
   const { setPostId } = postIdStore(state => state)
   const { postId } = router.query
+
   useEffect(() => {
     if (postId) {
       getPostById(postId as string)
       getAllComments(postId as string)
       setPostId(postId as string)
     }
-  }, [postId, getPostById, getAllComments, setPostId])
+  }, [postId])
 
   return (
     <Grid container justifyContent={'center'} pt={'0px !important'}>

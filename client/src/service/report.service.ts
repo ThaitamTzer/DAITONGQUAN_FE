@@ -21,7 +21,7 @@ const reportService = {
 
   // Delete a report
   deleteReport: async (reportId: string): Promise<void> => {
-    await axiosClient.delete(`/report/delete-report/${reportId}`)
+    await axiosClient.delete(`/report/${reportId}`)
   }
 }
 

@@ -8,7 +8,8 @@ import {
   Grid,
   IconButton,
   TextField,
-  Typography
+  Typography,
+  useMediaQuery
 } from '@mui/material'
 import { Box } from '@mui/system'
 import { editCommentState } from 'src/store/apps/posts'
@@ -22,7 +23,6 @@ import themeConfig from 'src/configs/themeConfig'
 import { useTheme } from '@mui/material/styles'
 import EmojiPicker, { EmojiClickData, EmojiStyle, SuggestionMode, Theme } from 'emoji-picker-react'
 import toast from 'react-hot-toast'
-import { userDataStore } from 'src/store/apps/posts'
 
 type RepliesCommentProps = {
   handleCloseReplies: () => void
@@ -39,11 +39,12 @@ const ReplyCommentModal = (props: RepliesCommentProps) => {
   const [scroll] = React.useState<DialogProps['scroll']>('paper')
   const [open, setOpen] = React.useState<boolean>(false)
   const [replyComment, setReplyComment] = React.useState('')
+  const theme = useTheme()
 
   const userData = JSON.parse(localStorage.getItem('userData') || '{}')
   const userLocal = userData
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'))
 
-  const theme = useTheme()
   const { settings } = useSettings()
   const handleClickOpen = () => {
     if (open && openReplies) {
@@ -106,7 +107,7 @@ const ReplyCommentModal = (props: RepliesCommentProps) => {
       <DialogWithCustomCloseButton handleClose={handleCloseReplies}>
         {comment && (
           <Grid container spacing={3} mb={7}>
-            <Grid container xs={1}>
+            <Grid container xs={2} lg={1}>
               <Grid
                 item
                 xs={12}
@@ -120,7 +121,7 @@ const ReplyCommentModal = (props: RepliesCommentProps) => {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid container xs={11}>
+            <Grid container xs={10} lg={11}>
               <Grid item xs={11} sx={{ display: 'flex', flexDirection: 'row' }}>
                 <Typography variant='subtitle1' mr={2}>
                   {comment.userId?.firstname + ' ' + comment.userId?.lastname + ' '}
@@ -149,14 +150,15 @@ const ReplyCommentModal = (props: RepliesCommentProps) => {
         <Grid container spacing={3}>
           <Grid
             container
-            xs={1}
+            xs={2}
+            lg={1}
             sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
           >
             <Grid item xs={12}>
               <Avatar src={userLocal.avatar} />
             </Grid>
           </Grid>
-          <Grid container xs={11}>
+          <Grid container xs={10} lg={11}>
             <Grid item xs={11} sx={{ display: 'flex', flexDirection: 'row' }}>
               <Typography variant='subtitle1' mr={2}>
                 {userLocal.firstname + ' ' + userLocal.lastname + ' '}

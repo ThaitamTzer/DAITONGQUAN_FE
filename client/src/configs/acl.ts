@@ -20,7 +20,8 @@ const defineRulesFor = (user: UserDataType) => {
 
   if (Array.isArray(user.role) && user.role.length > 0) {
     // Handle case where user.role is an array
-    permissionIDs = user.role[0].permissionID || []
+    permissionIDs = user.role.flatMap(role => role.permissionID)
+
     can(['read'], 'analytics')
   } else if (user.role === 'member') {
     can(['read'], 'member-page')

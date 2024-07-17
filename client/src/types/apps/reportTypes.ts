@@ -1,12 +1,15 @@
+import { GetPostType } from './postTypes'
 import { User } from './userTypes'
+
+export type StatusType = 'pending' | 'Processed' | 'rejected'
 
 export type ReportType = {
   _id: string
   userId: User
   reportType: string
   reportContent: string
-  postId: string
-  status: ['pending', 'Processed', 'rejected']
+  postId: GetPostType
+  status: StatusType
   createdAt: Date | string
   updatedAt: Date | string
 }

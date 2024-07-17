@@ -22,6 +22,7 @@ import { useSettings } from 'src/@core/hooks/useSettings'
 import styled from '@emotion/styled'
 import { usePostStore } from 'src/store/apps/posts'
 import toast from 'react-hot-toast'
+import DialogWithCustomCloseButton from 'src/views/components/dialog/customDialog'
 
 const AddPost = () => {
   const [openAddPostDialog, setOpenAddPostDialog] = useState<boolean>(false)
@@ -104,7 +105,7 @@ const AddPost = () => {
 
   return (
     <Grid container xs={12} sx={{ padding: 3 }}>
-      <Grid container xs={11} sx={{ display: 'flex', alignItems: 'center' }}>
+      <Grid container xs={10} sx={{ display: 'flex', alignItems: 'center' }}>
         <Grid
           item
           lg={1}
@@ -150,8 +151,17 @@ const AddPost = () => {
               }
             }}
           />
-          <Dialog open={openAddPostDialog} onClose={handleCloseAddPostDialog} fullWidth>
-            <DialogContent>
+          <Dialog
+            open={openAddPostDialog}
+            sx={{
+              '.MuiDialog-paper': {
+                overflow: 'visible'
+              }
+            }}
+            onClose={handleCloseAddPostDialog}
+            fullWidth
+          >
+            <DialogWithCustomCloseButton handleClose={handleCloseAddPostDialog}>
               <Grid container spacing={3} sx={{ mt: 1 }}>
                 <Grid
                   item
@@ -267,19 +277,34 @@ const AddPost = () => {
                   </Grid>
                 </Grid>
               </Grid>
-            </DialogContent>
+            </DialogWithCustomCloseButton>
             <DialogActions>
-              <Button variant='outlined' onClick={handleCloseAddPostDialog}>
-                Cancel
-              </Button>
-              <Button variant='outlined' onClick={handleAddPost}>
-                Post
-              </Button>
+              <Grid container justifyContent={'right'} spacing={2}>
+                <Grid item xs={2}>
+                  <Button fullWidth variant='outlined' onClick={handleCloseAddPostDialog}>
+                    Cancel
+                  </Button>
+                </Grid>
+                <Grid item xs={2}>
+                  <Button fullWidth variant='contained' onClick={handleAddPost}>
+                    Post
+                  </Button>
+                </Grid>
+              </Grid>
             </DialogActions>
           </Dialog>
         </Grid>
       </Grid>
-      <Grid item xs={1}>
+      <Grid
+        item
+        xs={2}
+        sx={{
+          display: 'grid',
+          placeItems: 'center',
+          alignContent: 'space-between',
+          marginTop: 2
+        }}
+      >
         <Button fullWidth variant='outlined' onClick={openAddPostDialogHandler}>
           <Typography variant='body2' sx={{ color: 'text.primary' }}>
             Post

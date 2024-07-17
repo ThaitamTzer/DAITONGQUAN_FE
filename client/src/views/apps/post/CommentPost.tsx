@@ -14,7 +14,6 @@ import {
   DialogTitle,
   DialogProps
 } from '@mui/material'
-import { CommentPostState } from 'src/store/apps/posts'
 import { renderContent, RenderUser } from './posts'
 import Icon from 'src/@core/components/icon'
 import { Box } from '@mui/system'
@@ -29,6 +28,7 @@ import themeConfig from 'src/configs/themeConfig'
 import { useSettings } from 'src/@core/hooks/useSettings'
 import useDebounce from 'src/utils/debounce'
 import toast from 'react-hot-toast'
+import { CommentPostState } from 'src/types/apps/postTypes'
 
 const CommentPost = (props: CommentPostState) => {
   const { post, openCommentModal, closeCommentModalPost, commentPost } = props

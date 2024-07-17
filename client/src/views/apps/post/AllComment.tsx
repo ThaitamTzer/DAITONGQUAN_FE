@@ -158,23 +158,62 @@ const AllComment = (props: CommentProps) => {
               >
                 <Avatar src={comment.userId?.avatar} alt={comment.userId?.firstname} />
               </Grid>
-              <Grid item lg={10} md={9} xs={10} sm={10}>
+              <Grid item lg={11} md={10.5} xs={10} sm={11}>
                 <Grid container spacing={2}>
                   <Grid
                     item
                     xs={12}
                     sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between'
+                      display: 'flex'
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Typography variant='subtitle1' fontWeight={'bold'} marginRight={2}>
-                        {comment.userId?.firstname} {comment.userId?.lastname}
-                      </Typography>
-                      <Typography fontSize={'14px'} color='GrayText' marginRight={2} mt={0.6}>
-                        {RenderRelativeTime(comment.createdAt)}
-                      </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography variant='subtitle1' fontWeight={'bold'} marginRight={2}>
+                          {comment.userId?.firstname} {comment.userId?.lastname}
+                        </Typography>
+                        <Typography fontSize={'14px'} color='GrayText' marginRight={2} mt={0.6}>
+                          {RenderRelativeTime(comment.createdAt)}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        {currentUser === comment.userId._id ? (
+                          <>
+                            <IconButton onClick={event => handleMoreOptions(event, comment._id)}>
+                              <Icon icon='ri:more-fill' />
+                            </IconButton>
+                            <Menu
+                              PaperProps={{
+                                sx: { width: '200px' }
+                              }}
+                              anchorEl={anchorEl}
+                              open={Boolean(anchorEl) && selectedCommentId === comment._id}
+                              onClose={handleCloseOptions}
+                              anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'right'
+                              }}
+                              transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right'
+                              }}
+                            >
+                              <MenuItem onClick={() => handleOpenEditComment(comment.content, comment._id)}>
+                                <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                                  <Typography variant='body1'>Edit</Typography>
+                                  <Icon icon='eva:edit-2-fill' />
+                                </Box>
+                              </MenuItem>
+                              <MenuItem onClick={() => handleDelete(comment._id)}>
+                                <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                                  <Typography variant='body1'>Delete Comment</Typography>
+                                  <Icon icon='gg:trash' color='red' />
+                                </Box>
+                              </MenuItem>
+                            </Menu>
+                          </>
+                        ) : null}
+                      </Box>
                     </Box>
                   </Grid>
                   <Grid
@@ -199,55 +238,6 @@ const AllComment = (props: CommentProps) => {
                   </Grid>
                 </Grid>
               </Grid>
-              <Grid
-                item
-                lg={1}
-                md={1}
-                xs={1}
-                sm={1}
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'right',
-                  alignItems: 'start'
-                }}
-              >
-                {currentUser === comment.userId._id ? (
-                  <>
-                    <IconButton onClick={event => handleMoreOptions(event, comment._id)}>
-                      <Icon icon='ri:more-fill' />
-                    </IconButton>
-                    <Menu
-                      PaperProps={{
-                        sx: { width: '200px' }
-                      }}
-                      anchorEl={anchorEl}
-                      open={Boolean(anchorEl) && selectedCommentId === comment._id}
-                      onClose={handleCloseOptions}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'right'
-                      }}
-                      transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right'
-                      }}
-                    >
-                      <MenuItem onClick={() => handleOpenEditComment(comment.content, comment._id)}>
-                        <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                          <Typography variant='body1'>Edit</Typography>
-                          <Icon icon='eva:edit-2-fill' />
-                        </Box>
-                      </MenuItem>
-                      <MenuItem onClick={() => handleDelete(comment._id)}>
-                        <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                          <Typography variant='body1'>Delete Comment</Typography>
-                          <Icon icon='gg:trash' color='red' />
-                        </Box>
-                      </MenuItem>
-                    </Menu>
-                  </>
-                ) : null}
-              </Grid>
             </Grid>
             {comment.repliesComment
               .slice(-visibleReplies[comment._id] || -1)
@@ -256,7 +246,15 @@ const AllComment = (props: CommentProps) => {
                 <>
                   <Divider />
                   <Grid key={reply._id} container justifyContent={'flex-end'} pt={'0 !important'}>
-                    <Grid container xs={11.5} pt={'0 !important'} sx={{ padding: 3, justifyContent: 'flex-end' }}>
+                    <Grid
+                      container
+                      xs={11.5}
+                      sm={12}
+                      md={12}
+                      lg={12}
+                      pt={'0 !important'}
+                      sx={{ padding: 3, justifyContent: 'flex-end' }}
+                    >
                       <Grid
                         item
                         lg={1}
@@ -281,13 +279,72 @@ const AllComment = (props: CommentProps) => {
                               justifyContent: 'space-between'
                             }}
                           >
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <Typography variant='subtitle1' fontWeight={'bold'} marginRight={2}>
-                                {reply.userId?.firstname} {reply.userId?.lastname}
-                              </Typography>
-                              <Typography fontSize={'14px'} color='GrayText' marginRight={2} mt={0.6}>
-                                {RenderRelativeTime(reply.createdAt)}
-                              </Typography>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                width: '100%',
+                                justifyContent: 'space-between'
+                              }}
+                            >
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <Typography variant='subtitle1' fontWeight={'bold'} marginRight={2}>
+                                  {reply.userId?.firstname} {reply.userId?.lastname}
+                                </Typography>
+                                <Typography fontSize={'14px'} color='GrayText' marginRight={2} mt={0.6}>
+                                  {RenderRelativeTime(reply.createdAt)}
+                                </Typography>
+                              </Box>
+                              <Box>
+                                {currentUser === reply.userId._id ? (
+                                  <>
+                                    <IconButton onClick={event => handleMoreOptions(event, reply._id)}>
+                                      <Icon icon='ri:more-fill' />
+                                    </IconButton>
+                                    <Menu
+                                      PaperProps={{
+                                        sx: { width: '200px' }
+                                      }}
+                                      anchorEl={anchorEl}
+                                      open={Boolean(anchorEl) && selectedReplyId === reply._id}
+                                      onClose={handleCloseOptions}
+                                      anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'right'
+                                      }}
+                                      transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right'
+                                      }}
+                                    >
+                                      <MenuItem
+                                        onClick={() => handleOpenEditReply(reply.content, reply._id, comment._id)}
+                                      >
+                                        <Box
+                                          width={'100%'}
+                                          display='flex'
+                                          justifyContent='space-between'
+                                          alignItems={'center'}
+                                        >
+                                          <Typography variant='body1'>Edit</Typography>
+                                          <Icon icon='eva:edit-2-fill' />
+                                        </Box>
+                                      </MenuItem>
+                                      <MenuItem onClick={() => handleDeleteReply(comment._id, reply._id)}>
+                                        <Box
+                                          width={'100%'}
+                                          display='flex'
+                                          justifyContent='space-between'
+                                          alignItems={'center'}
+                                        >
+                                          <Typography variant='body1'>Delete Comment</Typography>
+                                          <Icon icon='gg:trash' color='red' />
+                                        </Box>
+                                      </MenuItem>
+                                    </Menu>
+                                  </>
+                                ) : null}
+                              </Box>
                             </Box>
                           </Grid>
                           <Grid
@@ -300,55 +357,6 @@ const AllComment = (props: CommentProps) => {
                             {renderContent(reply.content)}
                           </Grid>
                         </Grid>
-                      </Grid>
-                      <Grid
-                        item
-                        lg={1}
-                        md={1}
-                        xs={1}
-                        sm={1}
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'right',
-                          alignItems: 'start'
-                        }}
-                      >
-                        {currentUser === reply.userId._id ? (
-                          <>
-                            <IconButton onClick={event => handleMoreOptions(event, reply._id)}>
-                              <Icon icon='ri:more-fill' />
-                            </IconButton>
-                            <Menu
-                              PaperProps={{
-                                sx: { width: '200px' }
-                              }}
-                              anchorEl={anchorEl}
-                              open={Boolean(anchorEl) && selectedReplyId === reply._id}
-                              onClose={handleCloseOptions}
-                              anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'right'
-                              }}
-                              transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right'
-                              }}
-                            >
-                              <MenuItem onClick={() => handleOpenEditReply(reply.content, reply._id, comment._id)}>
-                                <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                                  <Typography variant='body1'>Edit</Typography>
-                                  <Icon icon='eva:edit-2-fill' />
-                                </Box>
-                              </MenuItem>
-                              <MenuItem onClick={() => handleDeleteReply(comment._id, reply._id)}>
-                                <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                                  <Typography variant='body1'>Delete Comment</Typography>
-                                  <Icon icon='gg:trash' color='red' />
-                                </Box>
-                              </MenuItem>
-                            </Menu>
-                          </>
-                        ) : null}
                       </Grid>
                     </Grid>
                   </Grid>

@@ -20,6 +20,7 @@ import React, { Fragment, useContext, useEffect } from 'react'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/router'
+import { usePostStore } from 'src/store/apps/posts'
 
 type UserPostsPageProps = {
   posts: GetPostType[]
@@ -120,8 +121,9 @@ const PostsPage = (props: UserPostsPageProps) => {
   const [openImage, setOpenImage] = React.useState<string>('')
   const [selectedPostId, setSelectedPostId] = React.useState<string | null>(null)
   const { handleOpenReportModal } = useReportStore(state => state)
+  const deleteFavorite = usePostStore(state => state.deleteFavoritePost)
   const ability = useContext(AbilityContext)
-  const router = useRouter()
+  const router = useRouter()  
 
   const RenderButtonReaction = ({ isLiked, post }: { isLiked: boolean; post: any }) => {
     return isLiked ? (
@@ -185,6 +187,13 @@ const PostsPage = (props: UserPostsPageProps) => {
         error: 'Error adding to favorite'
       })
     }
+  }
+  const handleDeleteFavorite = async (_id: string) => {
+    toast.promise(deleteFavorite(_id), {
+      loading: 'Deleting from favorite...',
+      success: 'Deleted from favorite!',
+      error: 'Error deleting from favorite'
+    })
   }
 
   const userAvatar = (userId: any) => {
@@ -267,7 +276,7 @@ const PostsPage = (props: UserPostsPageProps) => {
           {/* Close Button */}
           <IconButton
             onClick={handleCloseImage}
-            sx={{
+            sx={{ 
               position: 'absolute',
               top: 0,
               left: 0,
@@ -323,7 +332,7 @@ const PostsPage = (props: UserPostsPageProps) => {
 
   const userData = JSON.parse(localStorage.getItem('userData') || '{}')
   const idUser: string = userData._id
-  console.log(posts)
+  const currentPath = useRouter().asPath
 
   return (
     <>
@@ -381,17 +390,32 @@ const PostsPage = (props: UserPostsPageProps) => {
                             horizontal: 'right'
                           }}
                         >
-                          <MenuItem
-                            onClick={() => {
-                              handleAddPostToFavorite(post._id)
-                              handleCloseOptions()
-                            }}
-                          >
-                            <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                              <Typography variant='body1'>Favorite</Typography>
-                              <Icon icon='mdi:star' color='yellow' />
-                            </Box>
-                          </MenuItem>
+                          {/* Favorite */}
+                          {currentPath.includes('favorite') ? (
+                            <MenuItem
+                              onClick={() => {
+                                handleDeleteFavorite(post._id)
+                                handleCloseOptions()
+                              }}
+                            >
+                              <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                                <Typography variant='body1'>Unfavored</Typography>
+                                <Icon icon='mdi:star' color='yellow' />
+                              </Box>
+                            </MenuItem>
+                          ) : (
+                            <MenuItem
+                              onClick={() => {
+                                handleAddPostToFavorite(post._id)
+                                handleCloseOptions()
+                              }}
+                            >
+                              <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                                <Typography variant='body1'>Favorite</Typography>
+                                <Icon icon='mdi:star' color='yellow' />
+                              </Box>
+                            </MenuItem>
+                          )}
                           {post.userId._id !== idUser && (
                             <MenuItem
                               onClick={() => {

@@ -84,10 +84,6 @@ const EditComment = (props: EditCommentProps) => {
 
   const handleSubmitReply = async () => {
     if (onSubmiteditReplyComment && commentId && replyId && replyComment) {
-      console.log('commentId', commentId)
-      console.log('replyId', replyId)
-      console.log('replyComment', replyComment)
-
       await onSubmiteditReplyComment(commentId, replyId, replyComment)
     }
     handleCloseModal()
@@ -118,14 +114,17 @@ const EditComment = (props: EditCommentProps) => {
         <Grid container spacing={3}>
           <Grid
             container
-            xs={1}
+            xs={2}
+            sm={1}
+            md={1}
+            lg={1}
             sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
           >
             <Grid item xs={12}>
               <Avatar src={userLocal.avatar} />
             </Grid>
           </Grid>
-          <Grid container xs={11}>
+          <Grid container xs={10} sm={11} md={11} lg={11}>
             <Grid item xs={11} sx={{ display: 'flex', flexDirection: 'row' }}>
               <Typography variant='subtitle1' mr={2}>
                 {userLocal.firstname + ' ' + userLocal.lastname + ' '}

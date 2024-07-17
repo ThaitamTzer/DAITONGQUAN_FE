@@ -122,9 +122,6 @@ export type CommentType = {
   __v: 0
 }
 
-
-
-
 export type UserPostState = {
   posts: GetPostType[]
   post: GetPostType
@@ -140,6 +137,7 @@ export type UserPostState = {
   getPostById: (_id: string) => Promise<void>
   clearPostData: () => void
   getAllComments: (postId: string) => Promise<void>
+  deleteFavoritePost: (_id: string) => Promise<void>
 }
 
 export type EditPostState = {

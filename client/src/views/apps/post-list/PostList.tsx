@@ -112,7 +112,6 @@ const PostList = (props: PostListProps) => {
     openModalPost(data)
   }
 
-
   return (
     <Card>
       <CardHeader title={<Typography variant='h2'>List Posts</Typography>} />

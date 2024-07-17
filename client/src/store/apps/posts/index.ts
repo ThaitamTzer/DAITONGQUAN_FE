@@ -98,6 +98,11 @@ export const usePostStore = create<UserPostState>(set => ({
     set({ loading: true })
     const response = await postService.getCommentByPostId(postId)
     set({ allComments: response, loading: false })
+  },
+  deleteFavoritePost: async (_id: string) => {
+    set({ loading: true })
+    await postService.deletePostFromFavorite(_id)
+    viewFavoritePostStore.getState().getFavoritePosts()
   }
 }))
 
@@ -143,8 +148,8 @@ export const commentPostState = create<CommentPostState>(set => ({
   },
   handleDeleteComment: async (_id: string) => {
     await postService.deleteComment(_id)
-    const postId = postIdStore.getState().postId
-    usePostStore.getState().getPostById(postId)
+    const postId = await postIdStore.getState().postId
+    await usePostStore.getState().getPostById(postId)
     usePostStore.getState().getAllComments(postId)
   }
 }))
@@ -173,12 +178,13 @@ export const editCommentState = create<EditCommentState>(set => ({
   },
   updateReplyComment: async (commentId: string, replyId: string, content: string) => {
     await postService.editReplyComment(commentId, replyId, content)
-    const postId = postIdStore.getState().postId
+    const postId = await postIdStore.getState().postId
     usePostStore.getState().getAllComments(postId)
   },
   deleteReplyComment: async (commentId: string, replyId: string) => {
     await postService.deleteReplyComment(commentId, replyId)
-    const postId = postIdStore.getState().postId
+    const postId = await postIdStore.getState().postId
+    await usePostStore.getState().getPostById(postId)
     usePostStore.getState().getAllComments(postId)
   }
 }))
@@ -210,7 +216,8 @@ export const repliesCommentState = create<RepliesCommentState>(set => ({
   handleCloseReplies: () => set({ openReplies: false, comment: {} as CommentType }),
   handleReplyComment: async (_id: string, comment: string) => {
     await postService.replyComment(_id, comment)
-    const postId = postIdStore.getState().postId
+    const postId = await postIdStore.getState().postId
+    usePostStore.getState().getPostById(postId)
     usePostStore.getState().getAllComments(postId)
   }
 }))
