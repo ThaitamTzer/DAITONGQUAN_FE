@@ -3,7 +3,7 @@ import { ProfileAboutType } from 'src/types/apps/profileType'
 
 const userProfileService = {
   // ** Get User Profile
-  getUserProfile: async (): Promise<ProfileAboutType[]> => axiosClient.get(`/users/view-profile`),
+  getUserProfile: async (): Promise<any> => axiosClient.get(`/users/view-profile`),
 
   // ** Update User Profile
   updateUserProfile: async (data: ProfileAboutType): Promise<ProfileAboutType> =>

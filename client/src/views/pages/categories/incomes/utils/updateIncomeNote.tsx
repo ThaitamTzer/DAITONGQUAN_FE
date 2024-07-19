@@ -52,7 +52,8 @@ const UpdateIncomeNote = ({ incomeCate }: any) => {
   const handleOpen = (cateId: any) => {
     setOpen(true)
     setCateId(cateId)
-    console.log(incomeCate)
+    
+    // console.log(incomeCate)
   }
 
   const handleClose = () => {

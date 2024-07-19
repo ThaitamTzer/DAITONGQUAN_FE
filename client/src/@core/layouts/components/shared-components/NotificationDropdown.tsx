@@ -1,5 +1,5 @@
-// ** React Imports
-import { useState, SyntheticEvent, Fragment, ReactNode, useEffect } from 'react'
+import { useState, SyntheticEvent, Fragment, ReactNode, useContext, useEffect } from 'react'
+import { io } from 'socket.io-client'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -17,43 +17,21 @@ import Icon from 'src/@core/components/icon'
 
 // ** Third Party Components
 import PerfectScrollbarComponent from 'react-perfect-scrollbar'
+import { AbilityContext } from 'src/layouts/components/acl/Can'
 
 // ** Type Imports
-import { ThemeColor } from 'src/@core/layouts/types'
 import { Settings } from 'src/@core/context/settingsContext'
-
-// import { CustomAvatarProps } from 'src/@core/components/mui/avatar/types'
 
 // ** Custom Components Imports
 import CustomChip from 'src/@core/components/mui/chip'
-import CustomAvatar from 'src/@core/components/mui/avatar'
+
+// ** Services Imports
+import spendNoteService from 'src/service/spendNote.service'
+import ScheduleService from 'src/service/schedule.service'
 
 // ** Util Import
-// import { getInitials } from 'src/@core/utils/get-initials'
-import spendNoteService from 'src/service/spendNote.service'
-import useSWR, { mutate } from 'swr'
+import useSWR from 'swr'
 
-// export type NotificationsType = {
-//   meta: string
-//   title: string
-//   subtitle: string
-// } & (
-//   | { avatarAlt: string; avatarImg: string; avatarText?: never; avatarColor?: never; avatarIcon?: never }
-//   | {
-//       avatarAlt?: never
-//       avatarImg?: never
-//       avatarText: string
-//       avatarIcon?: never
-//       avatarColor?: ThemeColor
-//     }
-//   | {
-//       avatarAlt?: never
-//       avatarImg?: never
-//       avatarText?: never
-//       avatarIcon: ReactNode
-//       avatarColor?: ThemeColor
-//     }
-// )
 interface Props {
   settings: Settings
 }
@@ -95,13 +73,6 @@ const PerfectScrollbar = styled(PerfectScrollbarComponent)({
   maxHeight: 349
 })
 
-// ** Styled Avatar component
-// const Avatar = styled(CustomAvatar)<CustomAvatarProps>({
-//   width: 38,
-//   height: 38,
-//   fontSize: '1.125rem'
-// })
-
 // ** Styled component for the title in MenuItems
 const MenuItemTitle = styled(Typography)<TypographyProps>({
   fontWeight: 500,
@@ -128,7 +99,19 @@ const ScrollWrapper = ({ children, hidden }: { children: ReactNode; hidden: bool
 }
 
 const NotificationDropdown = (props: Props) => {
-  const { data: notifications } = useSWR('GET_ALL_NOTIFICATIONS', spendNoteService.getNotificationOutOfMoney)
+  const ability = useContext(AbilityContext)
+
+  const { data: notifications } = useSWR('GET_ALL_NOTIFICATIONS', spendNoteService.getNotificationOutOfMoney, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateOnMount: false,
+    refreshInterval: 0
+  })
+  const { data: eventNotifications, mutate: mutateEventNotifications } = useSWR(
+    'GET_ALL_EVENT_NOTIFICATIONS',
+    ScheduleService.notifySchedule,
+    { revalidateOnFocus: false, revalidateOnReconnect: false, refreshInterval: 0, revalidateOnMount: false }
+  )
 
   // ** Props
   const { settings } = props
@@ -141,6 +124,42 @@ const NotificationDropdown = (props: Props) => {
 
   // ** Vars
   const { direction } = settings
+
+  // ** Socket setup
+  useEffect(() => {
+    const role: any = localStorage.getItem('userData')
+    if (role?.role === 'member') {
+      const access_token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
+
+      const socket = io('https://daitongquan.onrender.com', {
+        extraHeaders: {
+          Authorization: `Bearer ${access_token}`
+        }
+      }) // replace with your socket server URL
+
+      socket.on('connect', function () {
+        console.log('connected')
+        socket.emit('getSchedule')
+      })
+
+      socket.on('schedules', data => {
+        // Update event notifications list
+        console.log('Event notifications:', data)
+
+        mutateEventNotifications()
+      })
+
+      socket.on('disconnect', () => {
+        console.log('Disconnected from socket server')
+      })
+
+      return () => {
+        socket.disconnect()
+      }
+    } else {
+      return
+    }
+  }, [])
 
   const handleDropdownOpen = (event: SyntheticEvent) => {
     setAnchorEl(event.currentTarget)
@@ -161,42 +180,43 @@ const NotificationDropdown = (props: Props) => {
     return <Typography sx={{ textDecoration: 'underline', display: 'inline' }}>{str}</Typography>
   }
 
-  // const RenderAvatar = ({ notification }: { notification: NotificationsType }) => {
-  //   const { avatarAlt, avatarImg, avatarIcon, avatarText, avatarColor } = notification
-
-  //   if (avatarImg) {
-  //     return <Avatar alt={avatarAlt} src={avatarImg} />
-  //   } else if (avatarIcon) {
-  //     return (
-  //       <Avatar skin='light' color={avatarColor}>
-  //         {avatarIcon}
-  //       </Avatar>
-  //     )
-  //   } else {
-  //     return (
-  //       <Avatar skin='light' color={avatarColor}>
-  //         {getInitials(avatarText as string)}
-  //       </Avatar>
-  //     )
-  //   }
-  // }
-
   return (
     <Fragment>
       <IconButton color='inherit' aria-haspopup='true' onClick={handleDropdownOpen} aria-controls='customized-menu'>
-        <Badge
-          color='error'
-          variant='standard'
-          badgeContent={
-            notifications?.outOfBudgetCategories? .length > 9 ? '9+' : notifications?.outOfBudgetCategories?.length
-          }
-          invisible={!notifications?.outOfBudgetCategories?.length}
-          sx={{
-            '& .MuiBadge-badge': { top: 4, right: 4, boxShadow: theme => `0 0 0 2px ${theme.palette.background.paper}` }
-          }}
-        >
-          <Icon fontSize='1.625rem' icon='tabler:bell' />
-        </Badge>
+        {ability.cannot('manage', 'all') && notifications?.outOfBudgetCategories?.length > 0 ? (
+          <Badge
+            color='error'
+            variant='standard'
+            badgeContent={
+              notifications?.outOfBudgetCategories?.length > 9 ? '9+' : notifications?.outOfBudgetCategories?.length
+            }
+            invisible={!notifications?.outOfBudgetCategories?.length}
+            sx={{
+              '& .MuiBadge-badge': {
+                top: 4,
+                right: 4,
+                boxShadow: theme => `0 0 0 2px ${theme.palette.background.paper}`
+              }
+            }}
+          >
+            <Icon fontSize='1.625rem' icon='tabler:bell' />
+          </Badge>
+        ) : (
+          <Badge
+            color='error'
+            variant='standard'
+            badgeContent={eventNotifications?.length > 9 ? '9+' : eventNotifications?.length}
+            sx={{
+              '& .MuiBadge-badge': {
+                top: 4,
+                right: 4,
+                boxShadow: theme => `0 0 0 2px ${theme.palette.background.paper}`
+              }
+            }}
+          >
+            <Icon fontSize='1.625rem' icon='tabler:bell' />
+          </Badge>
+        )}
       </IconButton>
       <Menu
         anchorEl={anchorEl}
@@ -214,30 +234,54 @@ const NotificationDropdown = (props: Props) => {
             <Typography variant='h5' sx={{ cursor: 'text' }}>
               Notifications
             </Typography>
-            <CustomChip
-              skin='light'
-              size='small'
-              color='primary'
-              label={`${notifications?.outOfBudgetCategories?.length} New`}
-            />
+            {ability.cannot('manage', 'all') && notifications?.outOfBudgetCategories?.length > 0 ? (
+              <CustomChip
+                skin='light'
+                size='small'
+                color='primary'
+                label={`${notifications?.outOfBudgetCategories?.length} New`}
+              />
+            ) : (
+              <CustomChip skin='light' size='small' color='primary' label={`${eventNotifications?.length} New`} />
+            )}
           </Box>
         </MenuItem>
         <ScrollWrapper hidden={hidden}>
-          {notifications?.outOfBudgetCategories?.map((notification: any, index: number) => (
-            <MenuItem key={index} disableRipple disableTouchRipple onClick={handleDropdownClose}>
-              <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
-                {/* <RenderAvatar notification={notification} /> */}
-                <Box sx={{ mr: 4, ml: 2.5, flex: '1 1', display: 'flex', overflow: 'hidden', flexDirection: 'column' }}>
-                  <MenuItemTitle variant='body1'>
-                    Category {handleUnderline(notification.nameCate)} has limit {handleFormatCost(notification.budget)}
-                  </MenuItemTitle>
-                  <MenuItemSubtitle variant='body2'>
-                    {handleFormatCost(notification.budgetUsed)} has spent
-                  </MenuItemSubtitle>
-                </Box>
-              </Box>
-            </MenuItem>
-          ))}
+          {ability.cannot('manage', 'all') && (
+            <>
+              {notifications?.outOfBudgetCategories?.map((notification: any, index: number) => (
+                <MenuItem key={index} disableRipple disableTouchRipple onClick={handleDropdownClose}>
+                  <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+                    <Box
+                      sx={{ mr: 4, ml: 2.5, flex: '1 1', display: 'flex', overflow: 'hidden', flexDirection: 'column' }}
+                    >
+                      <MenuItemTitle variant='body1'>
+                        Category {handleUnderline(notification.nameCate)} has limit{' '}
+                        {handleFormatCost(notification.budget)}
+                      </MenuItemTitle>
+                      <MenuItemSubtitle variant='body2'>
+                        {handleFormatCost(notification.budgetUsed)} has spent
+                      </MenuItemSubtitle>
+                    </Box>
+                  </Box>
+                </MenuItem>
+              ))}
+              {eventNotifications?.map((notification: any, index: number) => (
+                <MenuItem key={index} disableRipple disableTouchRipple onClick={handleDropdownClose}>
+                  <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+                    <Box
+                      sx={{ mr: 4, ml: 2.5, flex: '1 1', display: 'flex', overflow: 'hidden', flexDirection: 'column' }}
+                    >
+                      <MenuItemTitle variant='body1'>
+                        Event {handleUnderline(notification.title)} is coming
+                      </MenuItemTitle>
+                      <MenuItemSubtitle variant='body2'>{notification.startDateTime}</MenuItemSubtitle>
+                    </Box>
+                  </Box>
+                </MenuItem>
+              ))}
+            </>
+          )}
         </ScrollWrapper>
         <MenuItem
           disableRipple
@@ -257,6 +301,11 @@ const NotificationDropdown = (props: Props) => {
       </Menu>
     </Fragment>
   )
+}
+
+NotificationDropdown.acl = {
+  action: 'read',
+  subject: 'member-page'
 }
 
 export default NotificationDropdown

@@ -48,7 +48,7 @@ const ScheduleService = {
     axiosClient.delete('/schedule/delete-many', { data: { scheduleIds } }),
 
   // Notify a schedule
-  notifySchedule: async (): Promise<Schedule[]> => axiosClient.get('/schedule/notify-schedule'),
+  notifySchedule: async (): Promise<any> => axiosClient.get('/schedule/notify-schedule'),
 
   // Enable encryption
   enableEncryption: async (scheduleId: string) => axiosClient.get(`/schedule/enable-encrypt/${scheduleId}`),

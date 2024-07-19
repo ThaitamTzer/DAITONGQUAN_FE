@@ -105,12 +105,12 @@
     "id": 17,
     "namePermission": "ReadlistPost",
     "action": "read",
-    "subject": "permission"
+    "subject": "post"
   },
   {
     "id": 18,
     "namePermission": "ApprovePost",
-    "action": "update",
+    "action": "approve",
     "subject": "post"
   },
   {
@@ -136,5 +136,17 @@
     "namePermission": "WarningReport",
     "action": "update",
     "subject": "report"
+  },
+  {
+    "id": 23,
+    "namePermission": "BlockReport",
+    "action": "block",
+    "subject": "report"
+  },
+  {
+    "id": 24,
+    "namePermission": "ReadDashboard",
+    "action": "read",
+    "subject": "dashboard"
   }
 ]

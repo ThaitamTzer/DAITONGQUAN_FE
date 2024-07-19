@@ -10,7 +10,7 @@ const categoriesService = {
   getCategoriesSpend: async () => axiosClient.get<CategoryCard[]>('/category/spend'),
 
   // Get categories income
-  getCategoriesIncome: async () => axiosClient.get<CategoryCard[]>('/category/income'),
+  getCategoriesIncome: async (): Promise<any> => axiosClient.get<CategoryCard[]>('/category/income'),
 
   // Create new category
   createCategory: async (data: any) => axiosClient.post('/category', data),

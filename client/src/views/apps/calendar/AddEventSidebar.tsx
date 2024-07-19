@@ -27,7 +27,6 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 
 // ** Types
 import { EventDateType, AddEventSidebarType } from 'src/types/apps/calendarTypes'
-import toast from 'react-hot-toast'
 
 interface PickerProps {
   label?: string
@@ -45,6 +44,7 @@ interface DefaultStateType {
   startDate: Date | string
   guests: string[] | string | undefined
   location: string
+  isEncrypted?: boolean
   _id: string
 }
 
@@ -68,6 +68,8 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
     dispatch,
     addEvent,
     updateEvent,
+    encryptEvent,
+    decryptEvent,
     drawerWidth,
     calendarApi,
     deleteEvent,
@@ -99,21 +101,33 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
       title: data.title,
       location: values.location,
       isAllDay: values.allDay,
-      startDateTime: values.startDate,
-      endDateTime: values.endDate,
+      startDateTime: new Date(values.startDate).toISOString(),
+      endDateTime: new Date(values.endDate).toISOString(),
       note: values.description,
       isLoop: false,
       calendars: values.calendar,
       url: values.url
     }
 
+    // Check if it's a new event or updating an existing one
     if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
       dispatch(addEvent(modifiedEvent))
     } else {
+      // Update the event
       dispatch(
-        updateEvent({ id: store.selectedEvent.id, ...modifiedEvent }),
-        toast.success('Event Updated Successfully')
+        updateEvent({
+          id: store.selectedEvent.id,
+          isEncrypted: store.selectedEvent.extendedProps.isEncrypted,
+          ...modifiedEvent
+        })
       )
+
+      // Check the encryption state and apply encryption or decryption accordingly
+      if (values.isEncrypted) {
+        dispatch(encryptEvent(store.selectedEvent.id))
+      } else if (!values.isEncrypted) {
+        dispatch(decryptEvent(store.selectedEvent.id))
+      }
     }
     calendarApi.refetchEvents()
     handleSidebarClose()
@@ -130,7 +144,7 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
 
   const handleStartDate = (date: Date) => {
     if (date > values.endDate) {
-      setValues({ ...values, startDate: new Date(date), endDate: new Date(date) })
+      setValues({ ...values, startDate: new Date(date).toISOString(), endDate: new Date(date).toISOString() })
     }
   }
 
@@ -147,14 +161,17 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
         guests: event.extendedProps.guests || [],
         description: event.extendedProps.description || '',
         calendar: event.extendedProps.calendar || 'Business',
-        endDate: event.end !== null ? event.end : event.start,
-        startDate: event.start !== null ? event.start : new Date(),
-        location: event.extendedProps.location || ''
+        endDate: event.end !== null ? new Date(event.end).toISOString() : new Date(event.start).toISOString(),
+        startDate: event.start !== null ? new Date(event.start).toISOString() : new Date().toISOString(),
+        location: event.extendedProps.location || '',
+        isEncrypted: event.extendedProps.isEncrypted || false
       })
     }
 
     // eslint-disable-next-line
   }, [setValue, store.selectedEvent])
+
+  console.log(new Date(values.startDate).toISOString(), new Date(values.endDate).toISOString())
 
   const resetToEmptyValues = useCallback(() => {
     setValue('title', '')
@@ -204,6 +221,26 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
             Reset
           </Button>
         </Fragment>
+      )
+    }
+  }
+
+  const RenderEncryptSwitch = () => {
+    if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
+      return null
+    } else {
+      return (
+        <FormControl sx={{ mb: 4 }}>
+          <FormControlLabel
+            label='Encrypt'
+            control={
+              <Switch
+                checked={values.isEncrypted}
+                onChange={e => setValues({ ...values, isEncrypted: e.target.checked })}
+              />
+            }
+          />
+        </FormControl>
       )
     }
   }
@@ -294,13 +331,13 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
               <DatePicker
                 selectsStart
                 id='event-start-date'
-                endDate={values.endDate as EventDateType}
-                selected={values.startDate as EventDateType}
-                startDate={values.startDate as EventDateType}
+                endDate={new Date(values.endDate)}
+                selected={values.startDate ? new Date(values.startDate) : null}
+                startDate={new Date(values.startDate)}
                 showTimeSelect={!values.allDay}
-                dateFormat={!values.allDay ? 'yyyy-MM-dd hh:mm' : 'yyyy-MM-dd'}
+                dateFormat={!values.allDay ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd'}
                 customInput={<PickersComponent label='Start Date' registername='startDate' />}
-                onChange={(date: Date) => setValues({ ...values, startDate: new Date(date) })}
+                onChange={(date: Date) => setValues({ ...values, startDate: date.toISOString() })}
                 onSelect={handleStartDate}
               />
             </Box>
@@ -308,14 +345,14 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
               <DatePicker
                 selectsEnd
                 id='event-end-date'
-                endDate={values.endDate as EventDateType}
-                selected={values.endDate as EventDateType}
-                minDate={values.startDate as EventDateType}
-                startDate={values.startDate as EventDateType}
+                endDate={new Date(values.endDate)}
+                selected={values.endDate ? new Date(values.endDate) : null}
+                minDate={new Date(values.startDate)}
+                startDate={new Date(values.startDate)}
                 showTimeSelect={!values.allDay}
-                dateFormat={!values.allDay ? 'yyyy-MM-dd hh:mm' : 'yyyy-MM-dd'}
+                dateFormat={!values.allDay ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd'}
                 customInput={<PickersComponent label='End Date' registername='endDate' />}
-                onChange={(date: Date) => setValues({ ...values, endDate: new Date(date) })}
+                onChange={(date: Date) => setValues({ ...values, endDate: date.toISOString() })}
               />
             </Box>
             <FormControl sx={{ mb: 4 }}>
@@ -372,6 +409,16 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
               value={values.description}
               onChange={e => setValues({ ...values, description: e.target.value })}
             />
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mt: 6
+              }}
+            >
+              <RenderEncryptSwitch />
+            </Box>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <RenderSidebarFooter />
             </Box>

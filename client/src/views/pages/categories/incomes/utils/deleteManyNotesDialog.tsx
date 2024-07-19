@@ -24,18 +24,17 @@ const DeleteManyNotesDialog = ({ rowSelectionModel, data }: any) => {
       setOpen(false)
       setLoading(false)
       toast.success('Notes deleted successfully')
-      mutate('GET_ALL_NOTIFICATIONS')
       mutate('GET_ALL_SPENDNOTES')
       mutate('GET_SPENDNOTE_BY_RANGE_DATE')
     } catch (error: any) {
       toast.error(error.response.data.message)
       setLoading(false)
-      mutate('GET_ALL_NOTIFICATIONS')
     }
   }
 
   const totalNotes = data?.length
-  console.log(totalNotes)
+
+  // console.log(totalNotes)
 
   return (
     <>

@@ -7,7 +7,6 @@ import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material'
-import { debounce } from 'src/utils/debounce'
 import Icon from 'src/@core/components/icon'
 import CustomChip from 'src/@core/components/mui/chip'
 import CustomAvatar from 'src/@core/components/mui/avatar'
@@ -63,7 +62,7 @@ const RowOptions = ({ id }: { id: string }) => {
   const [userId, setUserId] = useState<string | null>(null)
   const ability = useContext(AbilityContext)
 
-  const { data } = useSWR('GET_ALL_USERS', userAdminService.getAllUser)
+  const { data }: any = useSWR('GET_ALL_USERS', userAdminService.getAllUser)
 
   const handleOpenDialog = (id: string) => {
     setUserId(id)
@@ -252,28 +251,11 @@ const UserList = ({ apiData }: InferGetStaticPropsType<typeof getStaticProps>) =
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [searchQuery, setSearchQuery] = useState<string>('')
 
-  const { data } = useSWR('GET_ALL_USERS', userAdminService.getAllUser)
+  const { data }: any = useSWR('GET_ALL_USERS', userAdminService.getAllUser)
 
-  const debouncedSearch = useMemo(
-    () =>
-      debounce(async (query: string) => {
-        try {
-          const dataSearch = await userAdminService.searchUser(query)
-          setUserData(dataSearch.data.user)
-        } catch (error) {
-          console.log(error)
-        }
-      }, 200),
-    []
-  )
-
-  const handleSearch = useCallback(
-    (query: string) => {
-      setSearchQuery(query)
-      debouncedSearch(query)
-    },
-    [debouncedSearch]
-  )
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query)
+  }, [])
 
   useMemo(() => {
     if (data) {

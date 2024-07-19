@@ -26,7 +26,7 @@ import UpdateIncomeNote from './utils/updateIncomeNote'
 import DatePicker from 'react-datepicker'
 import { format } from 'date-fns'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
-import CustomNoRowsOverlay from 'src/pages/components/datagrid/nodataOverlay'
+import { CustomNoRowsOverlay } from 'src/pages/components/datagrid/nodataOverlay'
 
 type IcomeNote = {
   _id: string
@@ -202,7 +202,7 @@ const ListOfSpendNote = () => {
     { refreshInterval: 0 }
   )
 
-  console.log(incomeNoteByRangeDate)
+  // console.log(incomeNoteByRangeDate)
 
   useEffect(() => {
     let filteredNotes: any = notes?.incomeNotes || []

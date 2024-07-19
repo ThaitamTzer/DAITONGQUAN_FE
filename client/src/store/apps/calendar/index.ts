@@ -3,7 +3,6 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 // ** Axios Imports
 import axios from 'axios'
-import { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import axiosClient from 'src/lib/axios'
 
@@ -22,34 +21,24 @@ type CalendarState = {
   isLoop: boolean
   calendars: string
   url: string
+  isEncrypted: boolean
 }
 
 type AddEvent = {
   title: string
   location: string
   isAllDay: boolean
-  startDateTime: Date
-  endDateTime: Date
+  startDateTime: Date | string
+  endDateTime: Date | string
   note: string
   isLoop: boolean
   calendars: string
   url: string
 }
 
-// ** Fetch Events
-// export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async (calendars: CalendarFiltersType[]) => {
-//   const response = await axios.get('/apps/calendar/events', {
-//     params: {
-//       calendars
-//     }
-//   })
-
-//   return response.data
-// })
-
 export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async (calendars: CalendarFiltersType[]) => {
   try {
-    const response = await axiosClient.get('/schedule', {
+    const response: any = await axiosClient.get('/schedule', {
       params: {
         calendars: calendars || ['']
       }
@@ -67,7 +56,8 @@ export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async (ca
           calendar: event.calendars,
           guests: [],
           location: event.location,
-          description: event.note
+          description: event.note,
+          isEncrypted: event.isEncrypted
         }
       }
     })
@@ -82,33 +72,55 @@ export const fetchEvents = createAsyncThunk('appCalendar/fetchEvents', async (ca
 // ** Add Event
 export const addEvent = createAsyncThunk('appCalendar/addEvent', async (event: AddEvent, { dispatch }) => {
   try {
+    toast.loading('Adding Event...') // Start loading toast
     const response = await axiosClient.post('/schedule', event)
     await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
-    toast.success('Event Added Successfully')
+    toast.dismiss() // Dismiss the loading toast
+    toast.success('Event Added Successfully') // Show success toast
 
     return response
   } catch (error) {
-    toast.error('Error Adding Event')
+    toast.dismiss() // Dismiss the loading toast
+    toast.error('Error Adding Event') // Show error toast
   }
 })
 
 // ** Update Event
 export const updateEvent = createAsyncThunk('appCalendar/updateEvent', async (event: EventTypes, { dispatch }) => {
-  const response = await axiosClient.put(`/schedule/${event.id}`, event)
-  await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
+  try {
+    toast.loading('Updating Event...') // Start loading toast
+    const response = await axiosClient.put(`/schedule/${event.id}`, event)
+    toast.dismiss() // Dismiss the loading toast
+    toast.success('Event Updated Successfully') // Show success toast
+    await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
 
-  return response.data.event
+    return response
+  } catch (error) {
+    toast.dismiss() // Dismiss the loading toast
+    toast.error('Error Updating Event') // Show error toast
+  }
 })
 
 // ** Delete Event
 export const deleteEvent = createAsyncThunk('appCalendar/deleteEvent', async (_id: string | string, { dispatch }) => {
   try {
-    const response = await axiosClient.delete(`/schedule/${_id}`)
+    toast.loading('Deleting Event...') // Start loading toast
+    const response: any = await axiosClient.delete(`/schedule/${_id}`)
     await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
 
+    if (response.message === 'Delete schedule successfully') {
+      toast.dismiss() // Dismiss the loading toast
+      toast.success('Event Deleted Successfully') // Show success toast
+    } else {
+      toast.dismiss() // Dismiss the loading toast
+      toast.error('Error Deleting Event') // Show error toast
+    }
+
     return response.data
-  } catch (error) {
-    toast.error('Error Deleting Event')
+  } catch (error: any) {
+    toast.dismiss() // Ensure loading toast is dismissed on error
+    toast.error(error.response.data.message) // Show error toast
+    throw error // Rethrow the error to ensure it's handled by Redux Toolkit's rejected action
   }
 })
 
@@ -116,18 +128,41 @@ export const deleteEvent = createAsyncThunk('appCalendar/deleteEvent', async (_i
 export const deleteManyEvents = createAsyncThunk(
   'appCalendar/deleteManyEvents',
   async (scheduleIds: string[], { dispatch }) => {
-    try {
-      const response = await axiosClient.delete('/schedule/delete-many', {
-        data: { scheduleIds } // Changed from params to data
-      })
-      await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
-
-      return response.data
-    } catch (error) {
-      toast.error('Error Deleting Events')
+    toast.loading('Deleting Events...') // Start loading toast
+    const response = await axiosClient.delete('/schedule/delete-many', {
+      data: { scheduleIds } // Changed from params to data
+    })
+    await dispatch(fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC']))
+    if (response.status === 200) {
+      toast.dismiss() // Dismiss the loading toast
+      toast.success('Events Deleted Successfully') // Show success toast
+    } else {
+      toast.dismiss() // Dismiss the loading toast
+      toast.error('Error Deleting Events') // Show error toast
     }
+
+    return response.data
   }
 )
+
+// ** Encrypt Event
+export const encryptEvent = createAsyncThunk('appCalendar/encryptEvent', async (scheduleId: string) => {
+  try {
+    const response = await axiosClient.put(`/schedule/enable-encrypt/${scheduleId}`)
+    fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC'])
+
+    return response.data
+  } catch (error) {}
+})
+
+// ** Decrypt Event
+export const decryptEvent = createAsyncThunk('appCalendar/decryptEvent', async (scheduleId: string) => {
+  const response = await axiosClient.put(`/schedule/disable-encrypt/${scheduleId}`)
+
+  await fetchEvents(['Work', 'Business', 'Family', 'Holiday', 'ETC'])
+
+  return response.data
+})
 
 export const appCalendarSlice = createSlice({
   name: 'appCalendar',

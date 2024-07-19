@@ -1,9 +1,19 @@
-// eslint-disable-next-line @typescript-eslint/ban-types
-export const debounce = (func: Function, delay: number) => {
-  let timeoutId: NodeJS.Timeout
+import { useState, useEffect } from 'react'
 
-  return (...args: any[]) => {
-    clearTimeout(timeoutId)
-    timeoutId = setTimeout(() => func(...args), delay)
-  }
+const useDebounce = (value: any, delay: any) => {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
 }
+
+export default useDebounce

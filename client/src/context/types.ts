@@ -40,11 +40,7 @@ export type UserDataType = {
   avatar: string
   dateOfBirth: Date | undefined
   address?: string | null
-  role:
-    | string
-    | {
-        name: string
-      } // Assuming it's a string here
+  role: any
   permissionIDs: number[]
   createdAt: string
   _id: string

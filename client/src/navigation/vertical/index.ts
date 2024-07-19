@@ -96,6 +96,13 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
+      title: 'Rank Management',
+      icon: 'tabler:star',
+      path: '/rank-management',
+      subject: 'rank',
+      action: 'read'
+    },
+    {
       title: 'Admins & Roles',
       icon: 'tabler:settings',
       children: [
@@ -108,6 +115,13 @@ const navigation = (): VerticalNavItemsType => {
           path: '/apps/roles'
         }
       ]
+    },
+    {
+      title: 'Post Management',
+      icon: 'tabler:file-text',
+      action: 'read',
+      subject: 'post',
+      path: '/apps/post-list'
     },
     {
       title: 'Pages',
@@ -568,11 +582,32 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
+      path: '/report-list',
+      action: 'read',
+      subject: 'report',
+      title: 'Report List',
+      icon: 'tabler:file-text'
+    },
+    {
       path: '/homepage',
       action: 'read',
       subject: 'member-page',
       title: 'Homepage',
       icon: 'tabler:home'
+    },
+    {
+      path: '/posts',
+      action: 'read',
+      subject: 'member-page',
+      title: 'Posts',
+      icon: 'iconoir:post'
+    },
+    {
+      path: '/posts/favorite',
+      action: 'read',
+      subject: 'member-page',
+      title: 'Favorite Posts',
+      icon: 'uit:favorite'
     },
     {
       title: 'Categories',
@@ -596,6 +631,13 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Calendar',
       icon: 'tabler:calendar',
       path: '/apps/calendar',
+      subject: 'member-page',
+      action: 'read'
+    },
+    {
+      title: 'Debt',
+      icon: 'tabler:credit-card',
+      path: '/apps/debt',
       subject: 'member-page',
       action: 'read'
     },

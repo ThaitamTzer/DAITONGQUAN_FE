@@ -5,7 +5,7 @@ const incomesNoteService = {
   createIncomesNote: async (data: any) => axiosClient.post('incomenote', data),
 
   // Get all incomes note
-  getAllIncomesNote: async () => axiosClient.get('incomenote'),
+  getAllIncomesNote: async (): Promise<any> => axiosClient.get('incomenote'),
 
   // Update incomes note
   updateIncomesNote: async (incomeNoteId: string, data: any) => axiosClient.put(`incomenote/${incomeNoteId}`, data),

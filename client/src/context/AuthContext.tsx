@@ -95,7 +95,7 @@ const AuthProvider = ({ children }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType, ) => {
+  const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
     axiosClient
       .post(authConfig.loginEndpoint, params)
       .then(async response => {
@@ -115,7 +115,7 @@ const AuthProvider = ({ children }: Props) => {
             ? window.localStorage.getItem(authConfig.storageTokenKeyName)
             : window.sessionStorage.getItem(authConfig.storageTokenKeyName)
           const decodeStoredAccessToken = storedAccessToken ? (jwtDecode(storedAccessToken) as JwtPayload) : null
-          const storedUserData = decodeStoredAccessToken as UserDataType
+          const storedUserData = decodeStoredAccessToken as any
           const adminData = storedUserData.fullname
 
           window.localStorage.setItem('userData', JSON.stringify(adminData))

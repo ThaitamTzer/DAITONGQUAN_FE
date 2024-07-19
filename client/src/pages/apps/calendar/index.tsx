@@ -28,6 +28,8 @@ import {
   fetchEvents,
   deleteEvent,
   updateEvent,
+  encryptEvent,
+  decryptEvent,
   handleSelectEvent,
   handleAllCalendars,
   handleCalendarsUpdate
@@ -119,6 +121,8 @@ const AppCalendar = () => {
         addEvent={addEvent}
         updateEvent={updateEvent}
         deleteEvent={deleteEvent}
+        encryptEvent={encryptEvent}
+        decryptEvent={decryptEvent}
         calendarApi={calendarApi}
         drawerWidth={addEventSidebarWidth}
         handleSelectEvent={handleSelectEvent}

@@ -1,4 +1,3 @@
-// ** React Imports
 import { useCallback, useState, Ref, forwardRef, ReactElement } from 'react'
 
 // ** MUI Imports
@@ -162,7 +161,8 @@ const AdminList = () => {
       return
     }
     setSelectedAdmin(admin)
-    console.log('admin: ', admin)
+
+    // console.log('admin: ', admin)
     setOpenUpdateDialog(true)
   }
 
@@ -330,6 +330,9 @@ const AdminList = () => {
     }
   ]
 
+  // Filter out the admin with the specified email
+  const filteredAdmins = admins?.filter((admin: AdminsType) => admin.email !== 'masterAdmin@gmail.com') ?? []
+
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
@@ -338,7 +341,7 @@ const AdminList = () => {
           <DataGrid
             autoHeight
             rowHeight={62}
-            rows={admins?.map((item: { _id: any }) => ({ ...item, id: item._id })) ?? []}
+            rows={filteredAdmins.map((item: { _id: any }) => ({ ...item, id: item._id }))}
             columns={columns}
             checkboxSelection
             disableRowSelectionOnClick

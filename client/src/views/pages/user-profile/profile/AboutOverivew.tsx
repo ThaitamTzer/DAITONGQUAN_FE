@@ -19,7 +19,6 @@ import { useAuth } from 'src/hooks/useAuth'
 import userProfileService from 'src/service/userProfileService.service'
 import { useEffect } from 'react'
 
-
 const renderList = (arr: ProfileTabCommonType[]) => {
   if (arr && arr.length) {
     return arr.map((item, index) => {
