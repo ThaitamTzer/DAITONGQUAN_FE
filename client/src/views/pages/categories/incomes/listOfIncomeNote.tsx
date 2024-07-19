@@ -26,7 +26,7 @@ import UpdateIncomeNote from './utils/updateIncomeNote'
 import DatePicker from 'react-datepicker'
 import { format } from 'date-fns'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
-import { CustomNoRowsOverlay } from 'src/pages/components/datagrid/nodataOverlay'
+import CustomNoRowsOverlay from 'src/pages/components/datagrid/nodataOverlay'
 
 type IcomeNote = {
   _id: string
