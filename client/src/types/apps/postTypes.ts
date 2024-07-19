@@ -1,11 +1,7 @@
 // Define types
-export type User = {
-  _id: string
-  firstname: string
-  lastname: string
-  avatar: string
-  rankID: null
-}
+
+import { User } from "./userTypes"
+
 
 export type ReplyComment = {
   commentId: string

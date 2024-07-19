@@ -24,7 +24,7 @@ const ReportPost = () => {
     control,
     handleSubmit,
     reset,
-    formState: { errors }
+    formState: { errors, isValid }
   } = useForm<FormData>({
     mode: 'onBlur',
     resolver: yupResolver(getCreateReportPostValidationSchema(t))
@@ -114,7 +114,14 @@ const ReportPost = () => {
                 </Button>
               </Grid>
               <Grid item xs={3}>
-                <Button type='submit' id='ButtonCancel' fullWidth variant='contained' color='primary'>
+                <Button
+                  disabled={!isValid}
+                  type='submit'
+                  id='ButtonCancel'
+                  fullWidth
+                  variant='contained'
+                  color='primary'
+                >
                   Report
                 </Button>
               </Grid>

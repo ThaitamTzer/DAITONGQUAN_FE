@@ -96,6 +96,13 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
+      title: 'Rank Management',
+      icon: 'tabler:star',
+      path: '/rank-management',
+      subject: 'rank',
+      action: 'read'
+    },
+    {
       title: 'Admins & Roles',
       icon: 'tabler:settings',
       children: [

@@ -19,6 +19,11 @@ const reportService = {
     await axiosClient.patch(`/report/block-user/${reportId}`)
   },
 
+  // Reject a report
+  rejectReport: async (reportId: string): Promise<void> => {
+    await axiosClient.patch(`/report/reject/${reportId}`)
+  },
+
   // Delete a report
   deleteReport: async (reportId: string): Promise<void> => {
     await axiosClient.delete(`/report/${reportId}`)

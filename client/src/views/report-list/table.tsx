@@ -18,7 +18,7 @@ import {
   Typography,
   useMediaQuery,
   Box,
-  Button
+  TableSortLabel
 } from '@mui/material'
 import { IconButton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
@@ -27,6 +27,7 @@ import { ReportType, StatusType } from 'src/types/apps/reportTypes'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { getInitials } from 'src/@core/utils/get-initials'
 import { useTheme } from '@mui/material/styles'
+import { getComparator, stableSort } from 'src/utils/sort'
 import React, { ChangeEvent } from 'react'
 
 export default function TableReportList() {
@@ -41,6 +42,7 @@ export default function TableReportList() {
     handleOpenReportModal,
     handleOpenAlreadyBlockedPostModal,
     handleOpenAlreadyBlockedUserModal,
+    handleOpenRejectModal,
     setReportId
   } = useReportStore()
   const theme = useTheme()
@@ -50,6 +52,8 @@ export default function TableReportList() {
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
   const [selectedType, setSelectedType] = React.useState('all')
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [order, setOrder] = React.useState<'asc' | 'desc'>('desc')
+  const [orderBy, setOrderBy] = React.useState<keyof ReportType>('createdAt')
 
   const handleMoreOptions = (event: React.MouseEvent<HTMLElement>, _id: string) => {
     setAnchorEl(event.currentTarget)
@@ -59,6 +63,16 @@ export default function TableReportList() {
   const handleCloseOptions = () => {
     setAnchorEl(null)
     setReportId('')
+  }
+
+  const closeMoreOption = () => {
+    setAnchorEl(null)
+  }
+
+  const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof ReportType) => {
+    const isAsc = orderBy === property && order === 'asc'
+    setOrder(isAsc ? 'desc' : 'asc')
+    setOrderBy(property)
   }
 
   const handleStatusColor = (status: StatusType) => {
@@ -122,6 +136,8 @@ export default function TableReportList() {
   const FilterType = () => {
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = event.target.value
+      console.log('value', value)
+
       setSelectedType(value)
       handleFilterReportType(value)
     }
@@ -137,10 +153,41 @@ export default function TableReportList() {
     )
   }
 
+  const FilterPostOwner = () => {
+    // Step 1: Create a unique list of names
+    const uniqueNames = Array.from(
+      new Set(
+        reportList.map(report => {
+          const fullName = report.postId.userId.firstname + ' ' + report.postId.userId.lastname
+
+          return fullName
+        })
+      )
+    )
+
+    return (
+      <TextField
+        select
+        label='Post Owner'
+        value={selectedType}
+        size='small'
+        sx={{ width: 150 }}
+
+        // onChange={handleChange}
+      >
+        {uniqueNames.map((name, index) => (
+          <MenuItem key={index} value={name}>
+            {name}
+          </MenuItem>
+        ))}
+      </TextField>
+    )
+  }
+
   const NoDataLoGo = () => {
     return (
       <TableRow>
-        <TableCell colSpan={mobile ? 1 : 4}>
+        <TableCell colSpan={mobile ? 1 : 5}>
           <Box display='flex' flexDirection='column' justifyContent='center' alignItems='center' p={5}>
             <Typography variant='h6'>No Data</Typography>
             <CardMedia
@@ -160,8 +207,9 @@ export default function TableReportList() {
     )
   }
 
-  // Calculate the paginated reports
-  const paginatedReports = reportList.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+  const reportSort = stableSort(reportList, getComparator(order, orderBy))
+  const paginatedReports = reportSort.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+  console.log('paginatedReports', paginatedReports)
 
   return (
     <Card>
@@ -170,8 +218,11 @@ export default function TableReportList() {
         <Box mr={1}>
           <FilterType />
         </Box>
-        <Box>
+        <Box mr={1}>
           <FilterReport />
+        </Box>
+        <Box>
+          <FilterPostOwner />
         </Box>
       </CardContent>
       <TableContainer component={Paper}>
@@ -180,23 +231,62 @@ export default function TableReportList() {
             {mobile ? (
               <TableRow>
                 <TableCell>
-                  <Typography variant='h6'>Report Content</Typography>
+                  <TableSortLabel
+                    active={orderBy === 'reportContent'}
+                    direction={orderBy === 'reportContent' ? order : 'asc'}
+                    onClick={event => handleRequestSort(event, 'reportContent')}
+                  >
+                    <Typography variant='h6'>Report Content</Typography>
+                  </TableSortLabel>
                 </TableCell>
                 <TableCell sx={{ px: '0 !important' }} align='right'></TableCell>
               </TableRow>
             ) : (
               <TableRow>
                 <TableCell>
-                  <Typography variant='h6'>Author</Typography>
+                  <TableSortLabel
+                    active={orderBy === 'userId'}
+                    direction={orderBy === 'userId' ? order : 'asc'}
+                    onClick={event => handleRequestSort(event, 'userId')}
+                  >
+                    <Typography variant='h6'>Author</Typography>
+                  </TableSortLabel>
                 </TableCell>
                 <TableCell>
-                  <Typography variant='h6'>Type</Typography>
+                  <TableSortLabel
+                    active={orderBy === 'reportType'}
+                    direction={orderBy === 'reportType' ? order : 'asc'}
+                    onClick={event => handleRequestSort(event, 'reportType')}
+                  >
+                    <Typography variant='h6'>Type</Typography>
+                  </TableSortLabel>
                 </TableCell>
                 <TableCell>
-                  <Typography variant='h6'>Content</Typography>
+                  <TableSortLabel
+                    active={orderBy === 'reportContent'}
+                    direction={orderBy === 'reportContent' ? order : 'asc'}
+                    onClick={event => handleRequestSort(event, 'reportContent')}
+                  >
+                    <Typography variant='h6'>Content</Typography>
+                  </TableSortLabel>
                 </TableCell>
                 <TableCell>
-                  <Typography variant='h6'>Status</Typography>
+                  <TableSortLabel
+                    active={orderBy === (`postId.userId` as keyof ReportType)}
+                    direction={orderBy === (`postId.userId` as keyof ReportType) ? order : 'asc'}
+                    onClick={event => handleRequestSort(event, `postId.userId` as keyof ReportType)}
+                  >
+                    <Typography variant='h6'>Post Owner</Typography>
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell align='right'>
+                  <TableSortLabel
+                    active={orderBy === 'status'}
+                    direction={orderBy === 'status' ? order : 'asc'}
+                    onClick={event => handleRequestSort(event, 'status')}
+                  >
+                    <Typography variant='h6'>Status</Typography>
+                  </TableSortLabel>
                 </TableCell>
                 {!mobile ? (
                   <TableCell align='right'>
@@ -250,7 +340,10 @@ export default function TableReportList() {
                       report.reportContent
                     )}
                   </TableCell>
-                  <TableCell align='center'>
+                  <TableCell>
+                    <Typography>{report.postId.userId.firstname + ' ' + report.postId.userId.lastname}</Typography>
+                  </TableCell>
+                  <TableCell align='right'>
                     <Chip
                       label={report.status}
                       color={handleStatusColor(report.status)}
@@ -258,42 +351,140 @@ export default function TableReportList() {
                     />
                   </TableCell>
                   <TableCell align='right'>
-                    <Box display={'flex'} justifyContent={'flex-end'}>
-                      {mobile ? (
-                        <IconButton>
-                          <Icon icon='mingcute:more-2-fill' />
-                        </IconButton>
-                      ) : (
-                        <>
+                    {report.status !== 'rejected' ? (
+                      <Box display={'flex'} justifyContent={'flex-end'}>
+                        {mobile ? (
                           <IconButton>
-                            <Icon icon='weui:eyes-on-outlined' />
+                            <Icon icon='mingcute:more-2-fill' />
                           </IconButton>
-                          {report.status === 'Processed' ? (
-                            <IconButton onClick={() => handleOpenAlreadyBlockedUserModal()}>
-                              <Icon icon='solar:user-block-linear' />
+                        ) : (
+                          <>
+                            <IconButton onClick={event => handleMoreOptions(event, report._id)}>
+                              <Icon icon='mingcute:more-2-fill' />
                             </IconButton>
-                          ) : (
-                            <IconButton onClick={() => handleOpenBlockUserModal(report._id)}>
-                              <Icon icon='solar:user-block-linear' />
-                            </IconButton>
-                          )}
-
-                          {report.postId.status === 'blocked' ? (
-                            <IconButton onClick={() => handleOpenAlreadyBlockedPostModal()}>
-                              <Icon icon='streamline:browser-block' />
-                            </IconButton>
-                          ) : (
-                            <IconButton onClick={() => handleOpenBlockPostModal(report._id)}>
-                              <Icon icon='streamline:browser-block' />
-                            </IconButton>
-                          )}
-
-                          <IconButton onClick={() => handleOpenReportModal(report._id)}>
-                            <Icon icon='tdesign:delete' />
-                          </IconButton>
-                        </>
-                      )}
-                    </Box>
+                            <Menu
+                              PaperProps={{
+                                sx: { width: '200px' }
+                              }}
+                              anchorEl={anchorEl}
+                              open={Boolean(anchorEl) && reportId === report._id}
+                              onClose={handleCloseOptions}
+                              anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'right'
+                              }}
+                              transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right'
+                              }}
+                            >
+                              <MenuItem>
+                                <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                                  <Typography variant='body1'>View Post</Typography>
+                                  <Icon icon='weui:eyes-on-outlined' />
+                                </Box>
+                              </MenuItem>
+                              {report.postId.userId.isBlock ? (
+                                <MenuItem
+                                  onClick={() => {
+                                    handleOpenAlreadyBlockedUserModal()
+                                    closeMoreOption()
+                                  }}
+                                >
+                                  <Box
+                                    width={'100%'}
+                                    display='flex'
+                                    justifyContent='space-between'
+                                    alignItems={'center'}
+                                  >
+                                    <Typography variant='body1'>Block User</Typography>
+                                    <Icon icon='solar:user-block-linear' />
+                                  </Box>
+                                </MenuItem>
+                              ) : (
+                                <MenuItem
+                                  onClick={() => {
+                                    handleOpenBlockUserModal(report._id)
+                                    closeMoreOption()
+                                  }}
+                                >
+                                  <Box
+                                    width={'100%'}
+                                    display='flex'
+                                    justifyContent='space-between'
+                                    alignItems={'center'}
+                                  >
+                                    <Typography variant='body1'>Block User</Typography>
+                                    <Icon icon='solar:user-block-linear' />
+                                  </Box>
+                                </MenuItem>
+                              )}
+                              {report.postId.status === 'blocked' ? (
+                                <MenuItem
+                                  onClick={() => {
+                                    handleOpenAlreadyBlockedPostModal()
+                                    closeMoreOption()
+                                  }}
+                                >
+                                  <Box
+                                    width={'100%'}
+                                    display='flex'
+                                    justifyContent='space-between'
+                                    alignItems={'center'}
+                                  >
+                                    <Typography variant='body1'>Block Post</Typography>
+                                    <Icon icon='streamline:browser-block' />
+                                  </Box>
+                                </MenuItem>
+                              ) : (
+                                <MenuItem
+                                  onClick={() => {
+                                    handleOpenBlockPostModal(report._id)
+                                    closeMoreOption()
+                                  }}
+                                >
+                                  <Box
+                                    width={'100%'}
+                                    display='flex'
+                                    justifyContent='space-between'
+                                    alignItems={'center'}
+                                  >
+                                    <Typography variant='body1'>Block Post</Typography>
+                                    <Icon icon='streamline:browser-block' />
+                                  </Box>
+                                </MenuItem>
+                              )}
+                              <MenuItem
+                                onClick={() => {
+                                  handleOpenRejectModal(report._id)
+                                  closeMoreOption()
+                                }}
+                              >
+                                <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                                  <Typography variant='body1'>Eject Report</Typography>
+                                  <Icon icon='icon-park-outline:reject' />
+                                </Box>
+                              </MenuItem>
+                              <MenuItem
+                                onClick={() => {
+                                  handleOpenReportModal(report._id)
+                                  closeMoreOption()
+                                }}
+                              >
+                                <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                                  <Typography variant='body1'>Delete Report</Typography>
+                                  <Icon icon='tdesign:delete' />
+                                </Box>
+                              </MenuItem>
+                            </Menu>
+                          </>
+                        )}
+                      </Box>
+                    ) : (
+                      <IconButton onClick={() => handleOpenReportModal(report._id)}>
+                        <Icon icon='tdesign:delete' />
+                      </IconButton>
+                    )}
                   </TableCell>
                 </TableRow>
               ) : (

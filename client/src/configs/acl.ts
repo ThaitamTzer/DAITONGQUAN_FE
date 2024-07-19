@@ -29,8 +29,6 @@ const defineRulesFor = (user: UserDataType) => {
     console.warn('User role not found or has an invalid format.')
   }
 
-  // console.log('permissionIDs:', permissionIDs)
-
   permissionIDs.forEach(permissionID => {
     const permission = permissions.find(p => p.id === permissionID)
     if (permission) {

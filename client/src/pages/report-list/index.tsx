@@ -11,6 +11,8 @@ export default function ReportListPage() {
     openAlreadyBlockedPostModal,
     openAlreadyBlockedUserModal,
     openBlockUserModal,
+    openRejectModal,
+    handleCloseRejectModal,
     handleCloseReportModal,
     handleCloseBlockPostModal,
     handleCloseBlockUserModal,
@@ -19,6 +21,7 @@ export default function ReportListPage() {
     handleDeleteReport,
     handleBlockUser,
     handleBlockPost,
+    handleRejectReport,
     reportId
   } = useReportStore()
 
@@ -63,6 +66,14 @@ export default function ReportListPage() {
         open={openAlreadyBlockedUserModal}
         onClose={handleCloseAlreadyBlockedUserModal}
         title='This user is already blocked'
+      />
+      <DialogConfirm
+        open={openRejectModal}
+        onClose={handleCloseRejectModal}
+        title='Are you sure to reject this report'
+        onSubmit={() => {
+          handleRejectReport(reportId)
+        }}
       />
     </>
   )

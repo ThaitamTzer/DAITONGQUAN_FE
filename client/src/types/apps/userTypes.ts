@@ -7,6 +7,7 @@ export type User = {
   lastname: string
   avatar: string
   rankID: null
+  isBlock: boolean
 }
 
 export type UsersType = {
