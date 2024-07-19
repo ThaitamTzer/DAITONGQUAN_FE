@@ -26,7 +26,6 @@ import { EmojiClickData } from 'emoji-picker-react'
 import { Theme } from 'emoji-picker-react'
 import themeConfig from 'src/configs/themeConfig'
 import { useSettings } from 'src/@core/hooks/useSettings'
-import useDebounce from 'src/utils/debounce'
 import toast from 'react-hot-toast'
 import { CommentPostState } from 'src/types/apps/postTypes'
 
@@ -34,7 +33,6 @@ const CommentPost = (props: CommentPostState) => {
   const { post, openCommentModal, closeCommentModalPost, commentPost } = props
   const [open, setOpen] = React.useState<boolean>(false)
   const [comment, setComment] = React.useState('')
-  const debouncedComment = useDebounce(comment, 500)
   const [scroll] = React.useState<DialogProps['scroll']>('paper')
 
   const userData = JSON.parse(localStorage.getItem('userData') || '{}')
@@ -77,7 +75,7 @@ const CommentPost = (props: CommentPostState) => {
 
   const data = {
     postId: post._id,
-    content: debouncedComment as string
+    content: comment as string
   }
 
   const commentPostHandler = async () => {

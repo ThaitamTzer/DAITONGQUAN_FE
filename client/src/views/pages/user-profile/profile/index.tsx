@@ -11,8 +11,8 @@ import AboutOverivew from 'src/views/pages/user-profile/profile/AboutOverivew'
 // ** Types
 import { ProfileTabType } from 'src/types/apps/profileType'
 
-const ProfileTab = ({ data }: { data: ProfileTabType }) => {
-  return data && Object.values(data).length ? (
+const ProfileTab = () => {
+  return (
     <Grid container spacing={6}>
       <Grid item lg={4} md={5} xs={12}>
         <AboutOverivew />
@@ -29,7 +29,7 @@ const ProfileTab = ({ data }: { data: ProfileTabType }) => {
         </Grid>
       </Grid>
     </Grid>
-  ) : null
+  )
 }
 
 export default ProfileTab
