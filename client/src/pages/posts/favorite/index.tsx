@@ -4,23 +4,21 @@ import { commentPostState, editPostState, usePostStore, viewFavoritePostStore } 
 import { useEffect } from 'react'
 import CommentPost from 'src/views/apps/post/CommentPost'
 import EditPost from 'src/views/apps/post/EditPost'
+import useSWR from 'swr'
+import postService from 'src/service/post.service'
 
 const FavoritePosts = () => {
-  const posts = viewFavoritePostStore(state => state.posts)
-  const getFavoritePosts = viewFavoritePostStore(state => state.getFavoritePosts)
   const { post, commentPost, openCommentModal, closeCommentModalPost, openCommentModalPost } = commentPostState(
     state => state
   )
-  const reactionPost = usePostStore(state => state.reactionPost)
-  const deleteReactionPost = usePostStore(state => state.deleteReactionPost)
+  const reactionPost = viewFavoritePostStore(state => state.reactionPost)
+  const deleteReactionPost = viewFavoritePostStore(state => state.deleteReactionPost)
   const { openEditModal, editPost, openEditPost, closeEditPost, loading } = editPostState(state => state)
   const deletePost = usePostStore(state => state.deletePost)
   const addPostToFavorite = usePostStore(state => state.addPostToFavorite)
   const updatePost = usePostStore(state => state.updateUserPost)
 
-  useEffect(() => {
-    getFavoritePosts()
-  }, [getFavoritePosts])
+  const { data: posts } = useSWR('GetAllFavorite', postService.getFavoritedPosts)
 
   return (
     <Grid container spacing={3} justifyContent={'center'}>

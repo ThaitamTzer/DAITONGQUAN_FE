@@ -1,12 +1,12 @@
 import { CommentType } from 'src/types/apps/postTypes'
 import React from 'react'
 import { Avatar, Box, Button, Divider, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material'
-import { renderContent } from './posts'
 import Icon from 'src/@core/components/icon'
 import ReplyCommentModal from './ReplieComment'
 import { repliesCommentState, commentPostState, editCommentState } from 'src/store/apps/posts'
 import toast from 'react-hot-toast'
 import EditComment from './EditComment'
+import { renderContent } from './misc/misc'
 
 type CommentProps = {
   comments: CommentType[]

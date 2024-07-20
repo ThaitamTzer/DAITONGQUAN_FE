@@ -13,7 +13,6 @@ import {
 } from '@mui/material'
 import { Box } from '@mui/system'
 import { CommentType, GetPostType, UpdatePostType } from 'src/types/apps/postTypes'
-import { renderContent } from './posts'
 import Icon from 'src/@core/components/icon'
 import { useContext, useState } from 'react'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
@@ -24,6 +23,7 @@ import { useReportStore } from 'src/store/apps/posts/report'
 import { editPostState } from 'src/store/apps/posts'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/router'
+import { renderContent } from './misc/misc'
 
 type PostProps = {
   post: GetPostType
