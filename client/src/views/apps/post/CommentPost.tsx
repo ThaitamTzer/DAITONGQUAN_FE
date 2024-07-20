@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogProps
 } from '@mui/material'
-import { renderContent, RenderUser } from './posts'
+import { renderContent, RenderUser } from './misc/misc'
 import Icon from 'src/@core/components/icon'
 import { Box } from '@mui/system'
 import React from 'react'

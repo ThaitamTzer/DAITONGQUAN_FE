@@ -15,8 +15,10 @@ import {
   RepliesCommentState,
   SetPostId,
   ViewAllPostState,
-  viewFavoritePostState
+  viewFavoritePostState,
+  previewImage
 } from 'src/types/apps/postTypes'
+import { mutate } from 'swr'
 import postService from 'src/service/post.service'
 
 export const userDataStore = create<UserObj>(() => ({
@@ -63,8 +65,9 @@ export const usePostStore = create<UserPostState>(set => ({
     const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.reactionToPost(_id, action)
-    usePostStore.getState().getAllUserPosts()
-    viewAllPostStore.getState().getAllPosts()
+    mutate('GetAllPosts', async () => await postService.getAllPosts(), true)
+
+    // usePostStore.getState().getAllUserPosts()
     if (postId) {
       usePostStore.getState().getPostById(postId)
       usePostStore.getState().getAllUserPosts()
@@ -75,6 +78,8 @@ export const usePostStore = create<UserPostState>(set => ({
     const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.deleteReactionToPost(_id)
+    mutate('GetAllPosts', async () => await postService.getAllPosts(), true)
+
     if (postId) {
       usePostStore.getState().getPostById(postId)
     } else {
@@ -178,7 +183,7 @@ export const editCommentState = create<EditCommentState>(set => ({
   },
   updateReplyComment: async (commentId: string, replyId: string, content: string) => {
     await postService.editReplyComment(commentId, replyId, content)
-    const postId = await postIdStore.getState().postId
+    const postId = postIdStore.getState().postId
     usePostStore.getState().getAllComments(postId)
   },
   deleteReplyComment: async (commentId: string, replyId: string) => {
@@ -235,5 +240,19 @@ export const viewFavoritePostStore = create<viewFavoritePostState>(set => ({
   getFavoritePosts: async () => {
     const response = await postService.getFavoritedPosts()
     set({ posts: response })
+  },
+  reactionPost: async (_id: string, action: string) => {
+    await postService.reactionToPost(_id, action)
+    mutate('GetAllFavorite', async () => await postService.getFavoritedPosts(), true)
+  },
+  deleteReactionPost: async (_id: string) => {
+    await postService.deleteReactionToPost(_id)
+    mutate('GetAllFavorite', async () => await postService.getFavoritedPosts(), true)
   }
+}))
+
+export const previewImageStore = create<previewImage>(set => ({
+  openImage: '',
+  handleOpenImage: (image: string) => set({ openImage: image }),
+  handleCloseImage: () => set({ openImage: '' })
 }))

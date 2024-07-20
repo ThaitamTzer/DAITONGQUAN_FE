@@ -2,14 +2,13 @@ import { Card, Grid } from '@mui/material'
 import AddPost from 'src/views/apps/post/AddPost'
 import PostsPage from 'src/views/apps/post/posts'
 import { commentPostState, editPostState, usePostStore, viewAllPostStore } from 'src/store/apps/posts'
-import { useEffect } from 'react'
 import CommentPost from 'src/views/apps/post/CommentPost'
 import EditPost from 'src/views/apps/post/EditPost'
 import ReportPost from 'src/views/apps/post/ReportPost'
+import useSWR from 'swr'
+import postService from 'src/service/post.service'
 
 const Posts = () => {
-  const posts = viewAllPostStore(state => state.posts)
-  const getAllPosts = viewAllPostStore(state => state.getAllPosts)
   const { post, commentPost, openCommentModal, closeCommentModalPost, openCommentModalPost } = commentPostState(
     state => state
   )
@@ -20,9 +19,10 @@ const Posts = () => {
   const addPostToFavorite = usePostStore(state => state.addPostToFavorite)
   const updatePost = usePostStore(state => state.updateUserPost)
 
-  useEffect(() => {
-    getAllPosts()
-  }, [getAllPosts])
+  const { data: posts } = useSWR('GetAllPosts', postService.getAllPosts, {
+    revalidateOnFocus: true,
+    revalidateIfStale: true
+  })
 
   return (
     <Grid container spacing={3} justifyContent={'center'}>

@@ -1,7 +1,7 @@
 // Define types
 
-import { User } from "./userTypes"
-
+import { ViewOptionsRefined } from '@fullcalendar/core/internal'
+import { User } from './userTypes'
 
 export type ReplyComment = {
   commentId: string
@@ -218,4 +218,12 @@ export type ViewAllPostState = {
 export type viewFavoritePostState = {
   posts: GetPostType[]
   getFavoritePosts: () => Promise<void>
+  reactionPost: (_id: string, action: string) => Promise<void>
+  deleteReactionPost: (_id: string) => Promise<void>
+}
+
+export type previewImage = {
+  openImage: string
+  handleOpenImage: (image: string) => void
+  handleCloseImage: () => void
 }
