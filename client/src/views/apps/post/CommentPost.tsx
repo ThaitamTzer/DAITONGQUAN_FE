@@ -76,7 +76,7 @@ const CommentPost = (props: CommentPostState) => {
   }
 
   const data = {
-    postId: post._id,
+    postId: post?._id,
     content: debouncedComment as string
   }
 
@@ -146,7 +146,7 @@ const CommentPost = (props: CommentPostState) => {
                   marginTop: 1
                 }}
               >
-                <Avatar src={post.userId?.avatar} alt='user avatar' sx={{ mr: 2 }} />
+                <Avatar src={post?.userId?.avatar} alt='user avatar' sx={{ mr: 2 }} />
               </Grid>
               <Grid item xs={12} lg={12}>
                 <Divider orientation='vertical' sx={{ mr: 2, mt: 2, borderWidth: '1.5px' }} />
@@ -155,13 +155,13 @@ const CommentPost = (props: CommentPostState) => {
             <Grid item lg={11} md={10} xs={10} sm={11}>
               <Grid container spacing={3}>
                 <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '-6px' }}>
-                  {RenderUser(post.userId, post.updatedAt, post.isShow, post.isApproved)}
+                  {RenderUser(post?.userId, post?.updatedAt, post?.isShow, post?.isApproved)}
                 </Grid>
                 <Grid item xs={12} sx={{ paddingTop: '0px !important' }}>
-                  {renderContent(post.content)}
+                  {renderContent(post?.content)}
                 </Grid>
                 <Grid item xs={12} sx={{ paddingTop: '7px !important' }}>
-                  {post.postImage ? (
+                  {post?.postImage ? (
                     <Box
                       sx={{
                         width: 'fit-content'
@@ -176,7 +176,7 @@ const CommentPost = (props: CommentPostState) => {
                           borderRadius: 1
                         }}
                         component='img'
-                        image={post.postImage}
+                        image={post?.postImage}
                         alt='post image'
                       />
                     </Box>
@@ -213,7 +213,7 @@ const CommentPost = (props: CommentPostState) => {
             <Grid item lg={11} md={10} xs={10} sm={11}>
               <Grid container spacing={3}>
                 <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '-6px' }}>
-                  {/* {RenderUser(post.userId, post.updatedAt, post.isShow, post.isApproved)} */}
+                  {/* {RenderUser(post?.userId, post?.updatedAt, post?.isShow, post?.isApproved)} */}
                   <Typography variant='subtitle1' fontWeight={'bold'} marginRight={2}>
                     {user?.firstname} {user?.lastname}
                   </Typography>
@@ -221,7 +221,7 @@ const CommentPost = (props: CommentPostState) => {
                 <Grid item xs={12} sx={{ paddingTop: '0px !important' }}>
                   <TextField
                     id='comment'
-                    placeholder={`Comment for ${post.userId?.firstname} ${post.userId?.lastname}...`}
+                    placeholder={`Comment for ${post?.userId?.firstname} ${post?.userId?.lastname}...`}
                     value={comment}
                     onChange={onChange}
                     multiline
@@ -272,7 +272,7 @@ const CommentPost = (props: CommentPostState) => {
                   />
                 </Grid>
                 {/* <Grid item xs={12} sx={{ paddingTop: '7px !important' }}>
-                  {post.postImage ? (
+                  {post?.postImage ? (
                     <Box
                       sx={{
                         width: 'fit-content'
@@ -287,7 +287,7 @@ const CommentPost = (props: CommentPostState) => {
                           borderRadius: 1
                         }}
                         component='img'
-                        image={post.postImage}
+                        image={post?.postImage}
                         alt='post image'
                       />
                     </Box>

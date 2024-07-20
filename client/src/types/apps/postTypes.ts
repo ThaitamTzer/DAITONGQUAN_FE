@@ -41,7 +41,7 @@ export type UserReactionType = [
 
 export type UserCommentType = {
   content: string
-  postId: string
+  postId: string | undefined
 }
 
 export type GetPostType = {
@@ -129,7 +129,7 @@ export type UserPostState = {
   deletePost: (_id: string) => Promise<void>
   reactionPost: (_id: string, action: string) => Promise<void>
   deleteReactionPost: (_id: string) => Promise<void>
-  addPostToFavorite: (_id: string) => Promise<void>
+  addPostToFavorite: (_id: string | undefined) => Promise<void>
   getPostById: (_id: string) => Promise<void>
   clearPostData: () => void
   getAllComments: (postId: string) => Promise<void>
@@ -173,10 +173,10 @@ export type PostListState = {
 }
 
 export type CommentPostState = {
-  post: GetPostType
-  commentPost: (data: UserCommentType) => Promise<void>
+  post: GetPostType | undefined
+  commentPost: (data: UserCommentType | undefined) => Promise<void>
   openCommentModal: boolean
-  openCommentModalPost?: (data: GetPostType) => void
+  openCommentModalPost?: (data: GetPostType | undefined) => void
   closeCommentModalPost: () => void
   handleDeleteComment?: (_id: string) => Promise<void>
 }

@@ -9,7 +9,7 @@ import EditComment from './EditComment'
 import { renderContent } from './misc/misc'
 
 type CommentProps = {
-  comments: CommentType[]
+  comments: CommentType[] | undefined
 }
 
 export const RenderRelativeTime = (date: Date | string) => {
@@ -139,7 +139,7 @@ const AllComment = (props: CommentProps) => {
 
   return (
     <>
-      {comments.map((comment: CommentType) => (
+      {comments?.map((comment: CommentType) => (
         <React.Fragment key={comment._id}>
           <Divider />
           <Grid container xs={12}>

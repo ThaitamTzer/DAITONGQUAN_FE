@@ -26,17 +26,17 @@ import { useRouter } from 'next/router'
 import { renderContent } from './misc/misc'
 
 type PostProps = {
-  post: GetPostType
+  post: GetPostType | undefined
   updateUserPost?: (_id: string, data: UpdatePostType) => Promise<void>
   closeEditPost?: () => void
   postId: string
-  comments: CommentType[]
+  comments: CommentType[] | undefined
 }
 
 const ViewPost = (props: PostProps) => {
   const { post, comments } = props
   const [openImage, setOpenImage] = useState<string | null>(null)
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
+  const [selectedPostId, setSelectedPostId] = useState<string | undefined>(undefined)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const reactionPost = usePostStore(state => state.reactionPost)
   const deleteReactionPost = usePostStore(state => state.deleteReactionPost)
@@ -85,38 +85,38 @@ const ViewPost = (props: PostProps) => {
     }
   }
 
-  const RenderButtonReaction = ({ isLiked, post }: { isLiked: boolean; post: any }) => {
+  const RenderButtonReaction = ({ isLiked, post }: { isLiked: boolean | undefined; post: any }) => {
     return isLiked ? (
       <Button
-        onClick={() => deleteReactionPost(post._id)}
+        onClick={() => deleteReactionPost(post?._id)}
         color='inherit'
         sx={{ borderRadius: '40%' }}
         startIcon={<Icon icon='bi:heart-fill' color='#ff0000' />}
       >
-        {post.reactionCount}
+        {post?.reactionCount}
       </Button>
     ) : (
       <Button
-        onClick={() => reactionPost(post._id, 'like')}
+        onClick={() => reactionPost(post?._id, 'like')}
         color='inherit'
         sx={{ borderRadius: '40%' }}
         startIcon={<Icon icon='bi:heart' color='error' />}
       >
-        {post.reactionCount}
+        {post?.reactionCount}
       </Button>
     )
   }
 
-  const handleMoreOptions = (event: React.MouseEvent<HTMLElement>, postId: string) => {
+  const handleMoreOptions = (event: React.MouseEvent<HTMLElement>, postId: string | undefined) => {
     setAnchorEl(event.currentTarget)
     setSelectedPostId(postId)
   }
   const handleCloseOptions = () => {
     setAnchorEl(null)
-    setSelectedPostId(null)
+    setSelectedPostId(undefined)
   }
 
-  const renderRelativeTime = (date: Date | string) => {
+  const renderRelativeTime = (date: any) => {
     const currentDate = new Date()
     const postDate = new Date(date)
     const diff = currentDate.getTime() - postDate.getTime()
@@ -148,7 +148,7 @@ const ViewPost = (props: PostProps) => {
 
   const ImageDialog = (post: any) => {
     return (
-      <Dialog fullScreen key={post._id} open={openImage === post._id} onClose={handleCloseImage}>
+      <Dialog fullScreen key={post?._id} open={openImage === post?._id} onClose={handleCloseImage}>
         <DialogContent sx={{ py: '0px !important', px: '60px !important' }} onClick={() => handleCloseImage()}>
           {/* Close Button */}
           <IconButton
@@ -170,7 +170,7 @@ const ViewPost = (props: PostProps) => {
               objectFit: 'contain'
             }}
             component='img'
-            image={post.postImage}
+            image={post?.postImage}
             alt='post image'
           />
         </DialogContent>
@@ -179,7 +179,7 @@ const ViewPost = (props: PostProps) => {
   }
 
   return (
-    <Card id={post._id}>
+    <Card id={post?._id}>
       <Grid container sx={{ padding: 3 }}>
         <Grid
           item
@@ -194,7 +194,7 @@ const ViewPost = (props: PostProps) => {
             ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
           }}
         >
-          <Avatar src={post.userId?.avatar} alt={post.userId?.firstname} />
+          <Avatar src={post?.userId?.avatar} alt={post?.userId?.firstname} />
         </Grid>
         <Grid item lg={11} md={10} xs={10} sm={11}>
           <Grid container spacing={2}>
@@ -208,14 +208,14 @@ const ViewPost = (props: PostProps) => {
             >
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography variant='subtitle1' fontWeight={'bold'} marginRight={2}>
-                  {post.userId?.firstname} {post.userId?.lastname}
+                  {post?.userId?.firstname} {post?.userId?.lastname}
                 </Typography>
                 <Typography fontSize={'14px'} color='GrayText' marginRight={2} mt={0.6}>
-                  {renderRelativeTime(post.createdAt)}
+                  {renderRelativeTime(post?.createdAt)}
                 </Typography>
               </Box>
               <>
-                <IconButton onClick={event => handleMoreOptions(event, post._id)} size='small'>
+                <IconButton onClick={event => handleMoreOptions(event, post?._id)} size='small'>
                   <Icon icon='ri:more-fill' />
                 </IconButton>
                 <Menu
@@ -223,7 +223,7 @@ const ViewPost = (props: PostProps) => {
                     sx: { width: '200px' }
                   }}
                   anchorEl={anchorEl}
-                  open={Boolean(anchorEl) && selectedPostId === post._id}
+                  open={Boolean(anchorEl) && selectedPostId === post?._id}
                   onClose={handleCloseOptions}
                   anchorOrigin={{
                     vertical: 'bottom',
@@ -236,7 +236,7 @@ const ViewPost = (props: PostProps) => {
                 >
                   <MenuItem
                     onClick={() => {
-                      addPostToFavorite(post._id)
+                      addPostToFavorite(post?._id)
                       handleCloseOptions()
                     }}
                   >
@@ -245,10 +245,10 @@ const ViewPost = (props: PostProps) => {
                       <Icon icon='mdi:star' color='yellow' />
                     </Box>
                   </MenuItem>
-                  {post.userId?._id !== idUser && (
+                  {post?.userId?._id !== idUser && (
                     <MenuItem
                       onClick={() => {
-                        handleOpenReportModal(post._id)
+                        handleOpenReportModal(post?._id)
                         handleCloseOptions()
                       }}
                     >
@@ -258,7 +258,7 @@ const ViewPost = (props: PostProps) => {
                       </Box>
                     </MenuItem>
                   )}
-                  {post.userId?._id === idUser && (
+                  {post?.userId?._id === idUser && (
                     <>
                       <MenuItem
                         onClick={() => {
@@ -271,10 +271,10 @@ const ViewPost = (props: PostProps) => {
                           <Icon icon='eva:edit-2-fill' />
                         </Box>
                       </MenuItem>
-                      {post.isShow ? (
+                      {post?.isShow ? (
                         <MenuItem
                           onClick={() => {
-                            handleHidePost(post._id, {
+                            handleHidePost(post?._id, {
                               isShow: false
                             })
                           }}
@@ -287,7 +287,7 @@ const ViewPost = (props: PostProps) => {
                       ) : (
                         <MenuItem
                           onClick={() => {
-                            handleHidePost(post._id, {
+                            handleHidePost(post?._id, {
                               isShow: true
                             })
                           }}
@@ -300,7 +300,7 @@ const ViewPost = (props: PostProps) => {
                       )}
                       <MenuItem
                         onClick={() => {
-                          handleDeletePost(post._id)
+                          handleDeletePost(post?._id)
                         }}
                       >
                         <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
@@ -321,7 +321,7 @@ const ViewPost = (props: PostProps) => {
                 ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
               }}
             >
-              {renderContent(post.content)}
+              {renderContent(post?.content)}
             </Grid>
             <Grid
               item
@@ -331,7 +331,7 @@ const ViewPost = (props: PostProps) => {
                 ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
               }}
             >
-              {post.postImage ? (
+              {post?.postImage ? (
                 <Box
                   sx={{
                     width: 'fit-content'
@@ -345,9 +345,9 @@ const ViewPost = (props: PostProps) => {
                       objectPosition: 'left top',
                       borderRadius: 1
                     }}
-                    onClick={() => handleOpenImage(post._id)}
+                    onClick={() => handleOpenImage(post?._id)}
                     component='img'
-                    image={post.postImage}
+                    image={post?.postImage}
                     alt='post image'
                   />
                 </Box>
@@ -356,7 +356,7 @@ const ViewPost = (props: PostProps) => {
             </Grid>
             <Grid item sx={{ paddingLeft: '0px !important' }}>
               <RenderButtonReaction
-                isLiked={post.userReaction?.some((reaction: any) => reaction.userId._id === idUser)}
+                isLiked={post?.userReaction?.some((reaction: any) => reaction.userId._id === idUser)}
                 post={post}
               />
               <Button
@@ -365,7 +365,7 @@ const ViewPost = (props: PostProps) => {
                 sx={{ borderRadius: '40%' }}
                 startIcon={<Icon icon='teenyicons:chat-outline' />}
               >
-                {post.commentCount}
+                {post?.commentCount}
               </Button>
             </Grid>
           </Grid>

@@ -1,7 +1,6 @@
 import { Avatar, Button, CardMedia, Dialog, DialogContent, Grid, IconButton, TextField } from '@mui/material'
 import { Box } from '@mui/system'
 import { GetPostType, UpdatePostType } from 'src/types/apps/postTypes'
-import { RenderUser } from './posts'
 import Icon from 'src/@core/components/icon'
 import { useContext, useState } from 'react'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
@@ -10,6 +9,7 @@ import themeConfig from 'src/configs/themeConfig'
 import { useTheme } from '@mui/material'
 import { useSettings } from 'src/@core/hooks/useSettings'
 import toast from 'react-hot-toast'
+import { RenderUser } from './misc/misc'
 
 type PostProps = {
   post: GetPostType | any
