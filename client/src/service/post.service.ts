@@ -77,11 +77,11 @@ const postService = {
   },
 
   // Add post to favorite
-  addPostToFavorite: async (_id: string): Promise<void> => {
+  addPostToFavorite: async (_id: string | undefined): Promise<void> => {
     await axiosClient.post(`/post/favorite/${_id}`)
   },
 
-  commentToPost: async (data: UserCommentType): Promise<void> => {
+  commentToPost: async (data: UserCommentType | undefined): Promise<void> => {
     await axiosClient.post(`/comment`, data)
   },
 

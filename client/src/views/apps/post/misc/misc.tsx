@@ -33,11 +33,11 @@ export const renderRelativeTime = (date: Date | string) => {
   return `${Math.floor(seconds)} seconds ago`
 }
 
-export const renderHidePost = (isShow: boolean) => {
+export const renderHidePost = (isShow: boolean | undefined) => {
   return !isShow ? <Icon icon='ic:outline-lock' color='GrayText' /> : null
 }
 
-export const renderIsApproved = (isApproved: boolean) => {
+export const renderIsApproved = (isApproved: boolean | undefined) => {
   return !isApproved ? <Icon icon='iconamoon:clock-thin' color='#ffcc00' /> : null
 }
 
@@ -45,7 +45,12 @@ export const userAvatar = (userId: any) => {
   return <Avatar src={userId?.avatar} alt={`${userId?.firstname} ${userId?.lastname}`} />
 }
 
-export const RenderUser = (userId: any, updatedAt: Date | string, isShow: boolean, isApproved: boolean) => {
+export const RenderUser = (
+  userId: any,
+  updatedAt: any,
+  isShow: boolean | undefined,
+  isApproved: boolean | undefined
+) => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <Typography variant='subtitle1' fontWeight={'bold'} marginRight={2}>
@@ -60,7 +65,7 @@ export const RenderUser = (userId: any, updatedAt: Date | string, isShow: boolea
   )
 }
 
-export const renderContent = (content: string) => {
+export const renderContent = (content: string | undefined) => {
   return content ? (
     <Typography
       variant='body1'
