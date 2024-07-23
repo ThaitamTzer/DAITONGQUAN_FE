@@ -156,6 +156,11 @@ const postService = {
   // Approve a post as parameter
   approvePost: async (_id: string, isApproved: boolean): Promise<void> => {
     await axiosClient.patch(`/post/approve/${_id}?isApproved=${isApproved}`)
+  },
+
+  // Reject a post
+  rejectPost: async (_id: string): Promise<void> => {
+    await axiosClient.patch(`/post/rejection/${_id}`)
   }
 }
 

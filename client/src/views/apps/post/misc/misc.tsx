@@ -1,7 +1,6 @@
-import { Avatar, Button, CardMedia, Dialog, DialogContent, Grid, IconButton, Typography } from '@mui/material'
+import { Avatar, Button, CardMedia, Dialog, DialogContent, Grid, IconButton, Typography, Tooltip } from '@mui/material'
 import { Box } from '@mui/system'
 import Icon from 'src/@core/components/icon'
-import { usePostStore } from 'src/store/apps/posts'
 
 export const renderRelativeTime = (date: Date | string) => {
   const currentDate = new Date()
@@ -41,6 +40,16 @@ export const renderIsApproved = (isApproved: boolean | undefined) => {
   return !isApproved ? <Icon icon='iconamoon:clock-thin' color='#ffcc00' /> : null
 }
 
+export const renderRejected = (status?: string) => {
+  return status === 'rejected' ? (
+    <>
+      <IconButton>
+        <Icon icon='ci:stop-sign' color='error' />
+      </IconButton>
+    </>
+  ) : null
+}
+
 export const userAvatar = (userId: any) => {
   return <Avatar src={userId?.avatar} alt={`${userId?.firstname} ${userId?.lastname}`} />
 }
@@ -49,7 +58,8 @@ export const RenderUser = (
   userId: any,
   updatedAt: any,
   isShow: boolean | undefined,
-  isApproved: boolean | undefined
+  isApproved: boolean | undefined,
+  status?: string | undefined
 ) => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -61,6 +71,7 @@ export const RenderUser = (
       </Typography>
       {renderHidePost(isShow)}
       {renderIsApproved(isApproved)}
+      {renderRejected(status)}
     </Box>
   )
 }
@@ -125,17 +136,17 @@ export const ButtonApprove = ({
 }: {
   isApproved: boolean
   _id: string
-  handleApprove: any
+  handleApprove: (id: string, isApproved: boolean) => Promise<void>
 }) => {
   return !isApproved ? (
-    <Grid item xs={12}>
+    <Grid item xs={2}>
       <Grid container justifyContent={'right'}>
         <Grid item>
           <Button
             variant='contained'
             color='primary'
             startIcon={<Icon icon='ph:clock-duotone' />}
-            onClick={() => handleApprove(_id, true)}
+            onClick={() => handleApprove(_id, isApproved)}
           >
             Approve
           </Button>
@@ -143,7 +154,7 @@ export const ButtonApprove = ({
       </Grid>
     </Grid>
   ) : (
-    <Grid item xs={12}>
+    <Grid item xs={2}>
       <Grid container justifyContent={'right'}>
         <Grid item>
           <Button variant='contained' color='success' startIcon={<Icon icon='icon-park-twotone:check-one' />}>

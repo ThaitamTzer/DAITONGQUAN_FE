@@ -155,7 +155,7 @@ const CommentPost = (props: CommentPostState) => {
             <Grid item lg={11} md={10} xs={10} sm={11}>
               <Grid container spacing={3}>
                 <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '-6px' }}>
-                  {RenderUser(post?.userId, post?.updatedAt, post?.isShow, post?.isApproved)}
+                  {RenderUser(post?.userId, post?.updatedAt, post?.isShow, post?.isApproved, post?.status)}
                 </Grid>
                 <Grid item xs={12} sx={{ paddingTop: '0px !important' }}>
                   {renderContent(post?.content)}
@@ -271,29 +271,6 @@ const CommentPost = (props: CommentPostState) => {
                     }}
                   />
                 </Grid>
-                {/* <Grid item xs={12} sx={{ paddingTop: '7px !important' }}>
-                  {post?.postImage ? (
-                    <Box
-                      sx={{
-                        width: 'fit-content'
-                      }}
-                    >
-                      <CardMedia
-                        sx={{
-                          width: '100%',
-                          maxHeight: '430px',
-                          objectFit: 'contain',
-                          objectPosition: 'left top',
-                          borderRadius: 1
-                        }}
-                        component='img'
-                        image={post?.postImage}
-                        alt='post image'
-                      />
-                    </Box>
-                  ) : null}
-                </Grid> */}
-                {/* <Grid item sx={{ paddingLeft: '0px !important' }}></Grid> */}
               </Grid>
             </Grid>
           </Grid>

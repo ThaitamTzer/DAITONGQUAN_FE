@@ -1,7 +1,7 @@
 import { Dialog } from '@mui/material'
-import { EditPostState } from 'src/store/apps/posts'
 import Post from './post'
 import DialogWithCustomCloseButton from 'src/views/components/dialog/customDialog'
+import { EditPostState } from 'src/types/apps/postTypes'
 
 const EditPost = (props: EditPostState) => {
   const { openEditModal, editPost, closeEditPost, updateUserPost } = props

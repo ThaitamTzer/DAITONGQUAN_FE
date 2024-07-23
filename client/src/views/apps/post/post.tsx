@@ -101,6 +101,7 @@ const Post = (props: PostProps) => {
               objectFit: 'contain'
             }}
             component='img'
+            loading='lazy'
             image={post.postImage}
             alt='post image'
           />
@@ -203,6 +204,7 @@ const Post = (props: PostProps) => {
                   }}
                   onClick={() => handleOpenImage(post._id)}
                   component='img'
+                  loading='lazy'
                   image={post.postImage}
                   alt='post image'
                 />

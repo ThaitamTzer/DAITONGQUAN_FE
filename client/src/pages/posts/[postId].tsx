@@ -32,6 +32,7 @@ const PostDetail = () => {
     if (postId) {
       setPostId(postId as string)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId])
 
   return (
