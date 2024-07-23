@@ -2,6 +2,7 @@ import toast from 'react-hot-toast'
 import postService from 'src/service/post.service'
 import reportService from 'src/service/report.service'
 import { ReportType } from 'src/types/apps/reportTypes'
+import { mutate } from 'swr'
 import { create } from 'zustand'
 
 export type ReportState = {
@@ -44,6 +45,7 @@ export type ReportHandler = {
   handleRejectReport: (reportId: string) => Promise<void>
   applyFilters: () => Promise<void>
   setReportId: (reportId: string) => void
+  setReportList: (reportList: ReportType[] | undefined) => void
 }
 
 export const useReportStore = create<ReportState & ReportHandler>(set => ({
@@ -62,6 +64,7 @@ export const useReportStore = create<ReportState & ReportHandler>(set => ({
   selectedType: 'all',
   loading: false,
 
+  setReportList: reportList => set({ reportList }),
   handleOpenAlreadyBlockedPostModal: () => set({ openAlreadyBlockedPostModal: true }),
   handleCloseReportModal: () => set({ openReportModal: false }),
   handleOpenReportModal: postId => set({ openReportModal: true, postId, reportId: postId }),
@@ -90,7 +93,7 @@ export const useReportStore = create<ReportState & ReportHandler>(set => ({
     toast.promise(reportService.deleteReport(reportId), {
       loading: 'Deleting report...',
       success: () => {
-        useReportStore.getState().getAllReports()
+        mutate('GetAllReports')
 
         return 'Report deleted successfully'
       },
@@ -104,7 +107,7 @@ export const useReportStore = create<ReportState & ReportHandler>(set => ({
     toast.promise(reportService.blockPost(reportId), {
       loading: 'Blocking post...',
       success: () => {
-        useReportStore.getState().getAllReports()
+        mutate('GetAllReports')
 
         return 'Post blocked successfully'
       },
@@ -118,7 +121,7 @@ export const useReportStore = create<ReportState & ReportHandler>(set => ({
     toast.promise(reportService.blockUser(reportId), {
       loading: 'Blocking user...',
       success: () => {
-        useReportStore.getState().getAllReports()
+        mutate('GetAllReports')
 
         return 'User blocked successfully'
       },
@@ -132,7 +135,7 @@ export const useReportStore = create<ReportState & ReportHandler>(set => ({
     toast.promise(reportService.rejectReport(reportId), {
       loading: 'Rejecting report...',
       success: () => {
-        useReportStore.getState().getAllReports()
+        mutate('GetAllReports')
 
         return 'Report rejected successfully'
       },

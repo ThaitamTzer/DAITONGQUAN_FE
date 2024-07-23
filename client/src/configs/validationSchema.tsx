@@ -15,6 +15,8 @@ const CODE_LENGTH = 6
 const MAX_DESCRIPTINO_LENGTH = 100
 const MAX_CATE_NAME_LENGTH = 20
 const MIN_CATE_NAME_LENGTH = 1
+const MIN_NUMBER_LENGTH = 1
+const MAX_NUMBER_LENGTH = 1000
 
 export const getValidationMessages = (t: (arg0: string) => any) => ({
   email: {
@@ -126,6 +128,29 @@ export const getValidationMessages = (t: (arg0: string) => any) => ({
   },
   reportContent: {
     max: t(`Nội dung báo cáo không được quá 200 ký tự`)
+  },
+  rankName: {
+    required: t('Tên hạng không được để trống')
+  },
+  attendanceScore: {
+    required: t('Điểm không được để trống'),
+    min: t(`Điểm không được nhỏ hơn ${MIN_NUMBER_LENGTH}`),
+    max: t(`Điểm không được lớn hơn ${MAX_NUMBER_LENGTH}`)
+  },
+  numberOfComment: {
+    required: t('Số lượng bình luận không được để trống'),
+    min: t(`Số lượng bình luận không được nhỏ hơn ${MIN_NUMBER_LENGTH}`),
+    max: t(`Số lượng bình luận không được lớn hơn ${MAX_NUMBER_LENGTH}`)
+  },
+  numberOfBlog: {
+    required: t('Số lượng blog không được để trống'),
+    min: t(`Số lượng blog không được nhỏ hơn ${MIN_NUMBER_LENGTH}`),
+    max: t(`Số lượng blog không được lớn hơn ${MAX_NUMBER_LENGTH}`)
+  },
+  numberOfLike: {
+    required: t('Số lượng like không được để trống'),
+    min: t(`Số lượng like không được nhỏ hơn ${MIN_NUMBER_LENGTH}`),
+    max: t(`Số lượng like không được lớn hơn ${MAX_NUMBER_LENGTH}`)
   }
 })
 
@@ -350,5 +375,33 @@ export const getCreateReportPostValidationSchema = (t: (arg0: string) => any) =>
   return yup.object().shape({
     reportType: yup.string().required(messages.reportType.required),
     reportContent: yup.string().max(200, messages.reportContent.max)
+  })
+}
+
+export const getCreateRankValidationSchema = (t: (arg0: string) => any) => {
+  const messages = getValidationMessages(t)
+
+  return yup.object().shape({
+    rankName: yup.string().required(messages.rankName.required),
+    attendanceScore: yup
+      .number()
+      .required(messages.attendanceScore.required)
+      .min(MIN_NUMBER_LENGTH, messages.attendanceScore.min)
+      .max(MAX_NUMBER_LENGTH, messages.attendanceScore.max),
+    numberOfComment: yup
+      .number()
+      .required(messages.numberOfComment.required)
+      .min(MIN_NUMBER_LENGTH, messages.numberOfComment.min)
+      .max(MAX_NUMBER_LENGTH, messages.numberOfComment.max),
+    numberOfBlog: yup
+      .number()
+      .required(messages.numberOfBlog.required)
+      .min(MIN_NUMBER_LENGTH, messages.numberOfBlog.min)
+      .max(MAX_NUMBER_LENGTH, messages.numberOfBlog.max),
+    numberOfLike: yup
+      .number()
+      .required(messages.numberOfLike.required)
+      .min(MIN_NUMBER_LENGTH, messages.numberOfLike.min)
+      .max(MAX_NUMBER_LENGTH, messages.numberOfLike.max)
   })
 }

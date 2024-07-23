@@ -134,6 +134,10 @@ export type UserPostState = {
   clearPostData: () => void
   getAllComments: (postId: string) => Promise<void>
   deleteFavoritePost: (_id: string) => Promise<void>
+  reactionUserPost: (_id: string, action: string) => Promise<void>
+  deleteReactionUserPost: (_id: string) => Promise<void>
+  rejectPost: (_id: string) => Promise<void>
+  
 }
 
 export type EditPostState = {

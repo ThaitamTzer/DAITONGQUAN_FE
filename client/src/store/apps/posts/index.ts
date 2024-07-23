@@ -39,16 +39,17 @@ export const usePostStore = create<UserPostState>(set => ({
     set({ loading: true })
     await postService.addPost(data)
     mutate('GetAllPosts', async () => await postService.getAllPosts(), true)
+    mutate('GetAllUserPosts')
+
     set({ loading: false })
   },
   updateUserPost: async (_id: string, data: UpdatePostType) => {
     const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.updatePost(_id, data)
-    mutate('GetAllPosts', async () => await postService.getAllPosts(), true)
-    viewAllPostStore.getState().getAllPosts()
+    mutate('GetAllUserPosts')
     if (postId) {
-      usePostStore.getState().getPostById(postId)
+      mutate(['GetPostById', postId])
     }
   },
   deletePost: async (_id: string) => {
@@ -65,13 +66,12 @@ export const usePostStore = create<UserPostState>(set => ({
     const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.reactionToPost(_id, action)
-    mutate('GetAllPosts', async () => await postService.getAllPosts(), true)
+    mutate('GetAllPosts')
 
     // usePostStore.getState().getAllUserPosts()
     if (postId) {
-      usePostStore.getState().getPostById(postId)
-      usePostStore.getState().getAllUserPosts()
-      viewAllPostStore.getState().getAllPosts()
+      mutate(['GetCommentByPostId', postId])
+      mutate(['GetPostById', postId])
     }
   },
   deleteReactionPost: async (_id: string) => {
@@ -107,6 +107,21 @@ export const usePostStore = create<UserPostState>(set => ({
     set({ loading: true })
     await postService.deletePostFromFavorite(_id)
     mutate('GetAllFavorite', async () => await postService.getFavoritedPosts(), true)
+  },
+  reactionUserPost: async (_id: string, action: string) => {
+    set({ loading: true })
+    await postService.reactionToPost(_id, action)
+    mutate('GetAllUserPosts')
+  },
+  deleteReactionUserPost: async (_id: string) => {
+    set({ loading: true })
+    await postService.deleteReactionToPost(_id)
+    mutate('GetAllUserPosts')
+  },
+  rejectPost: async (_id: string) => {
+    set({ loading: true })
+    await postService.rejectPost(_id)
+    mutate('GetListPost')
   }
 }))
 
@@ -123,7 +138,7 @@ export const approvePostStore = create<PostListState>(set => ({
   approvePost: async (_id: string, isApproved: boolean) => {
     set({ loading: true })
     await postService.approvePost(_id, isApproved)
-    approvePostStore.getState().getListPost()
+    mutate('GetListPost')
   },
   openModalPost: (data: GetPostType) => set({ openModal: true, modalPost: data }),
   closeModalPost: () => {
@@ -143,6 +158,7 @@ export const commentPostState = create<CommentPostState>(set => ({
     await postService.commentToPost(data)
     usePostStore.getState().getAllUserPosts()
     mutate('GetAllPosts')
+    mutate('GetAllUserPosts')
     mutate('GetAllFavorite')
     const postId = postIdStore.getState().postId
     if (postId) {
@@ -204,7 +220,7 @@ export const editPostState = create<EditPostState>(set => ({
   updateUserPost: async (_id: string, data: UpdatePostType) => {
     set({ loading: true })
     await postService.updatePost(_id, data)
-    await usePostStore.getState().getAllUserPosts()
+    mutate('GetAllUserPosts')
   }
 }))
 
@@ -219,10 +235,10 @@ export const repliesCommentState = create<RepliesCommentState>(set => ({
   handleOpenReplies: (comment: CommentType | RepliesComment) => set({ openReplies: true, comment: comment }),
   handleCloseReplies: () => set({ openReplies: false, comment: {} as CommentType }),
   handleReplyComment: async (_id: string, comment: string) => {
+    const postId = postIdStore.getState().postId
     await postService.replyComment(_id, comment)
-    const postId = await postIdStore.getState().postId
-    usePostStore.getState().getPostById(postId)
-    usePostStore.getState().getAllComments(postId)
+    mutate(['GetCommentByPostId', postId])
+    mutate(['GetPostById', postId])
   }
 }))
 

@@ -32,6 +32,7 @@ const PostsPage = (props: UserPostsPageProps) => {
   const [reactionsCount, setReactionsCount] = useState<{ [key: string]: number }>({})
   const deleteFavorite = usePostStore(state => state.deleteFavoritePost)
   const { openImage, handleOpenImage, handleCloseImage } = previewImageStore()
+  const rejectPost = usePostStore(state => state.rejectPost)
   const ability = useContext(AbilityContext)
   const router = useRouter()
 
@@ -44,6 +45,7 @@ const PostsPage = (props: UserPostsPageProps) => {
     })
     setLikedPosts(initialLikedPosts)
     setReactionsCount(initialReactionsCount)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [posts])
 
   const RenderButtonReaction = ({ postId }: { postId: string }) => {
@@ -226,7 +228,7 @@ const PostsPage = (props: UserPostsPageProps) => {
                       ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
                     }}
                   >
-                    {RenderUser(post.userId, post.createdAt, post.isShow, post.isApproved)}
+                    {RenderUser(post.userId, post.createdAt, post.isShow, post.isApproved, post.status)}
                     {ability.can('read', 'member-page') && (
                       <>
                         <IconButton onClick={event => handleMoreOptions(event, post._id)} size='small'>
@@ -400,6 +402,7 @@ const PostsPage = (props: UserPostsPageProps) => {
                           }}
                           onClick={() => handleOpenImage(post._id)}
                           component='img'
+                          loading='lazy'
                           image={post.postImage}
                           alt='post image'
                         />
@@ -420,12 +423,40 @@ const PostsPage = (props: UserPostsPageProps) => {
                       </Button>
                     </Grid>
                   )}
-                  {ability.can('approve', 'post') && (
-                    <ButtonApprove
-                      isApproved={post.isApproved}
-                      _id={post._id}
-                      handleApprove={handleApprove(post._id, true)}
-                    />
+                  {approvePost && post.status === 'rejected' && (
+                    <Grid item xs={12}>
+                      <Grid container justifyContent={'right'}>
+                        <Button variant='contained' startIcon={<Icon icon='fluent:text-change-reject-24-regular' />}>
+                          Rejected
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  )}
+                  {post.status !== 'rejected' && (
+                    <>
+                      {approvePost && (
+                        <Grid item container direction={'row'} justifyContent={'right'} spacing={2}>
+                          <ButtonApprove
+                            isApproved={post.isApproved}
+                            _id={post._id}
+                            handleApprove={() => handleApprove(post._id, true)}
+                          />
+                          {!post.isApproved && (
+                            <Grid item xs={2}>
+                              <Grid container justifyContent={'right'}>
+                                <Button
+                                  variant='contained'
+                                  startIcon={<Icon icon='fluent:text-change-reject-24-regular' />}
+                                  onClick={() => rejectPost(post._id)}
+                                >
+                                  Reject
+                                </Button>
+                              </Grid>
+                            </Grid>
+                          )}
+                        </Grid>
+                      )}
+                    </>
                   )}
                 </Grid>
               </Grid>

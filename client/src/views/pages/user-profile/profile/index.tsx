@@ -11,10 +11,10 @@ import React, { useEffect } from 'react'
 import CommentPost from 'src/views/apps/post/CommentPost'
 import EditPost from 'src/views/apps/post/EditPost'
 import AddPost from 'src/views/apps/post/AddPost'
+import useSWR from 'swr'
+import postService from 'src/service/post.service'
 
 const Profile = () => {
-  const getAllUserPosts = usePostStore(state => state.getAllUserPosts)
-  const posts = usePostStore(state => state.posts)
   const reactionPost = usePostStore(state => state.reactionPost)
   const deleteReactionPost = usePostStore(state => state.deleteReactionPost)
   const deletePost = usePostStore(state => state.deletePost)
@@ -23,12 +23,13 @@ const Profile = () => {
   const { post, commentPost, openCommentModal, closeCommentModalPost, openCommentModalPost } = commentPostState(
     state => state
   )
-
   const { openEditModal, editPost, openEditPost, closeEditPost, loading } = editPostState(state => state)
 
-  useEffect(() => {
-    getAllUserPosts()
-  }, [getAllUserPosts])
+  const { data: posts } = useSWR('GetAllUserPosts', postService.getAllUserPosts, {
+    revalidateOnFocus: true,
+    revalidateIfStale: true,
+    errorRetryCount: 2
+  })
 
   return (
     <Grid container spacing={6}>

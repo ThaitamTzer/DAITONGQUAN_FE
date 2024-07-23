@@ -3,7 +3,6 @@ import {
   Button,
   Dialog,
   DialogActions,
-  DialogContent,
   Divider,
   Grid,
   IconButton,
@@ -19,10 +18,10 @@ import { useTheme } from '@mui/material/styles'
 import { Theme } from 'emoji-picker-react'
 import themeConfig from 'src/configs/themeConfig'
 import { useSettings } from 'src/@core/hooks/useSettings'
-import styled from '@emotion/styled'
 import { usePostStore } from 'src/store/apps/posts'
 import toast from 'react-hot-toast'
 import DialogWithCustomCloseButton from 'src/views/components/dialog/customDialog'
+import { VisuallyHiddenInput } from 'src/pages/components/upload'
 
 const AddPost = () => {
   const [openAddPostDialog, setOpenAddPostDialog] = useState<boolean>(false)
@@ -77,18 +76,6 @@ const AddPost = () => {
       setPreviewImage(imageUrl)
     }
   }
-
-  const VisuallyHiddenInput = styled('input')({
-    clip: 'rect(0 0 0 0)',
-    clipPath: 'inset(50%)',
-    height: 1,
-    overflow: 'hidden',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    whiteSpace: 'nowrap',
-    width: 1
-  })
 
   const handleAddPost = async () => {
     const data = {

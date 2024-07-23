@@ -1,12 +1,13 @@
 import { Card, Grid } from '@mui/material'
 import AddPost from 'src/views/apps/post/AddPost'
 import PostsPage from 'src/views/apps/post/posts'
-import { commentPostState, editPostState, usePostStore, viewAllPostStore } from 'src/store/apps/posts'
+import { commentPostState, editPostState, usePostStore } from 'src/store/apps/posts'
 import CommentPost from 'src/views/apps/post/CommentPost'
 import EditPost from 'src/views/apps/post/EditPost'
 import ReportPost from 'src/views/apps/post/ReportPost'
 import useSWR from 'swr'
 import postService from 'src/service/post.service'
+import { PostSkeleton } from 'src/views/skeleton'
 
 const Posts = () => {
   const { post, commentPost, openCommentModal, closeCommentModalPost, openCommentModalPost } = commentPostState(
@@ -19,9 +20,11 @@ const Posts = () => {
   const addPostToFavorite = usePostStore(state => state.addPostToFavorite)
   const updatePost = usePostStore(state => state.updateUserPost)
 
-  const { data: posts } = useSWR('GetAllPosts', postService.getAllPosts, {
+  const { data: posts, isLoading } = useSWR('GetAllPosts', postService.getAllPosts, {
     revalidateOnFocus: true,
-    revalidateIfStale: true
+    revalidateIfStale: true,
+    refreshInterval: 3000,
+    errorRetryCount: 2
   })
 
   return (
@@ -33,6 +36,7 @@ const Posts = () => {
       </Grid>
       <Grid item xs={12} md={9} sm={12} lg={8}>
         <Card>
+          {isLoading ? <PostSkeleton /> : null}
           <PostsPage
             posts={posts}
             reactionPost={reactionPost}
