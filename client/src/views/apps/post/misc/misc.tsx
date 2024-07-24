@@ -70,8 +70,7 @@ export const RenderUser = (
         {renderRelativeTime(updatedAt)}
       </Typography>
       {renderHidePost(isShow)}
-      {renderIsApproved(isApproved)}
-      {renderRejected(status)}
+      {status ? renderRejected(status) : renderIsApproved(isApproved)}
     </Box>
   )
 }

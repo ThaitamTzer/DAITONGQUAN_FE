@@ -39,6 +39,7 @@
     "axios": "1.4.0",
     "axios-mock-adapter": "1.21.4",
     "bootstrap-icons": "1.10.5",
+    "canvas-confetti": "^1.9.3",
     "chart.js": "4.3.0",
     "cleave.js": "1.6.0",
     "clipboard-copy": "4.0.1",
@@ -81,6 +82,7 @@
     "socket.io-client": "^4.7.5",
     "stylis": "4.1.4",
     "stylis-plugin-rtl": "2.1.1",
+    "sweetalert2": "^11.12.3",
     "swr": "^2.2.5",
     "yup": "1.1.1",
     "zustand": "^4.5.4"
@@ -91,6 +93,7 @@
     "@iconify/tools": "2.2.6",
     "@iconify/types": "2.0.0",
     "@iconify/utils": "2.1.5",
+    "@types/canvas-confetti": "^1.6.4",
     "@types/cleave.js": "1.4.7",
     "@types/crypto-js": "^4.2.2",
     "@types/draft-js": "0.11.10",

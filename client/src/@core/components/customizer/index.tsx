@@ -27,7 +27,7 @@ import { useSettings } from 'src/@core/hooks/useSettings'
 
 const Toggler = styled(Box)<BoxProps>(({ theme }) => ({
   right: 0,
-  top: '50%',
+  top: '97%',
   display: 'flex',
   cursor: 'pointer',
   position: 'fixed',
