@@ -22,6 +22,8 @@ import Navigation from './components/vertical/navigation'
 import Footer from './components/shared-components/footer'
 import ScrollToTop from 'src/@core/components/scroll-to-top'
 import Attendance from '../components/attendance'
+import { useContext } from 'react'
+import { AbilityContext } from 'src/layouts/components/acl/Can'
 
 const VerticalLayoutWrapper = styled('div')({
   height: '100%',
@@ -57,6 +59,7 @@ const VerticalLayout = (props: LayoutProps) => {
   const { navigationSize, disableCustomizer, collapsedNavigationSize } = themeConfig
   const navWidth = navigationSize
   const collapsedNavWidth = collapsedNavigationSize
+  const ability = useContext(AbilityContext)
 
   // ** States
   const [navVisible, setNavVisible] = useState<boolean>(false)
@@ -124,7 +127,7 @@ const VerticalLayout = (props: LayoutProps) => {
 
       {/* Customizer */}
       {disableCustomizer || hidden ? null : <Customizer />}
-      <Attendance />
+      {ability.can('read', 'member-page') && ability.cannot('all', 'manage') && <Attendance />}
 
       {/* Scroll to top button */}
       {scrollToTop ? (

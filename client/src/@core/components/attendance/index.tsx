@@ -118,4 +118,8 @@ const Attendance = () => {
   )
 }
 
+Attendance.acl = {
+  action: 'read',
+  subject: 'member-page'
+}
 export default Attendance

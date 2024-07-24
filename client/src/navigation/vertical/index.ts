@@ -59,41 +59,11 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
-      title: 'User',
+      title: 'User List',
       icon: 'tabler:user',
-      children: [
-        {
-          title: 'List',
-          path: '/apps/user/list',
-          subject: 'user',
-          action: 'read'
-        },
-        {
-          title: 'View',
-          children: [
-            {
-              title: 'Account',
-              path: '/apps/user/view/account'
-            },
-            {
-              title: 'Security',
-              path: '/apps/user/view/security'
-            },
-            {
-              title: 'Billing & Plans',
-              path: '/apps/user/view/billing-plan'
-            },
-            {
-              title: 'Notifications',
-              path: '/apps/user/view/notification'
-            },
-            {
-              title: 'Connection',
-              path: '/apps/user/view/connection'
-            }
-          ]
-        }
-      ]
+      path: '/apps/user/list',
+      subject: 'user',
+      action: 'read'
     },
     {
       title: 'Rank Management',
