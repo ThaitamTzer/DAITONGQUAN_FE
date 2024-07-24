@@ -91,7 +91,7 @@ const AddPost = () => {
   }
 
   return (
-    <Grid container xs={12} sx={{ padding: 3 }}>
+    <Grid container xs={12} display={'flex'} justifyContent={'space-between'} alignItems={'center'} sx={{ padding: 3 }}>
       <Grid container xs={10} sx={{ display: 'flex', alignItems: 'center' }}>
         <Grid
           item
@@ -282,21 +282,10 @@ const AddPost = () => {
           </Dialog>
         </Grid>
       </Grid>
-      <Grid
-        item
-        xs={2}
-        sx={{
-          display: 'grid',
-          placeItems: 'center',
-          alignContent: 'space-between',
-          marginTop: 2
-        }}
-      >
-        <Button fullWidth variant='outlined' onClick={openAddPostDialogHandler}>
-          <Typography variant='body2' sx={{ color: 'text.primary' }}>
-            Post
-          </Typography>
-        </Button>
+      <Grid item xs={1}>
+        <IconButton onClick={openAddPostDialogHandler}>
+          <Icon icon='material-symbols:post-add' />
+        </IconButton>
       </Grid>
     </Grid>
   )

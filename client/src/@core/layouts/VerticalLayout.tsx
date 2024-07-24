@@ -21,6 +21,7 @@ import Customizer from 'src/@core/components/customizer'
 import Navigation from './components/vertical/navigation'
 import Footer from './components/shared-components/footer'
 import ScrollToTop from 'src/@core/components/scroll-to-top'
+import Attendance from '../components/attendance'
 
 const VerticalLayoutWrapper = styled('div')({
   height: '100%',
@@ -123,6 +124,7 @@ const VerticalLayout = (props: LayoutProps) => {
 
       {/* Customizer */}
       {disableCustomizer || hidden ? null : <Customizer />}
+      <Attendance />
 
       {/* Scroll to top button */}
       {scrollToTop ? (

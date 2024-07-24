@@ -10,7 +10,10 @@ const userProfileService = {
     axiosClient.put(`/users/update-profile`, data),
 
   // ** Upload Profile Avatar with multipath Form Data
-  uploadProfileAvatar: async (data: FormData): Promise<string> => axiosUpload.patch(`/users/update-avatar`, data)
+  uploadProfileAvatar: async (data: FormData): Promise<string> => axiosUpload.patch(`/users/update-avatar`, data),
+
+  // ** Attendance User
+  attendanceUser: async (): Promise<any> => axiosClient.patch(`/users/attendance-user`)
 }
 
 export default userProfileService

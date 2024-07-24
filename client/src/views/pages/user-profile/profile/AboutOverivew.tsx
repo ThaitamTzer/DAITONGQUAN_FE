@@ -49,39 +49,19 @@ const renderList = (arr: ProfileTabCommonType[]) => {
   }
 }
 
-// const renderTeams = (arr: ProfileTeamsType[]) => {
-//   if (arr && arr.length) {
-//     return arr.map((item, index) => {
-//       return (
-//         <Box
-//           key={index}
-//           sx={{
-//             display: 'flex',
-//             alignItems: 'center',
-//             '&:not(:last-of-type)': { mb: 3 },
-//             '& svg': { color: `${item.color}.main` }
-//           }}
-//         >
-//           <Icon fontSize='1.25rem' icon={item.icon} />
-
-//           <Typography sx={{ mx: 2, fontWeight: 500, color: 'text.secondary' }}>
-//             {item.property.charAt(0).toUpperCase() + item.property.slice(1)}
-//           </Typography>
-//           <Typography sx={{ color: 'text.secondary' }}>
-//             {item.value.charAt(0).toUpperCase() + item.value.slice(1)}
-//           </Typography>
-//         </Box>
-//       )
-//     })
-//   } else {
-//     return null
-//   }
-// }
-
 const AboutOverivew = () => {
   // lấy dữ liệu từ data lưu vào auth.user
   const { user, setUser } = useAuth()
-  const { data } = useSWR('GET_PROFILE_DATA', userProfileService.getUserProfile)
+
+  const { data } = useSWR('GET_PROFILE_DATA', userProfileService.getUserProfile, {
+    revalidateOnFocus: false,
+    initialData: user,
+    onSuccess: data => {
+      if (data && data.data) {
+        setUser(data.data)
+      }
+    }
+  })
 
   useEffect(() => {
     if (data && data.data) {

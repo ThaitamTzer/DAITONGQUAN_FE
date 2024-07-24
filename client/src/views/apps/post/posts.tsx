@@ -196,7 +196,7 @@ const PostsPage = (props: UserPostsPageProps) => {
 
   return (
     <>
-      {ability.can('read', 'member-page') && <Card sx={{ mb: '20px' }}>{children}</Card>}
+      {children ? <Card sx={{ mb: '20px' }}>{children}</Card> : null}
       <Card>
         {posts?.map(post => (
           <Fragment key={post._id}>
