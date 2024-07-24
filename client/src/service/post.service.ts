@@ -24,6 +24,13 @@ const postService = {
     return response
   },
 
+  //Get all posts pagination service
+  getAllPostsPagination: async (limit: number, page: number): Promise<GetPostType[]> => {
+    const response: GetPostType[] = await axiosClient.get(`/post${limit}`)
+
+    return response
+  },
+
   // Get a post by id
   getPostById: async (_id: string): Promise<GetPostType> => {
     const response: GetPostType = await axiosClient.get(`/post/${_id}`)
