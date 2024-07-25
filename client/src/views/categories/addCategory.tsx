@@ -17,7 +17,6 @@ import Icon from 'src/@core/components/icon'
 import { Controller, useForm } from 'react-hook-form'
 import icons from 'src/configs/expense_icons.json'
 import { ColorPicker } from './colorPicker'
-import { presetColors } from '../pages/categories/spends/utils/addCategory'
 import { getCreateCategoryValidationSchema } from 'src/configs/validationSchema'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useState } from 'react'
@@ -28,6 +27,28 @@ type AddCategoryProps = {
   type: string
   swr: string
 }
+
+export const presetColors = [
+  '#f44336',
+  '#e91e63',
+  '#9c27b0',
+  '#673ab7',
+  '#3f51b5',
+  '#2196f3',
+  '#03a9f4',
+  '#00bcd4',
+  '#009688',
+  '#4caf50',
+  '#8bc34a',
+  '#cddc39',
+  '#ffeb3b',
+  '#ffc107',
+  '#ff9800',
+  '#ff5722',
+  '#795548',
+  '#9e9e9e',
+  '#607d8b'
+]
 
 const AddCategory = (props: AddCategoryProps) => {
   const { type, swr } = props
