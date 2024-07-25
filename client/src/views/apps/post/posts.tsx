@@ -3,13 +3,14 @@ import { Box } from '@mui/system'
 import Icon from 'src/@core/components/icon'
 import { GetPostType, UpdatePostType } from 'src/types/apps/postTypes'
 import { useReportStore } from 'src/store/apps/posts/report'
-import React, { Fragment, useContext, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useContext, useEffect, useState } from 'react'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/router'
 import { usePostStore, previewImageStore } from 'src/store/apps/posts'
 import { UserPostsPageProps } from 'src/types/postpage'
 import { ButtonApprove, ImageDialog, renderContent, RenderUser, userAvatar } from './misc/misc'
+import { debounce } from 'lodash'
 
 const PostsPage = (props: UserPostsPageProps) => {
   const {
@@ -39,9 +40,10 @@ const PostsPage = (props: UserPostsPageProps) => {
     const initialLikedPosts: { [key: string]: boolean } = {}
     const initialReactionsCount: { [key: string]: number } = {}
     posts?.forEach(post => {
-      initialLikedPosts[post._id] = post.userReaction.some(reaction => reaction.userId._id === idUser)
+      initialLikedPosts[post._id] = post.userReaction.some((reaction: any) => reaction.userId === idUser)
       initialReactionsCount[post._id] = post.reactionCount
     })
+
     setLikedPosts(initialLikedPosts)
     setReactionsCount(initialReactionsCount)
   }, [posts])
@@ -51,7 +53,7 @@ const PostsPage = (props: UserPostsPageProps) => {
 
     return isLiked ? (
       <Button
-        onClick={() => handleDeleteReaction(postId)}
+        onClick={() => onReactionDeleteClick(postId)}
         color='inherit'
         sx={{ borderRadius: '40%' }}
         startIcon={<Icon icon='bi:heart-fill' color='#ff0000' />}
@@ -60,7 +62,7 @@ const PostsPage = (props: UserPostsPageProps) => {
       </Button>
     ) : (
       <Button
-        onClick={() => handleReaction(postId, 'like')}
+        onClick={() => onReactionClick(postId, 'like')}
         color='inherit'
         sx={{ borderRadius: '40%' }}
         startIcon={<Icon icon='bi:heart' color='error' />}
@@ -106,6 +108,18 @@ const PostsPage = (props: UserPostsPageProps) => {
     if (deleteReactionPost) {
       deleteReactionPost(_id)
     }
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedHandleReaction = useCallback(debounce(handleReaction, 200), [])
+  const debouncedHandleDeleteReaction = useCallback(debounce(handleDeleteReaction, 200), [])
+
+  // Use the debounced function in your component
+  const onReactionClick = (_id: string, action: string) => {
+    debouncedHandleReaction(_id, action)
+  }
+
+  const onReactionDeleteClick = (_id: string) => {
+    debouncedHandleDeleteReaction(_id)
   }
 
   const handleMoreOptions = (event: React.MouseEvent<HTMLElement>, postId: string) => {
@@ -224,7 +238,14 @@ const PostsPage = (props: UserPostsPageProps) => {
                     ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
                   }}
                 >
-                  {RenderUser(post.userId, post.createdAt, post.isShow, post.isApproved, post.status)}
+                  {RenderUser(
+                    post.userId,
+                    post.createdAt,
+                    post.isShow,
+                    post.isApproved,
+                    post.status,
+                    post.userId.rankID
+                  )}
                   {ability.can('read', 'member-page') && (
                     <>
                       <IconButton onClick={event => handleMoreOptions(event, post._id)} size='small'>

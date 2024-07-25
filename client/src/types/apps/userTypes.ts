@@ -10,7 +10,7 @@ export type User = {
   isBlock: boolean
 }
 
-type RankId = {
+export type RankId = {
   _id: string
   rankName: string
   rankIcon: string

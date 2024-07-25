@@ -174,6 +174,7 @@ export const appCalendarSlice = createSlice({
   reducers: {
     handleSelectEvent: (state, action) => {
       state.selectedEvent = action.payload
+
     },
     handleCalendarsUpdate: (state, action) => {
       const filterIndex = state.selectedCalendars.findIndex(i => i === action.payload)

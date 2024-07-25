@@ -29,10 +29,6 @@ const blankEvent = {
   }
 }
 
-const handleDateUTC = (date: string) => {
-  return new Date(date).toISOString()
-}
-
 const Calendar = (props: CalendarType) => {
   // ** Props
   const {
@@ -137,10 +133,10 @@ const Calendar = (props: CalendarType) => {
         }
       },
 
-      dateClick(info: any) {
+      dateClick: function (arg: any) {
         const ev = { ...blankEvent }
-        ev.start = info.dateStr
-        ev.end = info.dateStr
+        ev.start = arg.dateStr
+        ev.end = arg.dateStr
         ev.allDay = true
 
         // @ts-ignore

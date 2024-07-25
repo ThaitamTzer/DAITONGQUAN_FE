@@ -104,14 +104,6 @@ const UserDropdown = (props: Props) => {
     handleDropdownClose()
   }
 
-  const handleFullname = () => {
-    if (auth.user?.fullname) {
-      return auth.user?.fullname
-    } else {
-      return `${auth.user?.firstname} ${auth.user?.lastname}`
-    }
-  }
-
   return (
     <Fragment>
       <Badge
@@ -162,7 +154,6 @@ const UserDropdown = (props: Props) => {
               />
             </Badge>
             <Box sx={{ display: 'flex', ml: 2.5, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 500 }}>{handleFullname()}</Typography>
               <Typography variant='body2'>{handleGetRole()}</Typography>
             </Box>
           </Box>

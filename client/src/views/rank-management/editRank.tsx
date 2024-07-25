@@ -21,7 +21,7 @@ interface EditRankForm {
 const EditRank = () => {
   const { t } = useTranslation()
   const openEditModal = useRankStore(state => state.openEditModal)
-  const handleClose = useRankStore(state => state.handleCloseEditModal)
+  const onCloseModal = useRankStore(state => state.handleCloseEditModal)
   const editRank = useRankStore(state => state.handleEditRank)
   const rank = useRankStore(state => state.rank)
   const selectedRank = useRankStore(state => state.selectedRank)
@@ -64,32 +64,44 @@ const EditRank = () => {
 
   console.log(rank)
 
+  const handleClose = () => {
+    onCloseModal()
+    reset({
+      rankName: '',
+      attendanceScore: 0,
+      numberOfComment: 0,
+      numberOfBlog: 0,
+      numberOfLike: 0
+    })
+    setPreviewImage('')
+    setImage(null)
+  }
+
   const onSubmit = (data: EditRankForm) => {
-    const formData = new FormData();
+    const formData = new FormData()
     if (image) {
-      formData.append('image', image);
+      formData.append('image', image)
     }
-    formData.append('rankName', data.rankName);
-    formData.append('attendanceScore', data.attendanceScore.toString());
-    formData.append('numberOfComment', data.numberOfComment.toString());
-    formData.append('numberOfBlog', data.numberOfBlog.toString());
-    formData.append('numberOfLike', data.numberOfLike.toString());
-  
+    formData.append('rankName', data.rankName)
+    formData.append('attendanceScore', data.attendanceScore.toString())
+    formData.append('numberOfComment', data.numberOfComment.toString())
+    formData.append('numberOfBlog', data.numberOfBlog.toString())
+    formData.append('numberOfLike', data.numberOfLike.toString())
+
     editRank(selectedRank, formData)
       .then(() => {
-        handleClose();
-        reset();
-        toast.success('Rank added successfully');
+        handleClose()
+        toast.success('Rank edit successfully')
       })
       .catch(error => {
-        setError('rankName', { type: 'manual', message: error.message });
-      });
-  };
+        setError('rankName', { type: 'manual', message: error.message })
+      })
+  }
 
   return (
     <Dialog
       open={openEditModal}
-      onClose={handleClose}
+      onClose={onCloseModal}
       fullWidth
       maxWidth='sm'
       sx={{
@@ -102,7 +114,7 @@ const EditRank = () => {
         <DialogTitle>
           <Typography variant='h3'>Edit Rank</Typography>
         </DialogTitle>
-        <DialogWithCustomCloseButton handleClose={handleClose}>
+        <DialogWithCustomCloseButton handleClose={onCloseModal}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Controller

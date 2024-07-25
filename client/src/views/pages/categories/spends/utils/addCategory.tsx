@@ -28,7 +28,7 @@ import categoriesService from 'src/service/categories.service'
 import icons from 'src/configs/expense_icons.json'
 import toast from 'react-hot-toast'
 import { mutate } from 'swr'
-import { ColorPicker } from '../colorPicker'
+import { ColorPicker } from '../../../../categories/colorPicker'
 
 export const presetColors = ['#a2be2b', '#f9a825', '#f44336', '#ff5722', '#e91e63', '#9c27b0', '#673ab7']
 

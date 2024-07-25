@@ -207,9 +207,18 @@ const ViewPost = (props: PostProps) => {
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant='subtitle1' fontWeight={'bold'} marginRight={2}>
+                <Typography variant='subtitle1' fontWeight={'bold'} marginRight={1}>
                   {post?.userId?.firstname} {post?.userId?.lastname}
                 </Typography>
+                {post?.userId.rankID?.rankIcon && (
+                  <CardMedia
+                    component={'img'}
+                    image={post?.userId.rankID.rankIcon}
+                    alt={post?.userId.rankID.rankIcon}
+                    sx={{ width: '20px', height: '20px', objectFit: 'contain', borderRadius: '50%', mr: 1 }}
+                    loading='lazy'
+                  />
+                )}
                 <Typography fontSize={'14px'} color='GrayText' marginRight={2} mt={0.6}>
                   {renderRelativeTime(post?.createdAt)}
                 </Typography>

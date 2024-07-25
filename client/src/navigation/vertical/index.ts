@@ -579,24 +579,22 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Favorite Posts',
       icon: 'uit:favorite'
     },
+
     {
-      title: 'Categories',
-      icon: 'tabler:grid',
-      children: [
-        {
-          path: '/categories/spends',
-          title: 'Spends Category',
-          action: 'read',
-          subject: 'member-page'
-        },
-        {
-          path: '/categories/incomes',
-          title: 'Incomes Category',
-          action: 'read',
-          subject: 'member-page'
-        }
-      ]
+      path: '/spends',
+      title: 'Spends Category',
+      action: 'read',
+      subject: 'member-page',
+      icon: 'solar:hand-money-linear'
     },
+    {
+      path: '/incomes',
+      title: 'Incomes Category',
+      action: 'read',
+      subject: 'member-page',
+      icon: 'tabler:pig-money'
+    },
+
     {
       title: 'Calendar',
       icon: 'tabler:calendar',

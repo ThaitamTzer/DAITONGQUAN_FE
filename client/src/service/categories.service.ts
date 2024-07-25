@@ -1,16 +1,9 @@
 import axiosClient from 'src/lib/axios'
-
-import { CategoryCard } from 'src/types/user/categories'
+import { CategoryType } from 'src/types/apps/categoryTypes'
 
 const categoriesService = {
   // Get all categories
-  getAllCategories: async () => axiosClient.get<CategoryCard[]>('/category'),
-
-  // Get categories spend
-  getCategoriesSpend: async () => axiosClient.get<CategoryCard[]>('/category/spend'),
-
-  // Get categories income
-  getCategoriesIncome: async (): Promise<any> => axiosClient.get<CategoryCard[]>('/category/income'),
+  getAllCategories: async (): Promise<CategoryType[]> => axiosClient.get('/category'),
 
   // Create new category
   createCategory: async (data: any) => axiosClient.post('/category', data),
@@ -22,10 +15,10 @@ const categoriesService = {
   deleteCategory: async (data: any) => axiosClient.delete(`/category/${data}`),
 
   // Get income categories
-  getIncomeCategories: async () => axiosClient.get('/category/income'),
+  getIncomeCategories: async (): Promise<CategoryType[]> => axiosClient.get('/category/income'),
 
   // Get spend categories
-  getSpendCategories: async () => axiosClient.get('/category/spend')
+  getSpendCategories: async (): Promise<CategoryType[]> => axiosClient.get('/category/spend')
 }
 
 export default categoriesService

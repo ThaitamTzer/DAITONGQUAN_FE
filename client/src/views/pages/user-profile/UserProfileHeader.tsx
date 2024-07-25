@@ -33,6 +33,7 @@ import { useAuth } from 'src/hooks/useAuth'
 // ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 import Fade, { FadeProps } from '@mui/material/Fade'
+import user from 'src/store/apps/user'
 
 const Menu = styled(MuiMenu)<MenuProps>(({ theme }) => ({
   '& .MuiMenu-paper': {
@@ -98,7 +99,7 @@ const UserProfileHeader = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [action, setAction] = useState<'view' | 'change' | null>(null)
   const auth = useAuth()
-  const { setUser } = useAuth()
+  const { setUser, user } = useAuth()
   const formatter = useFormatter()
   const { t } = useTranslation()
   const [openDialog, setOpenDialog] = useState(false)
@@ -109,12 +110,29 @@ const UserProfileHeader = () => {
     })
   }, [])
 
+  console.log('user: ' + auth.user)
+
   useEffect(() => {
     auth.user && setUser({ ...auth.user, avatar: handleAvatar() })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.user?.avatar])
 
-  const designationIcon = data?.designationIcon || 'tabler:briefcase'
+  const RankIcon = ({ rankIcon }: { rankIcon: string }) => {
+    if (!rankIcon) return null
+
+    return (
+      <CardMedia
+        component='img'
+        alt='rank-icon'
+        image={rankIcon}
+        sx={{
+          width: 24,
+          height: 24,
+          mr: 1
+        }}
+      />
+    )
+  }
 
   const handleAvatar = () => {
     if (auth.user?.avatar) {
@@ -216,7 +234,6 @@ const UserProfileHeader = () => {
           <Box sx={{ mb: [6, 0], display: 'flex', flexDirection: 'column', alignItems: ['center', 'flex-start'] }}>
             <Typography variant='h5' sx={{ mb: 2.5 }}>
               {`${auth.user?.firstname} ${auth.user?.lastname}`}
-              {auth.user?.username ? ` (${auth.user?.username})` : ''}
             </Typography>
             <Box
               sx={{
@@ -225,16 +242,27 @@ const UserProfileHeader = () => {
                 justifyContent: ['center', 'flex-start']
               }}
             >
-              <Box sx={{ mr: 4, display: 'flex', alignItems: 'center', '& svg': { mr: 1.5, color: 'text.secondary' } }}>
-                <Icon fontSize='1.25rem' icon={designationIcon} />
-                {/* icon rank here */}
-                <Typography sx={{ color: 'text.secondary' }}>{data.designation}</Typography>
-                {/* name rank here */}
-              </Box>
-              <Box sx={{ mr: 4, display: 'flex', alignItems: 'center', '& svg': { mr: 1.5, color: 'text.secondary' } }}>
-                <Icon fontSize='1.25rem' icon='tabler:map-pin' />
-                <Typography sx={{ color: 'text.secondary' }}>{handleLastValue(auth.user?.address || '')}</Typography>
-              </Box>
+              {user?.rankID && (
+                <Box
+                  sx={{ mr: 4, display: 'flex', alignItems: 'center', '& svg': { mr: 1.5, color: 'text.secondary' } }}
+                >
+                  <RankIcon rankIcon={user.rankID?.rankIcon ?? ''} />
+                  {/* icon rank here */}
+                  {user.rankID?.rankName && (
+                    <Typography sx={{ color: 'text.secondary' }}>{user.rankID.rankName}</Typography>
+                  )}
+                </Box>
+              )}
+
+              {auth.user?.address && (
+                <Box
+                  sx={{ mr: 4, display: 'flex', alignItems: 'center', '& svg': { mr: 1.5, color: 'text.secondary' } }}
+                >
+                  <Icon fontSize='1.25rem' icon='tabler:map-pin' />
+                  <Typography sx={{ color: 'text.secondary' }}>{handleLastValue(auth.user?.address || '')}</Typography>
+                </Box>
+              )}
+
               <Box sx={{ display: 'flex', alignItems: 'center', '& svg': { mr: 1.5, color: 'text.secondary' } }}>
                 <Icon fontSize='1.25rem' icon='tabler:calendar' />
                 <Typography sx={{ color: 'text.secondary' }}>

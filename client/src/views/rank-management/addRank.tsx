@@ -70,7 +70,15 @@ const AddRank = () => {
       addRank(formData)
         .then(() => {
           handleClose()
-          reset()
+          reset({
+            rankName: '',
+            attendanceScore: 0,
+            numberOfComment: 0,
+            numberOfBlog: 0,
+            numberOfLike: 0
+          })
+          setPreviewImage('')
+          setImage(null)
           toast.success('Rank added successfully')
         })
         .catch(error => {
