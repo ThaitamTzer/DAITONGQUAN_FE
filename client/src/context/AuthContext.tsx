@@ -25,7 +25,7 @@ import { JwtPayload } from 'jsonwebtoken' // Import JwtPayload from 'jsonwebtoke
 
 // ** Defaults
 const defaultProvider: AuthValuesType = {
-  user: null,
+  user: {} as UserDataType,
   loading: true,
   setUser: () => null,
   setLoading: () => Boolean,

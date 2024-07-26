@@ -24,7 +24,7 @@ const defineRulesFor = (user: UserDataType) => {
 
     can(['read'], 'analytics')
   } else if (user.role === 'member') {
-    can(['read'], 'member-page')
+    can('manage', 'all')
   } else {
     console.warn('User role not found or has an invalid format.')
   }

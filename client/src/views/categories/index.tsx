@@ -26,7 +26,7 @@ import useSWR from 'swr'
 import DeleteManyNotesDialog from './deleteManyNotesDialog'
 import UpdateSpendNote from './updateSpendNote'
 import { CategoryType } from 'src/types/apps/categoryTypes'
-import { CustomNoRowsOverlay } from 'src/pages/components/datagrid/nodataOverlay'
+import CustomNoRowsOverlay from 'src/pages/components/datagrid/nodataOverlay'
 
 type TableNoteProps = {
   data: NoteTypes[] | undefined

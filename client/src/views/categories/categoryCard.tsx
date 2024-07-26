@@ -12,8 +12,6 @@ import {
 } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import { CategoryType } from 'src/types/apps/categoryTypes'
-import LimitSpend from '../pages/categories/spends/utils/limitSpend'
-import UpdateCategory from '../pages/categories/spends/utils/updateCategory'
 import { useCategoryStore } from 'src/store/categories'
 import { useSpendLimitStore } from 'src/store/categories/limit.store'
 import { useSpendNoteStore } from 'src/store/categories/note.store'

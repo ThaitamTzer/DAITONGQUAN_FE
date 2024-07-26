@@ -21,7 +21,7 @@ import { useSettings } from 'src/@core/hooks/useSettings'
 import { usePostStore } from 'src/store/apps/posts'
 import toast from 'react-hot-toast'
 import DialogWithCustomCloseButton from 'src/views/components/dialog/customDialog'
-import { VisuallyHiddenInput } from 'src/pages/components/upload'
+import VisuallyHiddenInput from 'src/pages/components/upload'
 
 const AddPost = () => {
   const [openAddPostDialog, setOpenAddPostDialog] = useState<boolean>(false)

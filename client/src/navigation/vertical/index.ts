@@ -594,6 +594,13 @@ const navigation = (): VerticalNavItemsType => {
       subject: 'member-page',
       icon: 'tabler:pig-money'
     },
+    {
+      path: '/notes',
+      title: 'Notes',
+      action: 'read',
+      subject: 'member-page',
+      icon: 'tabler:notebook'
+    },
 
     {
       title: 'Calendar',
