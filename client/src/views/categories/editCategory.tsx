@@ -119,7 +119,7 @@ const EditCategory = (props: EditCategoryProps) => {
         }}
       >
         <DialogTitle>
-          <Typography variant='h2'>Add new category</Typography>
+          <Typography variant='h2'>Edit category</Typography>
         </DialogTitle>
         <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
           <DialogContent>

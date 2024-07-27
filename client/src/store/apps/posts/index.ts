@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { fetchPosts } from 'src/pages/posts'
 import {
   GetPostType,
   AddPostType,
@@ -38,7 +39,6 @@ export const usePostStore = create<UserPostState>(set => ({
   addPost: async (data: AddPostType) => {
     set({ loading: true })
     await postService.addPost(data)
-    mutate('GetAllPosts', async () => await postService.getAllPosts(), true)
     mutate('GetAllUserPosts')
 
     set({ loading: false })
@@ -67,11 +67,9 @@ export const usePostStore = create<UserPostState>(set => ({
     set({ loading: true })
     await postService.reactionToPost(_id, action)
     mutate('GetAllPosts')
-
-    // usePostStore.getState().getAllUserPosts()
     if (postId) {
-      mutate(['GetCommentByPostId', postId])
-      mutate(['GetPostById', postId])
+      mutate(['GetPostById', postId], async () => await postService.getPostById(postId), true)
+      mutate(['GetCommentByPostId', postId], async () => await postService.getCommentByPostId(postId), true)
     }
   },
   deleteReactionPost: async (_id: string) => {
@@ -156,8 +154,7 @@ export const commentPostState = create<CommentPostState>(set => ({
   commentPost: async (data: UserCommentType | undefined) => {
     set({ post: {} as GetPostType })
     await postService.commentToPost(data)
-    usePostStore.getState().getAllUserPosts()
-    mutate('GetAllPosts')
+    mutate(fetchPosts)
     mutate('GetAllUserPosts')
     mutate('GetAllFavorite')
     const postId = postIdStore.getState().postId

@@ -26,16 +26,17 @@ import { useSpendNoteStore } from 'src/store/categories/note.store'
 type AddNoteProps = {
   open: boolean
   handleClose: () => void
+  handleAddNote: (data: INote, swr: string) => void
+  dateNoteField?: string
+  method?: string
   swr: string
 }
 
 const AddNote = (props: AddNoteProps) => {
-  const { open, handleClose, swr } = props
+  const { open, handleClose, handleAddNote, dateNoteField = 'spendingDate', swr, method = 'paymentMethod' } = props
 
-  const { category, handleAddSpendNote } = useSpendNoteStore()
+  const { category } = useSpendNoteStore()
   const format = useFormatter()
-
-  console.log(category)
 
   const {
     control,
@@ -52,8 +53,8 @@ const AddNote = (props: AddNoteProps) => {
     reset({
       title: '',
       amount: 0,
-      spendingDate: new Date(),
-      paymentMethod: 'cash',
+      [dateNoteField]: new Date(),
+      [method]: 'cash',
       content: '',
       cateId: ''
     })
@@ -62,7 +63,7 @@ const AddNote = (props: AddNoteProps) => {
   const onSubmit = async (data: INote) => {
     try {
       onClose()
-      await handleAddSpendNote(
+      handleAddNote(
         {
           ...data,
           cateId: category._id

@@ -10,6 +10,8 @@ import { useSpendNoteStore } from 'src/store/categories/note.store'
 import AddLimitDialog from 'src/views/categories/addLimit'
 import EditLimitDialog from 'src/views/categories/editLimit'
 import AddNote from 'src/views/categories/addNote'
+import { CategoryCardSkeleton } from 'src/views/skeleton'
+import Error500 from '../500'
 
 const SpendPage = () => {
   const {
@@ -20,14 +22,16 @@ const SpendPage = () => {
     revalidateOnFocus: false
   })
   const { openDeleteCategoryModal, handleCloseDeleteCategoryModal, handleDeleteCategory } = useCategoryStore()
-  const { openAddSpendNoteModal, handleCloseAddSpendNoteModal } = useSpendNoteStore()
+  const { openAddSpendNoteModal, handleCloseAddSpendNoteModal, handleAddSpendNote } = useSpendNoteStore()
   const categoryId = useCategoryStore(state => state.data?._id)
   const swr = 'GET_ALL_SPENDS'
+
+  if (error) return <Error500 />
 
   return (
     <Grid container spacing={3}>
       <AddCategory type='spend' swr={swr} />
-      <CategoryCard data={spends} />
+      {isLoading ? <CategoryCardSkeleton /> : <CategoryCard data={spends} />}
       <EditCategory type='spend' swr={swr} />
       <DialogAlert
         title='Delete Category'
@@ -38,7 +42,12 @@ const SpendPage = () => {
       />
       <AddLimitDialog />
       <EditLimitDialog />
-      <AddNote open={openAddSpendNoteModal} handleClose={handleCloseAddSpendNoteModal} swr={swr} />
+      <AddNote
+        open={openAddSpendNoteModal}
+        handleClose={handleCloseAddSpendNoteModal}
+        handleAddNote={handleAddSpendNote}
+        swr={swr}
+      />
     </Grid>
   )
 }

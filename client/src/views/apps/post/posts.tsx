@@ -244,7 +244,7 @@ const PostsPage = (props: UserPostsPageProps) => {
                     post.isShow,
                     post.isApproved,
                     post.status,
-                    post.userId.rankID
+                    post.userId?.rankID
                   )}
                   {ability.can('read', 'member-page') && (
                     <>
@@ -292,7 +292,7 @@ const PostsPage = (props: UserPostsPageProps) => {
                             </Box>
                           </MenuItem>
                         )}
-                        {post.userId._id !== idUser && (
+                        {post.userId?._id !== idUser && (
                           <MenuItem
                             onClick={() => {
                               handleOpenReportModal(post._id)
@@ -305,7 +305,7 @@ const PostsPage = (props: UserPostsPageProps) => {
                             </Box>
                           </MenuItem>
                         )}
-                        {post.userId._id === idUser && (
+                        {post.userId?._id === idUser && (
                           <>
                             <MenuItem
                               onClick={() => {

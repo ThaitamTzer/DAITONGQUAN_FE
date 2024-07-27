@@ -44,8 +44,8 @@ const TableNote = (props: TableNoteProps) => {
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
 
-  const handleDate = (date: Date) => {
-    const newDate = new Date(date)
+  const handleDate = (date: Date | undefined) => {
+    const newDate = new Date(date || new Date())
 
     return newDate.toLocaleDateString('vi', {
       day: '2-digit',
@@ -60,18 +60,22 @@ const TableNote = (props: TableNoteProps) => {
     return category
   }
 
+  type CellType = {
+    row: NoteTypes
+  }
+
   const columns: GridColDef[] = [
     {
       flex: 1,
       field: 'title',
       headerName: 'Title',
-      renderCell: ({ row }) => <Typography variant='subtitle1'>{row.title}</Typography>
+      renderCell: ({ row }: CellType) => <Typography variant='subtitle1'>{`${row.title}`}</Typography>
     },
     {
       flex: 1,
       field: 'amount',
       headerName: 'Amount',
-      renderCell: ({ row }) => {
+      renderCell: ({ row }: CellType) => {
         const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
           row.amount
         )
@@ -79,23 +83,24 @@ const TableNote = (props: TableNoteProps) => {
         return <Typography variant='subtitle1'>{formattedAmount}</Typography>
       }
     },
-    {
-      flex: 1,
-      field: 'content',
-      headerName: 'Content',
-      renderCell: ({ row }) => (
-        <Tooltip arrow title={row.content} about={row.content || ''}>
-          <Typography sx={{ cursor: 'pointer', textDecoration: 'underline' }}>
-            {row.content ? row.content.substring(0, 10) + (row.content.length > 10 ? '...' : '') : ''}
-          </Typography>
-        </Tooltip>
-      )
-    },
+
+    // {
+    //   flex: 1,
+    //   field: 'content',
+    //   headerName: 'Content',
+    //   renderCell: ({ row }: CellType) => (
+    //     <Tooltip arrow title={row.content} about={row.content || ''}>
+    //       <Typography sx={{ cursor: 'pointer', textDecoration: 'underline' }}>
+    //         {row.content ? row.content.substring(0, 10) + (row.content.length > 10 ? '...' : '') : ''}
+    //       </Typography>
+    //     </Tooltip>
+    //   )
+    // },
     {
       flex: 1,
       field: 'cateId',
       headerName: 'Category',
-      renderCell: ({ row }) => {
+      renderCell: ({ row }: CellType) => {
         const category = HandleCategory(row.cateId)
 
         return category ? (
@@ -111,23 +116,26 @@ const TableNote = (props: TableNoteProps) => {
         ) : null
       }
     },
-    {
-      flex: 1,
-      field: 'paymentMethod',
-      headerName: 'Method',
-      renderCell: ({ row }) => <Typography variant='subtitle1'>{row.paymentMethod}</Typography>
-    },
+
+    // {
+    //   flex: 1,
+    //   field: 'paymentMethod',
+    //   headerName: 'Method',
+    //   renderCell: ({ row }: CellType) => <Typography variant='subtitle1'>{row.paymentMethod || row.method}</Typography>
+    // },
     {
       flex: 1,
       field: 'spendingDate',
       headerName: 'Date',
-      renderCell: ({ row }) => <Typography variant='subtitle1'>{handleDate(row.spendingDate)}</Typography>
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='subtitle1'>{handleDate(row.spendingDate || row.incomeDate)}</Typography>
+      )
     },
     {
-      flex: 1,
+      flex: 0,
       field: 'action',
       headerName: 'Action',
-      renderCell: ({ row }) => (
+      renderCell: ({ row }: CellType) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <UpdateSpendNote spendCate={row} />
           <IconButton>
@@ -315,7 +323,6 @@ const TableNote = (props: TableNoteProps) => {
             </Grid>
           </Grid>
         </Box>
-
         <Divider sx={{ marginBottom: 4, marginTop: 4 }} />
         <DataGrid
           autoHeight

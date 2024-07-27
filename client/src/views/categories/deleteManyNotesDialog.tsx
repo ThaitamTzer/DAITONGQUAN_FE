@@ -40,7 +40,7 @@ const DeleteManyNotesDialog: React.FC<DeleteManyNotesDialogProps> = ({
 
       // Mutate data for notifications, all spend notes, and notes within the range date
       mutate('GET_ALL_NOTIFICATIONS')
-      mutate('GET_ALL_NOTES')
+      mutate('GET_ALL_SPEND_NOTES')
       mutate(['GET_SPENDNOTE_BY_RANGE_DATE', startDate, endDate])
     } catch (error: any) {
       toast.error(error.response.data.message)

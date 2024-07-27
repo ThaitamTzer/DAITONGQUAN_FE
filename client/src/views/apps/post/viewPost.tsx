@@ -14,7 +14,7 @@ import {
 import { Box } from '@mui/system'
 import { CommentType, GetPostType, UpdatePostType } from 'src/types/apps/postTypes'
 import Icon from 'src/@core/components/icon'
-import { useContext, useState } from 'react'
+import { useContext, useState, useCallback, useEffect } from 'react'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import AllComment from './AllComment'
 import { commentPostState, usePostStore } from 'src/store/apps/posts'
@@ -24,6 +24,7 @@ import { editPostState } from 'src/store/apps/posts'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/router'
 import { renderContent } from './misc/misc'
+import { debounce } from 'lodash'
 
 type PostProps = {
   post: GetPostType | undefined
@@ -34,10 +35,17 @@ type PostProps = {
 }
 
 const ViewPost = (props: PostProps) => {
+  const userData = JSON.parse(localStorage.getItem('userData') || '{}')
+  const idUser: string = userData._id
   const { post, comments } = props
   const [openImage, setOpenImage] = useState<string | null>(null)
   const [selectedPostId, setSelectedPostId] = useState<string | undefined>(undefined)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [localLiked, setLocalLiked] = useState(
+    post?.userReaction?.some((reaction: any) => reaction.userId._id === idUser)
+  )
+  const [localReactionCount, setLocalReactionCount] = useState(post?.reactionCount || 0)
+
   const reactionPost = usePostStore(state => state.reactionPost)
   const deleteReactionPost = usePostStore(state => state.deleteReactionPost)
   const updatePost = usePostStore(state => state.updateUserPost)
@@ -50,9 +58,6 @@ const ViewPost = (props: PostProps) => {
   const { handleOpenReportModal } = useReportStore(state => state)
   const ability = useContext(AbilityContext)
   const router = useRouter()
-
-  const userData = JSON.parse(localStorage.getItem('userData') || '{}')
-  const idUser: string = userData._id
 
   const handleOpenImage = (id: string) => {
     setOpenImage(id)
@@ -85,24 +90,42 @@ const ViewPost = (props: PostProps) => {
     }
   }
 
-  const RenderButtonReaction = ({ isLiked, post }: { isLiked: boolean | undefined; post: any }) => {
-    return isLiked ? (
+  // Immediate UI update and background API request for liking a post
+  const handleReaction = (_id: string, action: string) => {
+    setLocalLiked(true)
+    setLocalReactionCount(localReactionCount + 1)
+    debouncedReactionPost(_id, action)
+  }
+
+  // Immediate UI update and background API request for unliking a post
+  const handleDeleteReaction = (_id: string) => {
+    setLocalLiked(false)
+    setLocalReactionCount(localReactionCount - 1)
+    debouncedDeleteReactionPost(_id)
+  }
+
+  // Debounced handlers to limit the rate of sending requests
+  const debouncedReactionPost = useCallback(debounce(reactionPost, 200), [])
+  const debouncedDeleteReactionPost = useCallback(debounce(deleteReactionPost, 200), [])
+
+  const RenderButtonReaction = () => {
+    return localLiked ? (
       <Button
-        onClick={() => deleteReactionPost(post?._id)}
+        onClick={() => handleDeleteReaction(post?._id || '')}
         color='inherit'
         sx={{ borderRadius: '40%' }}
         startIcon={<Icon icon='bi:heart-fill' color='#ff0000' />}
       >
-        {post?.reactionCount}
+        {localReactionCount}
       </Button>
     ) : (
       <Button
-        onClick={() => reactionPost(post?._id, 'like')}
+        onClick={() => handleReaction(post?._id || '', 'like')}
         color='inherit'
         sx={{ borderRadius: '40%' }}
         startIcon={<Icon icon='bi:heart' color='error' />}
       >
-        {post?.reactionCount}
+        {localReactionCount}
       </Button>
     )
   }
@@ -111,6 +134,7 @@ const ViewPost = (props: PostProps) => {
     setAnchorEl(event.currentTarget)
     setSelectedPostId(postId)
   }
+
   const handleCloseOptions = () => {
     setAnchorEl(null)
     setSelectedPostId(undefined)
@@ -146,7 +170,7 @@ const ViewPost = (props: PostProps) => {
     return `${Math.floor(seconds)} seconds ago`
   }
 
-  const ImageDialog = (post: any) => {
+  const ImageDialog = (post: GetPostType | undefined) => {
     return (
       <Dialog fullScreen key={post?._id} open={openImage === post?._id} onClose={handleCloseImage}>
         <DialogContent sx={{ py: '0px !important', px: '60px !important' }} onClick={() => handleCloseImage()}>
@@ -210,7 +234,7 @@ const ViewPost = (props: PostProps) => {
                 <Typography variant='subtitle1' fontWeight={'bold'} marginRight={1}>
                   {post?.userId?.firstname} {post?.userId?.lastname}
                 </Typography>
-                {post?.userId.rankID?.rankIcon && (
+                {post?.userId?.rankID?.rankIcon && (
                   <CardMedia
                     component={'img'}
                     image={post?.userId.rankID.rankIcon}
@@ -364,10 +388,7 @@ const ViewPost = (props: PostProps) => {
               {ImageDialog(post)}
             </Grid>
             <Grid item sx={{ paddingLeft: '0px !important' }}>
-              <RenderButtonReaction
-                isLiked={post?.userReaction?.some((reaction: any) => reaction.userId._id === idUser)}
-                post={post}
-              />
+              <RenderButtonReaction />
               <Button
                 onClick={() => openCommentModalPost && openCommentModalPost(post)}
                 color='inherit'

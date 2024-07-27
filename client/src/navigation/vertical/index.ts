@@ -573,7 +573,7 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'iconoir:post'
     },
     {
-      path: '/posts/favorite',
+      path: '/favorite',
       action: 'read',
       subject: 'member-page',
       title: 'Favorite Posts',
@@ -595,13 +595,19 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'tabler:pig-money'
     },
     {
-      path: '/notes',
-      title: 'Notes',
+      path: '/spends-notes',
+      title: 'Spend Notes',
       action: 'read',
       subject: 'member-page',
-      icon: 'tabler:notebook'
+      icon: 'tabler:file-text'
     },
-
+    {
+      path: '/incomes-notes',
+      title: 'Income Notes',
+      action: 'read',
+      subject: 'member-page',
+      icon: 'tabler:file-text'
+    },
     {
       title: 'Calendar',
       icon: 'tabler:calendar',

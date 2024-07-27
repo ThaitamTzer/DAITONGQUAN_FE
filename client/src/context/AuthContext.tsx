@@ -150,7 +150,10 @@ const AuthProvider = ({ children }: Props) => {
           sessionStorage.clear()
         })
         .catch(err => {
-          if (errorCallback) errorCallback(err)
+          router.push('/login')
+          setUser(null)
+          localStorage.clear()
+          sessionStorage.clear()
         })
     } catch (error) {
       // console.error(error)

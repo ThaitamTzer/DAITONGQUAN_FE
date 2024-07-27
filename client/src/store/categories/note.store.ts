@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import spendNoteService from 'src/service/spendNote.service'
+import incomesNoteService from 'src/service/incomesNote.service'
 import { INote, SpendNoteTypes, NoteTypes } from 'src/types/apps/noteTypes'
 import { CategoryType } from 'src/types/apps/categoryTypes'
 import { mutate } from 'swr'
@@ -20,6 +21,8 @@ type SpendNoteActions = {
   handleCloseUpdateSpendNoteModal: () => void
   handleAddSpendNote: (data: INote, swr: string) => Promise<void>
   handleUpdateSpendNote: (data: INote, swr: string) => Promise<void>
+  handleAddIncomeNote: (data: INote, swr: string) => Promise<void>
+  handleUpdateIncomeNote: (id: string, data: INote, swr: string) => Promise<void>
 }
 
 type SpendNoteStore = SpendNoteState & SpendNoteActions
@@ -48,6 +51,26 @@ export const useSpendNoteStore = create<SpendNoteStore>(set => ({
   },
   handleUpdateSpendNote: async (data, swr) => {
     toast.promise(spendNoteService.updateSpendNote(data), {
+      loading: 'Updating note...',
+      success: 'Update note successfully',
+      error: 'Update note failed'
+    })
+    mutate(swr)
+  },
+  handleAddIncomeNote: async (data, swr) => {
+    toast.promise(incomesNoteService.createIncomesNote(data), {
+      loading: 'Adding note...',
+      success: () => {
+        mutate(swr)
+
+        return 'Add note successfully'
+      },
+      error: 'Add note failed'
+    })
+    mutate(swr)
+  },
+  handleUpdateIncomeNote: async (id, data, swr) => {
+    toast.promise(incomesNoteService.updateIncomesNote(id, data), {
       loading: 'Updating note...',
       success: 'Update note successfully',
       error: 'Update note failed'

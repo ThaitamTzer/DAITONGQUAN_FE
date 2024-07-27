@@ -52,8 +52,6 @@ const UpdateSpendNote = ({ spendCate }: any) => {
   const handleOpen = (cateId: any) => {
     setOpen(true)
     setCateId(cateId)
-
-    // console.log(spendCate)
   }
 
   const handleClose = () => {
@@ -103,7 +101,7 @@ const UpdateSpendNote = ({ spendCate }: any) => {
       await spendNoteService
         .updateSpendNote(spendNote)
         .then((res: any) => {
-          mutate('GET_ALL_SPENDNOTES')
+          mutate('GET_ALL_SPEND_NOTES')
           if (res.warningMessage) {
             toast('Be careful, you are update a note with a large amount of money', {
               icon: '⚠️',

@@ -7,11 +7,10 @@ import AddCategory from 'src/views/categories/addCategory'
 import EditCategory from 'src/views/categories/editCategory'
 import DialogAlert from 'src/views/categories/dialogAlert'
 import { useCategoryStore } from 'src/store/categories'
-import { useSpendLimitStore } from 'src/store/categories/limit.store'
-import AddLimitDialog from 'src/views/categories/addLimit'
-import EditLimitDialog from 'src/views/categories/editLimit'
 import { useSpendNoteStore } from 'src/store/categories/note.store'
+import { CategoryCardSkeleton } from 'src/views/skeleton'
 import AddNote from 'src/views/categories/addNote'
+import Error500 from '../500'
 
 const IncomePage = () => {
   const {
@@ -22,14 +21,16 @@ const IncomePage = () => {
     revalidateOnFocus: false
   })
   const { openDeleteCategoryModal, handleCloseDeleteCategoryModal, handleDeleteCategory } = useCategoryStore()
-  const { openAddSpendNoteModal, handleCloseAddSpendNoteModal } = useSpendNoteStore()
+  const { openAddSpendNoteModal, handleCloseAddSpendNoteModal, handleAddIncomeNote } = useSpendNoteStore()
   const categoryId = useCategoryStore(state => state.data?._id)
   const swr = 'GET_ALL_INCOMES'
+
+  if (error) return <Error500 />
 
   return (
     <Grid container spacing={3}>
       <AddCategory type='income' swr={swr} />
-      <CategoryCard data={limits} />
+      {isLoading ? <CategoryCardSkeleton /> : <CategoryCard data={limits} />}
       <EditCategory type='income' swr={swr} />
       <DialogAlert
         title='Delete Category'
@@ -38,7 +39,14 @@ const IncomePage = () => {
         handleClose={handleCloseDeleteCategoryModal}
         handleSubmit={() => handleDeleteCategory(categoryId, swr)}
       />
-      <AddNote open={openAddSpendNoteModal} handleClose={handleCloseAddSpendNoteModal} swr={swr} />
+      <AddNote
+        open={openAddSpendNoteModal}
+        handleClose={handleCloseAddSpendNoteModal}
+        handleAddNote={handleAddIncomeNote}
+        swr={swr}
+        method='method'
+        dateNoteField='incomeDate'
+      />
     </Grid>
   )
 }
