@@ -1,6 +1,5 @@
 import { useReportStore } from 'src/store/apps/posts/report'
 import DialogConfirm from 'src/views/report-list/dialog'
-import TabelReportList from 'src/views/report-list/table'
 import useSWR from 'swr'
 import reportService from 'src/service/report.service'
 import ViewReports from 'src/views/report-list/reports'
