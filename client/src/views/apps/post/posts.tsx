@@ -409,7 +409,7 @@ const PostsPage = (props: UserPostsPageProps) => {
                         }}
                         onClick={() => handleOpenImage(post._id)}
                         component='img'
-                        loading='lazy'
+                        loading='eager'
                         image={post.postImage}
                         alt='post image'
                       />
