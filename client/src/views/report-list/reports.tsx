@@ -14,7 +14,7 @@ import {
   TableRow,
   Typography
 } from '@mui/material'
-import { ReportType, StatusType } from 'src/types/apps/reportTypes'
+import { ReportType } from 'src/types/apps/reportTypes'
 import { getInitials } from 'src/@core/utils/get-initials'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { Box } from '@mui/system'
