@@ -19,6 +19,7 @@ const PostDetail = () => {
     revalidateOnFocus: true,
     revalidateIfStale: true
   })
+
   const { data: comments } = useSWR(
     ['GetCommentByPostId', postId],
     () => postService.getCommentByPostId(postId as string),
@@ -57,6 +58,6 @@ const PostDetail = () => {
 
 PostDetail.acl = {
   action: 'read',
-  subject: 'member-page'
+  subject: 'view-post'
 }
 export default PostDetail

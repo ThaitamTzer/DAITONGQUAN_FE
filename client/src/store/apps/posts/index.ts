@@ -156,7 +156,7 @@ export const commentPostState = create<CommentPostState>(set => ({
     await postService.commentToPost(data)
     mutate(fetchPosts)
     mutate('GetAllUserPosts')
-    mutate('GetAllFavorite')
+    mutate('GetAllFavorite', async () => await postService.getFavoritedPosts(), true)
     const postId = postIdStore.getState().postId
     if (postId) {
       mutate(['GetCommentByPostId', postId])

@@ -153,7 +153,9 @@ const UserDropdown = (props: Props) => {
                 sx={{ width: '2.5rem', height: '2.5rem' }}
               />
             </Badge>
+
             <Box sx={{ display: 'flex', ml: 2.5, alignItems: 'flex-start', flexDirection: 'column' }}>
+              <Typography variant='h6'>{`${auth.user?.firstname} ${auth.user?.lastname}`}</Typography>
               <Typography variant='body2'>{handleGetRole()}</Typography>
             </Box>
           </Box>

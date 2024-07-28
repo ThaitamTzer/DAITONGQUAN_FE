@@ -2,8 +2,14 @@ import TableNote from 'src/views/categories'
 import useSWR from 'swr'
 import spendNoteService from 'src/service/spendNote.service'
 import categoriesService from 'src/service/categories.service'
+import ViewPostModal from 'src/views/categories/viewNoteModal'
+import { useSpendNoteStore } from 'src/store/categories/note.store'
 
 const SpendNotesPage = () => {
+  const { openDeleteSpendNoteModal, handleCloseDeleteSpendNoteModal, note, handleDeleteSpendNote } = useSpendNoteStore(
+    state => state
+  )
+
   const {
     data: notes,
     isLoading,
@@ -16,7 +22,17 @@ const SpendNotesPage = () => {
     revalidateOnFocus: false
   })
 
-  return <TableNote data={notes || undefined} catedata={categories} />
+  return (
+    <>
+      <TableNote data={notes || undefined} catedata={categories} />
+      <ViewPostModal
+        open={openDeleteSpendNoteModal}
+        onClose={handleCloseDeleteSpendNoteModal}
+        note={note}
+        onSubmit={() => handleDeleteSpendNote(note._id, 'GET_ALL_SPEND_NOTES')}
+      />
+    </>
+  )
 }
 SpendNotesPage.acl = {
   action: 'read',

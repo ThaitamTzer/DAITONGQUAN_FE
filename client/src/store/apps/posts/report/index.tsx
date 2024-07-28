@@ -20,6 +20,9 @@ export type ReportState = {
   selectedStatus: string
   selectedType: string
   loading: boolean
+
+  anchorEl: null | HTMLElement
+  openPreviewReportModal: boolean
 }
 
 export type ReportHandler = {
@@ -46,6 +49,11 @@ export type ReportHandler = {
   applyFilters: () => Promise<void>
   setReportId: (reportId: string) => void
   setReportList: (reportList: ReportType[] | undefined) => void
+
+  handleOpenPreviewReportModal: (report: ReportType) => void
+  handleClosePreviewReportModal: () => void
+  handleOpenOptionMenu: (report: ReportType, event: React.MouseEvent<HTMLElement>) => void
+  handleCloseOptionMenu: () => void
 }
 
 export const useReportStore = create<ReportState & ReportHandler>(set => ({
@@ -63,6 +71,14 @@ export const useReportStore = create<ReportState & ReportHandler>(set => ({
   selectedStatus: 'all',
   selectedType: 'all',
   loading: false,
+
+  anchorEl: null,
+  handleOpenOptionMenu: (report, event) => set({ anchorEl: event.currentTarget, report }),
+  handleCloseOptionMenu: () => set({ anchorEl: null }),
+
+  openPreviewReportModal: false,
+  handleOpenPreviewReportModal: report => set({ openPreviewReportModal: true, report }),
+  handleClosePreviewReportModal: () => set({ openPreviewReportModal: false }),
 
   setReportList: reportList => set({ reportList }),
   handleOpenAlreadyBlockedPostModal: () => set({ openAlreadyBlockedPostModal: true }),
@@ -147,9 +163,13 @@ export const useReportStore = create<ReportState & ReportHandler>(set => ({
     const { selectedStatus, selectedType } = useReportStore.getState()
     const reportList = await reportService.getReportList()
     const filteredByStatus =
-      selectedStatus === 'all' ? reportList : reportList.filter(report => report.status === selectedStatus)
+      selectedStatus === 'all'
+        ? reportList
+        : reportList.filter(report => report.report.some(item => item.status.toLowerCase() === selectedStatus))
     const filteredByType =
-      selectedType === 'all' ? filteredByStatus : filteredByStatus.filter(report => report.reportType === selectedType)
+      selectedType === 'all'
+        ? filteredByStatus
+        : filteredByStatus.filter(report => report.report.some(item => item.reportType.toLowerCase() === selectedType))
     set({
       reportList: filteredByType,
       noData: filteredByType.length === 0 && reportList.length === 0

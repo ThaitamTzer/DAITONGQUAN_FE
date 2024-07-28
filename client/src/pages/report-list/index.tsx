@@ -1,8 +1,19 @@
 import { useReportStore } from 'src/store/apps/posts/report'
 import DialogConfirm from 'src/views/report-list/dialog'
 import TabelReportList from 'src/views/report-list/table'
+import useSWR from 'swr'
+import reportService from 'src/service/report.service'
+import ViewReports from 'src/views/report-list/reports'
+import PreviewReport from 'src/views/report-list/viewPostAndReport'
 
 export default function ReportListPage() {
+  const { data: reportListData, isLoading } = useSWR('GetAllReports', () => reportService.getReportList(), {
+    revalidateOnFocus: true,
+    revalidateIfStale: true,
+    refreshInterval: 5000,
+    errorRetryCount: 3
+  })
+
   const {
     openReportModal,
     openBlockPostModal,
@@ -25,7 +36,7 @@ export default function ReportListPage() {
 
   return (
     <>
-      <TabelReportList />{' '}
+      <ViewReports reports={reportListData} /> <PreviewReport />
       <DialogConfirm
         open={openReportModal}
         onClose={handleCloseReportModal}

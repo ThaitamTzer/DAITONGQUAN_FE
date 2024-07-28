@@ -11,8 +11,7 @@ import {
   Select,
   MenuItem,
   Divider,
-  LinearProgress,
-  Tooltip
+  LinearProgress
 } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import { Box } from '@mui/system'
@@ -27,6 +26,8 @@ import DeleteManyNotesDialog from './deleteManyNotesDialog'
 import UpdateSpendNote from './updateSpendNote'
 import { CategoryType } from 'src/types/apps/categoryTypes'
 import CustomNoRowsOverlay from 'src/pages/components/datagrid/nodataOverlay'
+import { useSpendNoteStore } from 'src/store/categories/note.store'
+import { NotesSkeleton } from '../skeleton'
 
 type TableNoteProps = {
   data: NoteTypes[] | undefined
@@ -35,6 +36,7 @@ type TableNoteProps = {
 
 const TableNote = (props: TableNoteProps) => {
   const { data, catedata } = props
+  const { handleOpenDeleteSpendNoteModal } = useSpendNoteStore(state => state)
 
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>([])
@@ -138,7 +140,7 @@ const TableNote = (props: TableNoteProps) => {
       renderCell: ({ row }: CellType) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <UpdateSpendNote spendCate={row} />
-          <IconButton>
+          <IconButton onClick={() => handleOpenDeleteSpendNoteModal(row)}>
             <Icon icon='tabler:trash' />
           </IconButton>
         </Box>
@@ -336,7 +338,7 @@ const TableNote = (props: TableNoteProps) => {
           disableColumnMenu
           slots={{
             noRowsOverlay: CustomNoRowsOverlay,
-            loadingOverlay: LinearProgress
+            loadingOverlay: NotesSkeleton
           }}
           onRowSelectionModelChange={(newSelection: any) => setRowSelectionModel(newSelection)}
           checkboxSelection

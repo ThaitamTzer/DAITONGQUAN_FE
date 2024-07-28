@@ -12,6 +12,7 @@ type SpendNoteState = {
   category: CategoryType
   openAddSpendNoteModal: boolean
   openUpdateSpendNoteModal: boolean
+  openDeleteSpendNoteModal: boolean
 }
 
 type SpendNoteActions = {
@@ -23,6 +24,9 @@ type SpendNoteActions = {
   handleUpdateSpendNote: (data: INote, swr: string) => Promise<void>
   handleAddIncomeNote: (data: INote, swr: string) => Promise<void>
   handleUpdateIncomeNote: (id: string, data: INote, swr: string) => Promise<void>
+  handleOpenDeleteSpendNoteModal: (note: NoteTypes) => void
+  handleCloseDeleteSpendNoteModal: () => void
+  handleDeleteSpendNote: (id: string, swr: string) => Promise<void>
 }
 
 type SpendNoteStore = SpendNoteState & SpendNoteActions
@@ -33,6 +37,7 @@ export const useSpendNoteStore = create<SpendNoteStore>(set => ({
   category: {} as CategoryType,
   openAddSpendNoteModal: false,
   openUpdateSpendNoteModal: false,
+  openDeleteSpendNoteModal: false,
   handleOpenAddSpendNoteModal: category => set({ openAddSpendNoteModal: true, category }),
   handleCloseAddSpendNoteModal: () => set({ openAddSpendNoteModal: false }),
   handleOpenUpdateSpendNoteModal: note => set({ openUpdateSpendNoteModal: true, note }),
@@ -74,6 +79,20 @@ export const useSpendNoteStore = create<SpendNoteStore>(set => ({
       loading: 'Updating note...',
       success: 'Update note successfully',
       error: 'Update note failed'
+    })
+    mutate(swr)
+  },
+  handleOpenDeleteSpendNoteModal: note => set({ openDeleteSpendNoteModal: true, note }),
+  handleCloseDeleteSpendNoteModal: () => set({ openDeleteSpendNoteModal: false }),
+  handleDeleteSpendNote: async (id, swr) => {
+    toast.promise(spendNoteService.deleteSpendNote(id), {
+      loading: 'Deleting note...',
+      success: () => {
+        mutate(swr)
+
+        return 'Delete note successfully'
+      },
+      error: 'Delete note failed'
     })
     mutate(swr)
   }

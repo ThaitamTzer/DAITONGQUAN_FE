@@ -148,7 +148,7 @@ const UserProfileHeader = () => {
     return values[values.length - 1].trim()
   }
 
-  const handleJoiningDate = (date: string) => {
+  const handleJoiningDate = (date: any) => {
     const dateISO = new Date(date)
 
     return formatter.dateTime(dateISO, { month: 'numeric', day: 'numeric', year: 'numeric' })
