@@ -32,10 +32,11 @@ import { NotesSkeleton } from '../skeleton'
 type TableNoteProps = {
   data: NoteTypes[] | undefined
   catedata: CategoryType[] | undefined
+  title: string
 }
 
 const TableNote = (props: TableNoteProps) => {
-  const { data, catedata } = props
+  const { data, catedata, title } = props
   const { handleOpenDeleteSpendNoteModal } = useSpendNoteStore(state => state)
 
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
@@ -238,7 +239,7 @@ const TableNote = (props: TableNoteProps) => {
     <>
       <Card>
         <CardHeader
-          title={<Typography variant='h2'>List Of Spend Note</Typography>}
+          title={<Typography variant='h2'>{title}</Typography>}
           sx={{
             borderLeft: '3px solid',
             borderColor: 'primary.main',

@@ -16,7 +16,7 @@ const IncomeNotesPage = () => {
     revalidateOnFocus: false
   })
 
-  return <TableNote data={notes || undefined} catedata={categories} />
+  return <TableNote title='List of Income Notes' data={notes || undefined} catedata={categories} />
 }
 
 IncomeNotesPage.acl = {

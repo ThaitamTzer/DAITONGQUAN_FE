@@ -5,9 +5,7 @@ import CardContent from '@mui/material/CardContent'
 
 // ** Third Party Imports
 import { Line } from 'react-chartjs-2'
-import { Chart as ChartJS, ChartData, ChartOptions, CategoryScale } from 'chart.js'
-
-ChartJS.register(CategoryScale)
+import { ChartData, ChartOptions } from 'chart.js'
 
 interface LineProps {
   white: string
@@ -19,7 +17,7 @@ interface LineProps {
   legendColor: string
 }
 
-const ChartjsLineChart = (props: LineProps) => {
+const StatisticNoteChart = (props: LineProps) => {
   // ** Props
   const { white, primary, success, warning, labelColor, borderColor, legendColor } = props
 
@@ -120,4 +118,4 @@ const ChartjsLineChart = (props: LineProps) => {
   )
 }
 
-export default ChartjsLineChart
+export default StatisticNoteChart

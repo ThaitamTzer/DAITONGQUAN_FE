@@ -154,7 +154,20 @@ export const commentPostState = create<CommentPostState>(set => ({
   commentPost: async (data: UserCommentType | undefined) => {
     set({ post: {} as GetPostType })
     await postService.commentToPost(data)
-    mutate(fetchPosts)
+
+    // Fetch all pages after commenting
+    const revalidateAllPages = async () => {
+      const { data } = await mutate(fetchPosts)
+
+      if (data) {
+        const totalPages = data.length
+        for (let i = 0; i < totalPages; i++) {
+          await mutate(fetchPosts(i, data[i]), true)
+        }
+      }
+    }
+    await revalidateAllPages()
+
     mutate('GetAllUserPosts')
     mutate('GetAllFavorite', async () => await postService.getFavoritedPosts(), true)
     const postId = postIdStore.getState().postId

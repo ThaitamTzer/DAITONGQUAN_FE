@@ -24,7 +24,7 @@ const SpendNotesPage = () => {
 
   return (
     <>
-      <TableNote data={notes || undefined} catedata={categories} />
+      <TableNote title='List of Spent Notes' data={notes || undefined} catedata={categories} />
       <ViewPostModal
         open={openDeleteSpendNoteModal}
         onClose={handleCloseDeleteSpendNoteModal}

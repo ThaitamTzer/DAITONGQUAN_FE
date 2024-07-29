@@ -32,11 +32,6 @@ const navigation = (): VerticalNavItemsType => {
       path: '/apps/email'
     },
     {
-      title: 'Chat',
-      icon: 'tabler:messages',
-      path: '/apps/chat'
-    },
-    {
       title: 'Invoice',
       icon: 'tabler:file-dollar',
       children: [
@@ -579,7 +574,13 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Favorite Posts',
       icon: 'uit:favorite'
     },
-
+    {
+      title: 'Chat',
+      icon: 'tabler:messages',
+      path: '/apps/chat',
+      action: 'read',
+      subject: 'member-page'
+    },
     {
       path: '/spends',
       title: 'Spends Category',

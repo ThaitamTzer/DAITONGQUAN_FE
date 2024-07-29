@@ -1,6 +1,7 @@
 import axiosClient from 'src/lib/axios'
 import { INote, SpendNoteTypes, NoteTypes } from 'src/types/apps/noteTypes'
 
+
 const spendNoteService = {
   // ** Get All Spend Note
   getAllSpendNote: async (): Promise<NoteTypes[]> => {
@@ -36,7 +37,8 @@ const spendNoteService = {
     axiosClient.get(`/spendingnote/filter-by-date`, { params: data }),
 
   // Get Notification Out Of Money
-  getNotificationOutOfMoney: async (): Promise<any> => axiosClient.get(`/spendingnote/notify-out-of-money`)
+  getNotificationOutOfMoney: async (): Promise<any> => axiosClient.get(`/spendingnote/notify-out-of-money`),
+
 }
 
 export default spendNoteService
