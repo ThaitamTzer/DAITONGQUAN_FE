@@ -21,8 +21,6 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import DatePicker from 'react-datepicker'
 import { useFormatter } from 'next-intl'
 import toast from 'react-hot-toast'
-import useSWR from 'swr'
-import categoriesService from 'src/service/categories.service'
 
 import DialogWithCustomCloseButton from '../components/dialog/customDialog'
 import { INote, NoteTypes } from 'src/types/apps/noteTypes'
@@ -71,6 +69,7 @@ const UpdateNoteModal = (props: UpdateSpendNoteProps) => {
       method: note.paymentMethod || note.method,
       amount: note.amount
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [note])
 
   const onSubmit = async (data: FormData) => {

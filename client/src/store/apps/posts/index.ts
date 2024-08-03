@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import { fetchPosts } from 'src/pages/posts'
 import {
   GetPostType,
   AddPostType,
@@ -66,7 +65,6 @@ export const usePostStore = create<UserPostState>(set => ({
     const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.reactionToPost(_id, action)
-    mutate('GetAllPosts')
     if (postId) {
       mutate(['GetPostById', postId], async () => await postService.getPostById(postId), true)
       mutate(['GetCommentByPostId', postId], async () => await postService.getCommentByPostId(postId), true)
@@ -76,13 +74,10 @@ export const usePostStore = create<UserPostState>(set => ({
     const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.deleteReactionToPost(_id)
-    mutate('GetAllPosts', async () => await postService.getAllPosts(), true)
-
     if (postId) {
       usePostStore.getState().getPostById(postId)
     } else {
       usePostStore.getState().getAllUserPosts()
-      viewAllPostStore.getState().getAllPosts()
     }
   },
   addPostToFavorite: async (_id: string | undefined) => {
@@ -146,7 +141,9 @@ export const approvePostStore = create<PostListState>(set => ({
 
 export const commentPostState = create<CommentPostState>(set => ({
   post: {} as GetPostType,
+  pageIndex: 0,
   openCommentModal: false,
+  setPageIndex: (pageIndex: number) => set({ pageIndex }),
   openCommentModalPost: (data: GetPostType | undefined) => set(() => ({ openCommentModal: true, post: data })),
   closeCommentModalPost: () => {
     set(state => ({ openCommentModal: false, post: state.post }))
@@ -154,19 +151,6 @@ export const commentPostState = create<CommentPostState>(set => ({
   commentPost: async (data: UserCommentType | undefined) => {
     set({ post: {} as GetPostType })
     await postService.commentToPost(data)
-
-    // Fetch all pages after commenting
-    const revalidateAllPages = async () => {
-      const { data } = await mutate(fetchPosts)
-
-      if (data) {
-        const totalPages = data.length
-        for (let i = 0; i < totalPages; i++) {
-          await mutate(fetchPosts(i, data[i]), true)
-        }
-      }
-    }
-    await revalidateAllPages()
 
     mutate('GetAllUserPosts')
     mutate('GetAllFavorite', async () => await postService.getFavoritedPosts(), true)

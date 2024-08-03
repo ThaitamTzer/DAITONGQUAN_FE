@@ -10,8 +10,7 @@ import {
   Grid,
   Select,
   MenuItem,
-  Divider,
-  LinearProgress
+  Divider
 } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import { Box } from '@mui/system'
@@ -23,12 +22,10 @@ import spendNoteService from 'src/service/spendNote.service'
 import { NoteTypes } from 'src/types/apps/noteTypes'
 import useSWR from 'swr'
 import DeleteManyNotesDialog from './deleteManyNotesDialog'
-import UpdateSpendNote from './updateSpendNote'
 import { CategoryType } from 'src/types/apps/categoryTypes'
 import CustomNoRowsOverlay from 'src/pages/components/datagrid/nodataOverlay'
 import { useSpendNoteStore } from 'src/store/categories/note.store'
 import { NotesSkeleton } from '../skeleton'
-import { IncomeNoteType } from 'src/types/apps/noteTypes'
 
 type TableNoteProps = {
   data: NoteTypes[] | undefined

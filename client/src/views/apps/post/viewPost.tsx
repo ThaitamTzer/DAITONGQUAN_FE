@@ -41,11 +41,11 @@ const ViewPost = (props: PostProps) => {
   const [openImage, setOpenImage] = useState<string | null>(null)
   const [selectedPostId, setSelectedPostId] = useState<string | undefined>(undefined)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const [localLiked, setLocalLiked] = useState(post?.userReaction?.some(reaction => reaction.userId._id === idUser))
+  const [localLiked, setLocalLiked] = useState(post?.userReaction?.some(reaction => reaction.userId?._id === idUser))
   const [localReactionCount, setLocalReactionCount] = useState(post?.reactionCount || 0)
 
   useEffect(() => {
-    setLocalLiked(post?.userReaction?.some(reaction => reaction.userId._id === idUser))
+    setLocalLiked(post?.userReaction?.some(reaction => reaction.userId?._id === idUser))
     setLocalReactionCount(post?.reactionCount || 0)
   }, [post])
 

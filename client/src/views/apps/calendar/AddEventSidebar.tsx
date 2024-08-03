@@ -14,6 +14,7 @@ import { useForm, Controller } from 'react-hook-form'
 import Icon from 'src/@core/components/icon'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { AddEventSidebarType } from 'src/types/apps/calendarTypes'
+import utcToZonedTime from 'date-fns-tz/utcToZonedTime'
 
 interface PickerProps {
   label?: string
@@ -86,8 +87,26 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
       title: data.title,
       location: values.location,
       isAllDay: values.allDay,
-      startDateTime: values.startDate,
-      endDateTime: values.endDate,
+      startDateTime: new Date(
+        Date.UTC(
+          values.startDate.getFullYear(),
+          values.startDate.getMonth(),
+          values.startDate.getDate(),
+          values.startDate.getHours(),
+          values.startDate.getMinutes(),
+          values.startDate.getSeconds()
+        )
+      ) as Date,
+      endDateTime: new Date(
+        Date.UTC(
+          values.endDate.getFullYear(),
+          values.endDate.getMonth(),
+          values.endDate.getDate(),
+          values.endDate.getHours(),
+          values.endDate.getMinutes(),
+          values.endDate.getSeconds()
+        )
+      ) as Date,
       note: values.description,
       isLoop: false,
       calendars: values.calendar,
@@ -96,6 +115,7 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
 
     if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
       dispatch(addEvent(modifiedEvent))
+      console.log('Add Event:', modifiedEvent)
     } else {
       dispatch(
         updateEvent({
@@ -125,17 +145,50 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
 
   const handleStartDate = (date: Date) => {
     if (date > new Date(values.endDate)) {
-      setValues({ ...values, startDate: date.toISOString(), endDate: date.toISOString() })
+      setValues({ ...values, startDate: date, endDate: date })
+    } else {
+      setValues({ ...values, startDate: date })
     }
-  }
-
-  const handleToUTCDateTime = (date: Date) => {
-    return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
   }
 
   const resetToStoredValues = useCallback(() => {
     if (store.selectedEvent !== null) {
       const event = store.selectedEvent
+
+      const inputDate = new Date(event.start) // Ensure this is a Date object
+      const endDate = new Date(event.end) // Ensure this is a Date object
+
+      // Convert the input date to UTC
+      const zonedDate = utcToZonedTime(inputDate, 'UTC')
+      const zonedEndDate = utcToZonedTime(endDate, 'UTC')
+
+      // Create a new Date object from the zonedDate directly using UTC methods
+      const formattedStartDate = new Date(
+        Date.UTC(
+          zonedDate.getUTCFullYear(),
+          zonedDate.getUTCMonth(),
+          zonedDate.getUTCDate(),
+          zonedDate.getUTCHours(),
+          zonedDate.getUTCMinutes(),
+          zonedDate.getUTCSeconds(),
+          zonedDate.getUTCMilliseconds()
+        )
+      )
+
+      // Create a new Date object from the zonedEndDate directly using UTC methods
+      const formattedEndDate = new Date(
+        Date.UTC(
+          zonedEndDate.getUTCFullYear(),
+          zonedEndDate.getUTCMonth(),
+          zonedEndDate.getUTCDate(),
+          zonedEndDate.getUTCHours(),
+          zonedEndDate.getUTCMinutes(),
+          zonedEndDate.getUTCSeconds(),
+          zonedEndDate.getUTCMilliseconds()
+        )
+      )
+
+      console.log('Formatted End Date:', formattedEndDate)
 
       setValue('title', event.title || '')
       setValues({
@@ -146,13 +199,15 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
         guests: event.extendedProps.guests || [],
         description: event.extendedProps.description || '',
         calendar: event.extendedProps.calendar || 'Business',
-        endDate: event.end ? event.end : event.start,
-        startDate: event.start || new Date().toISOString(),
+        endDate: event.end ? formattedEndDate : formattedStartDate,
+        startDate: formattedStartDate,
         location: event.extendedProps.location || '',
         isEncrypted: event.extendedProps.isEncrypted || false
       })
     }
   }, [setValue, store.selectedEvent])
+
+  console.log(values)
 
   const resetToEmptyValues = useCallback(() => {
     setValue('title', '')
@@ -225,8 +280,6 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
       )
     }
   }
-
-  console.log(values)
 
   return (
     <Drawer
@@ -314,13 +367,13 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
               <DatePicker
                 selectsStart
                 id='event-start-date'
-                endDate={handleToUTCDateTime(new Date(values.endDate))}
-                selected={values.startDate ? handleToUTCDateTime(new Date(values.startDate)) : null}
-                startDate={handleToUTCDateTime(new Date(values.startDate))}
+                endDate={new Date(values.endDate)}
+                selected={values.startDate ? new Date(values.startDate) : null}
+                startDate={new Date(values.startDate)}
                 showTimeSelect={!values.allDay}
                 dateFormat={!values.allDay ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd'}
                 customInput={<PickersComponent label='Start Date' registername='startDate' />}
-                onChange={(date: Date) => setValues({ ...values, startDate: date.toISOString() })}
+                onChange={(date: Date) => setValues({ ...values, startDate: date })}
                 onSelect={handleStartDate}
               />
             </Box>
@@ -328,14 +381,14 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
               <DatePicker
                 selectsEnd
                 id='event-end-date'
-                endDate={handleToUTCDateTime(new Date(values.endDate))}
-                selected={values.endDate ? handleToUTCDateTime(new Date(values.endDate)) : null}
-                minDate={handleToUTCDateTime(new Date(values.startDate))}
-                startDate={handleToUTCDateTime(new Date(values.startDate))}
+                endDate={new Date(values.endDate)}
+                selected={values.endDate ? new Date(values.endDate) : null}
+                minDate={new Date(values.startDate)}
+                startDate={new Date(values.startDate)}
                 showTimeSelect={!values.allDay}
                 dateFormat={!values.allDay ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd'}
                 customInput={<PickersComponent label='End Date' registername='endDate' />}
-                onChange={(date: Date) => setValues({ ...values, endDate: date.toISOString() })}
+                onChange={(date: Date) => setValues({ ...values, endDate: date })}
               />
             </Box>
             <FormControl sx={{ mb: 4 }}>

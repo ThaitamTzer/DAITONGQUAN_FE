@@ -135,8 +135,8 @@ const Calendar = (props: CalendarType) => {
 
       dateClick: function (arg: any) {
         const ev = { ...blankEvent }
-        ev.start = arg.dateStr
-        ev.end = arg.dateStr
+        ev.start = arg.date.toUTCString()
+        ev.end = arg.date.toUTCString()
         ev.allDay = true
 
         // @ts-ignore

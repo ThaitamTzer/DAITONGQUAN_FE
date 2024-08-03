@@ -2,6 +2,8 @@
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 
+import { useContext } from 'react'
+
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
 
@@ -15,6 +17,7 @@ import UserDropdown from 'src/@core/layouts/components/shared-components/UserDro
 import LanguageDropdown from 'src/@core/layouts/components/shared-components/LanguageDropdown'
 import NotificationDropdown from 'src/@core/layouts/components/shared-components/NotificationDropdown'
 import ShortcutsDropdown, { ShortcutsType } from 'src/@core/layouts/components/shared-components/ShortcutsDropdown'
+import { AbilityContext } from '../acl/Can'
 
 // ** Hook Import
 import { useAuth } from 'src/hooks/useAuth'
@@ -83,6 +86,7 @@ const AppBarContent = (props: Props) => {
 
   // ** Hook
   const auth = useAuth()
+  const ability = useContext(AbilityContext)
 
   return (
     <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -100,7 +104,7 @@ const AppBarContent = (props: Props) => {
         {auth.user && (
           <>
             {/* <ShortcutsDropdown settings={settings} shortcuts={shortcuts} /> */}
-            <NotificationDropdown settings={settings} />
+            {ability.can('read', 'member-page') && <NotificationDropdown settings={settings} />}
             <UserDropdown settings={settings} />
           </>
         )}

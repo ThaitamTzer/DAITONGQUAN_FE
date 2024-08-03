@@ -180,7 +180,7 @@ const AllComment = (props: CommentProps) => {
                         </Typography>
                       </Box>
                       <Box>
-                        {currentUser === comment.userId._id ? (
+                        {currentUser === comment.userId?._id ? (
                           <>
                             <IconButton onClick={event => handleMoreOptions(event, comment._id)}>
                               <Icon icon='ri:more-fill' />

@@ -110,7 +110,13 @@ const NotificationDropdown = (props: Props) => {
   const { data: eventNotifications, mutate: mutateEventNotifications } = useSWR(
     'GET_ALL_EVENT_NOTIFICATIONS',
     ScheduleService.notifySchedule,
-    { revalidateOnFocus: false, revalidateOnReconnect: false, refreshInterval: 0, revalidateOnMount: false }
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      refreshInterval: 0,
+      errorRetryCount: 2,
+      shouldRetryOnError: false
+    }
   )
 
   // ** Props
@@ -131,7 +137,7 @@ const NotificationDropdown = (props: Props) => {
     if (role?.role === 'member') {
       const access_token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
 
-      const socket = io('https://daitongquan.onrender.com', {
+      const socket = io('https://daitongquan-production.up.railway.app', {
         extraHeaders: {
           Authorization: `Bearer ${access_token}`
         }
@@ -145,7 +151,6 @@ const NotificationDropdown = (props: Props) => {
       socket.on('schedules', data => {
         // Update event notifications list
         console.log('Event notifications:', data)
-
         mutateEventNotifications()
       })
 
@@ -275,7 +280,7 @@ const NotificationDropdown = (props: Props) => {
                       <MenuItemTitle variant='body1'>
                         Event {handleUnderline(notification.title)} is coming
                       </MenuItemTitle>
-                      <MenuItemSubtitle variant='body2'>{notification.startDateTime}</MenuItemSubtitle>
+                      <MenuItemSubtitle variant='body2'>{notification.startDateTime.toLocaleString()}</MenuItemSubtitle>
                     </Box>
                   </Box>
                 </MenuItem>
