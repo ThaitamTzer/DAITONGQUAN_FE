@@ -2,12 +2,22 @@
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
+import { StatisticSpendMonth } from 'src/types/statistic/spend'
+import { StatisticIncomeMonth } from 'src/types/statistic/income'
 
 // ** Third Party Imports
 import { Line } from 'react-chartjs-2'
-import { ChartData, ChartOptions } from 'chart.js'
+import { defaults, ChartData, ChartOptions } from 'chart.js'
+import { number } from 'yup'
+import { MenuItem, TextField } from '@mui/material'
+import { useStatisticStore } from 'src/store/statistic'
+
+defaults.maintainAspectRatio = false
+defaults.responsive = true
 
 interface LineProps {
+  statisticSpend: StatisticSpendMonth | undefined
+  statisticIncome: StatisticIncomeMonth | undefined
   white: string
   warning: string
   primary: string
@@ -18,8 +28,29 @@ interface LineProps {
 }
 
 const StatisticNoteChart = (props: LineProps) => {
+  const { filter, number, cateId, setNumber, setCateId, setFilter } = useStatisticStore(state => state)
+
   // ** Props
-  const { white, primary, success, warning, labelColor, borderColor, legendColor } = props
+  const { white, primary, success, warning, labelColor, borderColor, legendColor, statisticSpend, statisticIncome } =
+    props
+
+  const roundedTotalCosts = (costs: number | undefined) => {
+    const totalCosts = costs
+    const totalCostsLength = totalCosts?.toString().length
+    const totalCostsFirstDigit = totalCosts?.toString().charAt(0)
+    const totalCostsSecondtDigit = totalCosts?.toString().charAt(1)
+    if (totalCostsLength && (totalCostsSecondtDigit ?? '0') >= '5') {
+      const roundedTotalCosts = `${Number(totalCostsFirstDigit) + 1}${'0'.repeat(totalCostsLength - 1)}`
+
+      return Number(roundedTotalCosts)
+    } else if (totalCostsLength && (totalCostsSecondtDigit ?? '0') < '5') {
+      const roundedTotalCosts = `${totalCostsFirstDigit}5${'0'.repeat(totalCostsLength - 2)}`
+
+      return Number(roundedTotalCosts)
+    }
+
+    return 0
+  }
 
   const options: ChartOptions<'line'> = {
     responsive: true,
@@ -33,9 +64,9 @@ const StatisticNoteChart = (props: LineProps) => {
       },
       y: {
         min: 0,
-        max: 400,
+        max: roundedTotalCosts(statisticIncome?.highestAmount),
         ticks: {
-          stepSize: 100,
+          stepSize: roundedTotalCosts(statisticIncome?.highestAmount) / 10,
           color: labelColor
         },
         grid: {
@@ -57,15 +88,32 @@ const StatisticNoteChart = (props: LineProps) => {
     }
   }
 
+  const getTotalCostsInMonth = () => {
+    const totalCostsInMonth: number[] = []
+    for (const key in statisticSpend?.groupedSpendingDetails) {
+      totalCostsInMonth.push(statisticSpend?.groupedSpendingDetails[key].totalCost)
+    }
+
+    return totalCostsInMonth.reverse()
+  }
+
+  const getTotalAmountsInMonth = () => {
+    const totalAmountsInMonth: number[] = []
+    for (const key in statisticIncome?.groupedIncomeDetails) {
+      totalAmountsInMonth.push(statisticIncome?.groupedIncomeDetails[key].totalAmount)
+    }
+
+    return totalAmountsInMonth.reverse()
+  }
+
   const data: ChartData<'line'> = {
-    labels: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140],
+    labels: Object.keys(statisticSpend?.groupedSpendingDetails ?? {}).reverse(),
     datasets: [
       {
-        fill: false,
         tension: 0.5,
-        pointRadius: 1,
-        label: 'Europe',
+        label: 'Spend',
         pointHoverRadius: 5,
+        pointRadius: 1,
         pointStyle: 'circle',
         borderColor: primary,
         backgroundColor: primary,
@@ -73,12 +121,11 @@ const StatisticNoteChart = (props: LineProps) => {
         pointHoverBorderColor: white,
         pointBorderColor: 'transparent',
         pointHoverBackgroundColor: primary,
-        data: [80, 150, 180, 270, 210, 160, 160, 202, 265, 210, 270, 255, 290, 360, 375]
+        data: getTotalCostsInMonth()
       },
       {
-        fill: false,
         tension: 0.5,
-        label: 'Asia',
+        label: 'Income',
         pointRadius: 1,
         pointHoverRadius: 5,
         pointStyle: 'circle',
@@ -88,31 +135,56 @@ const StatisticNoteChart = (props: LineProps) => {
         pointHoverBorderColor: white,
         pointBorderColor: 'transparent',
         pointHoverBackgroundColor: warning,
-        data: [80, 125, 105, 130, 215, 195, 140, 160, 230, 300, 220, 170, 210, 200, 280]
-      },
-      {
-        fill: false,
-        tension: 0.5,
-        pointRadius: 1,
-        label: 'Africa',
-        pointHoverRadius: 5,
-        pointStyle: 'circle',
-        borderColor: success,
-        backgroundColor: success,
-        pointHoverBorderWidth: 5,
-        pointHoverBorderColor: white,
-        pointBorderColor: 'transparent',
-        pointHoverBackgroundColor: success,
-        data: [80, 99, 82, 90, 115, 115, 74, 75, 130, 155, 125, 90, 140, 130, 180]
+        data: getTotalAmountsInMonth()
       }
     ]
   }
 
   return (
     <Card>
-      <CardHeader title='New Technologies Data' subheader='Commercial networks & enterprises' />
+      <CardHeader
+        title='New Technologies Data'
+        subheader='Commercial networks & enterprises'
+        action={
+          <>
+            <TextField
+              sx={{
+                mr: 2
+              }}
+              select
+              label='Filter By'
+              size='small'
+              value={filter}
+              onChange={e => {
+                setFilter(e.target.value)
+              }}
+            >
+              <MenuItem value='month'>Month</MenuItem>
+              <MenuItem value='year'>Year</MenuItem>
+            </TextField>
+            <TextField
+              sx={{
+                mr: 2
+              }}
+              select
+              label='Number of Item'
+              size='small'
+              value={number}
+              onChange={e => {
+                setNumber(Number(e.target.value))
+              }}
+            >
+              {Array.from({ length: 12 }, (_, i) => (
+                <MenuItem key={i} value={i + 1}>
+                  {i + 1}
+                </MenuItem>
+              ))}
+            </TextField>
+          </>
+        }
+      />
       <CardContent>
-        <Line data={data} height={400} options={options} />
+        <Line data={data} height={300} options={options} />
       </CardContent>
     </Card>
   )

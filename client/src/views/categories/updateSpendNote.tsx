@@ -60,7 +60,7 @@ const UpdateSpendNote = ({ spendCate }: any) => {
       amount: spendCate.amount,
       content: spendCate.content,
       paymentMethod: spendCate.paymentMethod,
-      spendingDate: new Date(spendCate.spendingDate)
+      date: new Date(spendCate.spendingDate)
     })
     setOpen(false)
   }
@@ -70,7 +70,7 @@ const UpdateSpendNote = ({ spendCate }: any) => {
     cateId: string
     title: string
     content: string
-    spendingDate: Date
+    date: Date
     paymentMethod: string
     amount: number
   }
@@ -186,7 +186,7 @@ const UpdateSpendNote = ({ spendCate }: any) => {
               </Grid>
               <Grid item xs={12}>
                 <Controller
-                  name='spendingDate'
+                  name='date'
                   control={control}
                   defaultValue={
                     new Date(spendCate.spendingDate) // This sets the default value to the current date

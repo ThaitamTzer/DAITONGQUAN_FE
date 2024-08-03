@@ -2,14 +2,14 @@ import { Button, Dialog, DialogActions, DialogTitle, Typography } from '@mui/mat
 import { NoteTypes } from 'src/types/apps/noteTypes'
 import DialogWithCustomCloseButton from '../components/dialog/customDialog'
 
-type ViewPostModalProps = {
+type ViewNoteModalProps = {
   open: boolean
   onClose: () => void
   note: NoteTypes | undefined
   onSubmit: () => void
 }
 
-const ViewPostModal = (props: ViewPostModalProps) => {
+const ViewNoteModal = (props: ViewNoteModalProps) => {
   const { open, onClose, note, onSubmit } = props
 
   return (
@@ -35,6 +35,7 @@ const ViewPostModal = (props: ViewPostModalProps) => {
           color='error'
           onClick={() => {
             onSubmit()
+            onClose()
           }}
         >
           Delete
@@ -44,4 +45,4 @@ const ViewPostModal = (props: ViewPostModalProps) => {
   )
 }
 
-export default ViewPostModal
+export default ViewNoteModal

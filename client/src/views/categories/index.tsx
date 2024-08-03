@@ -28,6 +28,7 @@ import { CategoryType } from 'src/types/apps/categoryTypes'
 import CustomNoRowsOverlay from 'src/pages/components/datagrid/nodataOverlay'
 import { useSpendNoteStore } from 'src/store/categories/note.store'
 import { NotesSkeleton } from '../skeleton'
+import { IncomeNoteType } from 'src/types/apps/noteTypes'
 
 type TableNoteProps = {
   data: NoteTypes[] | undefined
@@ -37,7 +38,8 @@ type TableNoteProps = {
 
 const TableNote = (props: TableNoteProps) => {
   const { data, catedata, title } = props
-  const { handleOpenDeleteSpendNoteModal } = useSpendNoteStore(state => state)
+  const { handleOpenDeleteSpendNoteModal, handleOpenUpdeteIncomeNoteModal, handleOpenViewNoteModal } =
+    useSpendNoteStore(state => state)
 
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>([])
@@ -86,19 +88,6 @@ const TableNote = (props: TableNoteProps) => {
         return <Typography variant='subtitle1'>{formattedAmount}</Typography>
       }
     },
-
-    // {
-    //   flex: 1,
-    //   field: 'content',
-    //   headerName: 'Content',
-    //   renderCell: ({ row }: CellType) => (
-    //     <Tooltip arrow title={row.content} about={row.content || ''}>
-    //       <Typography sx={{ cursor: 'pointer', textDecoration: 'underline' }}>
-    //         {row.content ? row.content.substring(0, 10) + (row.content.length > 10 ? '...' : '') : ''}
-    //       </Typography>
-    //     </Tooltip>
-    //   )
-    // },
     {
       flex: 1,
       field: 'cateId',
@@ -111,7 +100,7 @@ const TableNote = (props: TableNoteProps) => {
             label={
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={1}>{category.name}</Typography>
-                <Icon icon={category.type === 'spend' ? 'solar:hand-money-linear' : 'tabler:pig-money'} />
+                <Icon icon={category.icon} />
               </Box>
             }
             sx={{ backgroundColor: `${category.color}9A`, color: 'white' }}
@@ -119,15 +108,8 @@ const TableNote = (props: TableNoteProps) => {
         ) : null
       }
     },
-
-    // {
-    //   flex: 1,
-    //   field: 'paymentMethod',
-    //   headerName: 'Method',
-    //   renderCell: ({ row }: CellType) => <Typography variant='subtitle1'>{row.paymentMethod || row.method}</Typography>
-    // },
     {
-      flex: 1,
+      flex: 0.5,
       field: 'spendingDate',
       headerName: 'Date',
       renderCell: ({ row }: CellType) => (
@@ -135,12 +117,17 @@ const TableNote = (props: TableNoteProps) => {
       )
     },
     {
-      flex: 0,
+      flex: 0.5,
       field: 'action',
       headerName: 'Action',
       renderCell: ({ row }: CellType) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <UpdateSpendNote spendCate={row} />
+          <IconButton onClick={() => handleOpenViewNoteModal(row)}>
+            <Icon icon='tabler:eye' />
+          </IconButton>
+          <IconButton onClick={() => handleOpenUpdeteIncomeNoteModal(row)}>
+            <Icon icon='tabler:edit' />
+          </IconButton>
           <IconButton onClick={() => handleOpenDeleteSpendNoteModal(row)}>
             <Icon icon='tabler:trash' />
           </IconButton>

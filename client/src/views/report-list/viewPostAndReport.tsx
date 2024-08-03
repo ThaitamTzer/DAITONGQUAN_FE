@@ -76,13 +76,15 @@ const PreviewReport = () => {
                     <Icon icon='majesticons:open-line' />
                   </IconButton>
                 </Tooltip>
-                <IconButton
-                  onClick={e => {
-                    handleOpenOptionMenu(report, e)
-                  }}
-                >
-                  <Icon icon='ri:more-fill' />
-                </IconButton>
+                {/* {report.report[0].status !== 'rejected' && (
+                  <IconButton
+                    onClick={e => {
+                      handleOpenOptionMenu(report, e)
+                    }}
+                  >
+                    <Icon icon='ri:more-fill' />
+                  </IconButton>
+                )} */}
               </Box>
             </Grid>
           </Grid>

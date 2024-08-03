@@ -1,21 +1,21 @@
 export type ItemInMonth = {
   title: string
-  cost: number
+  amount: number
   category: string
-  spendingDate: string | Date
+  incomeDate: string | Date
 }
 
 export type StatisticMonth = {
-  totalCost: 266254
+  totalAmount: 266254
   items: ItemInMonth[]
 }
 
-export type StatisticSpendMonth = {
+export type StatisticIncomeMonth = {
   start: string | Date
   end: string | Date
-  totalCosts: number
-  highestCosts: number
-  groupedSpendingDetails: {
+  highestAmount: number
+  totalAmount: number
+  groupedIncomeDetails: {
     [key: string]: StatisticMonth
   }
 }

@@ -5,9 +5,7 @@ import CardContent from '@mui/material/CardContent'
 
 // ** Third Party Imports
 import { Line } from 'react-chartjs-2'
-import { Chart as ChartJS, ChartData, ChartOptions, CategoryScale } from 'chart.js'
-
-ChartJS.register(CategoryScale)
+import { ChartData, ChartOptions } from 'chart.js'
 
 interface LineProps {
   white: string

@@ -99,7 +99,7 @@ const AppBarContent = (props: Props) => {
         <ModeToggler settings={settings} saveSettings={saveSettings} />
         {auth.user && (
           <>
-            <ShortcutsDropdown settings={settings} shortcuts={shortcuts} />
+            {/* <ShortcutsDropdown settings={settings} shortcuts={shortcuts} /> */}
             <NotificationDropdown settings={settings} />
             <UserDropdown settings={settings} />
           </>

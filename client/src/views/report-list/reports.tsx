@@ -158,9 +158,7 @@ const ViewReports = (props: ViewReportProps) => {
                     )}
                     <IconButton
                       onClick={() => {
-                        forEach(row.report, rp => {
-                          handleDeleteReport(rp._id)
-                        })
+                        handleDeleteReport(row.report[0]._id)
                       }}
                     >
                       <Icon icon='tabler:trash' />

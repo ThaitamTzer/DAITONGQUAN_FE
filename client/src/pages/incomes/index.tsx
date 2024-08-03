@@ -1,5 +1,4 @@
 import useSWR from 'swr'
-import { CategoryType } from 'src/types/apps/categoryTypes'
 import categoriesService from 'src/service/categories.service'
 import CategoryCard from 'src/views/categories/categoryCard'
 import { Grid } from '@mui/material'
@@ -14,7 +13,7 @@ import Error500 from '../500'
 
 const IncomePage = () => {
   const {
-    data: limits,
+    data: incomes,
     isLoading,
     error
   } = useSWR('GET_ALL_INCOMES', categoriesService.getIncomeCategories, {
@@ -30,7 +29,7 @@ const IncomePage = () => {
   return (
     <Grid container spacing={3}>
       <AddCategory type='income' swr={swr} />
-      {isLoading ? <CategoryCardSkeleton /> : <CategoryCard data={limits} />}
+      {isLoading ? <CategoryCardSkeleton /> : <CategoryCard data={incomes} />}
       <EditCategory type='income' swr={swr} />
       <DialogAlert
         title='Delete Category'
@@ -44,8 +43,6 @@ const IncomePage = () => {
         handleClose={handleCloseAddSpendNoteModal}
         handleAddNote={handleAddIncomeNote}
         swr={swr}
-        method='method'
-        dateNoteField='incomeDate'
       />
     </Grid>
   )

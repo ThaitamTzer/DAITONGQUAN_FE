@@ -1,4 +1,3 @@
-import { DatePicker } from '@mui/lab'
 import {
   Dialog,
   DialogTitle,
@@ -16,6 +15,7 @@ import Icon from 'src/@core/components/icon'
 import { t } from 'i18next'
 import { Controller, useForm } from 'react-hook-form'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
+import DatePicker from 'react-datepicker'
 import { CustomCloseButton } from '../components/dialog/customDialog'
 import { INote } from 'src/types/apps/noteTypes'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -27,13 +27,11 @@ type AddNoteProps = {
   open: boolean
   handleClose: () => void
   handleAddNote: (data: INote, swr: string) => void
-  dateNoteField?: string
-  method?: string
   swr: string
 }
 
 const AddNote = (props: AddNoteProps) => {
-  const { open, handleClose, handleAddNote, dateNoteField = 'spendingDate', swr, method = 'paymentMethod' } = props
+  const { open, handleClose, handleAddNote, swr } = props
 
   const { category } = useSpendNoteStore()
   const format = useFormatter()
@@ -53,8 +51,8 @@ const AddNote = (props: AddNoteProps) => {
     reset({
       title: '',
       amount: 0,
-      [dateNoteField]: new Date(),
-      [method]: 'cash',
+      date: new Date(),
+      method: 'cash',
       content: '',
       cateId: ''
     })
@@ -133,13 +131,13 @@ const AddNote = (props: AddNoteProps) => {
             </Grid>
             <Grid item xs={12}>
               <Controller
-                name='spendingDate'
+                name='date'
                 control={control}
                 defaultValue={new Date()} // This sets the default value to the current date
                 render={({ field: { value, onChange } }) => (
                   <DatePickerWrapper>
                     <DatePicker
-                      id='spendingDate'
+                      id='date'
                       showYearDropdown
                       showMonthDropdown
                       selected={value}
@@ -162,7 +160,7 @@ const AddNote = (props: AddNoteProps) => {
               />
               <Grid item xs={12}>
                 <Controller
-                  name='paymentMethod'
+                  name='method'
                   control={control}
                   defaultValue='cash'
                   render={({ field: { value, onChange } }) => (
