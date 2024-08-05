@@ -207,8 +207,6 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
     }
   }, [setValue, store.selectedEvent])
 
-  console.log(values)
-
   const resetToEmptyValues = useCallback(() => {
     setValue('title', '')
     setValues(defaultState)
@@ -370,7 +368,7 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
                 endDate={new Date(values.endDate)}
                 selected={values.startDate ? new Date(values.startDate) : null}
                 startDate={new Date(values.startDate)}
-                showTimeSelect={!values.allDay}
+                showTimeInput={!values.allDay}
                 dateFormat={!values.allDay ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd'}
                 customInput={<PickersComponent label='Start Date' registername='startDate' />}
                 onChange={(date: Date) => setValues({ ...values, startDate: date })}
@@ -385,7 +383,7 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
                 selected={values.endDate ? new Date(values.endDate) : null}
                 minDate={new Date(values.startDate)}
                 startDate={new Date(values.startDate)}
-                showTimeSelect={!values.allDay}
+                showTimeInput={!values.allDay}
                 dateFormat={!values.allDay ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd'}
                 customInput={<PickersComponent label='End Date' registername='endDate' />}
                 onChange={(date: Date) => setValues({ ...values, endDate: date })}

@@ -155,7 +155,7 @@ const Calendar = (props: CalendarType) => {
           updateEvent({
             id,
             startDateTime: startDateTime.toISOString(),
-            endDateTime: endDateTime.toISOString()
+            endDateTime: endDateTime?.toISOString()
           })
         )
       },

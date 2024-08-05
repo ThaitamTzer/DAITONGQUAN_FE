@@ -31,6 +31,7 @@ import ScheduleService from 'src/service/schedule.service'
 
 // ** Util Import
 import useSWR from 'swr'
+import toast from 'react-hot-toast'
 
 interface Props {
   settings: Settings
@@ -104,8 +105,10 @@ const NotificationDropdown = (props: Props) => {
   const { data: notifications } = useSWR('GET_ALL_NOTIFICATIONS', spendNoteService.getNotificationOutOfMoney, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
+    revalidateIfStale: false,
     revalidateOnMount: false,
-    refreshInterval: 0
+    refreshWhenHidden: false,
+    refreshWhenOffline: false
   })
   const { data: eventNotifications, mutate: mutateEventNotifications } = useSWR(
     'GET_ALL_EVENT_NOTIFICATIONS',
@@ -113,9 +116,10 @@ const NotificationDropdown = (props: Props) => {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      refreshInterval: 0,
-      errorRetryCount: 2,
-      shouldRetryOnError: false
+      revalidateIfStale: false,
+      revalidateOnMount: false,
+      refreshWhenHidden: false,
+      refreshWhenOffline: false
     }
   )
 
@@ -133,9 +137,9 @@ const NotificationDropdown = (props: Props) => {
 
   // ** Socket setup
   useEffect(() => {
-    const role: any = localStorage.getItem('userData')
-    if (role?.role === 'member') {
+    if (ability.can('read', 'member-page')) {
       const access_token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
+      console.log('access_token:')
 
       const socket = io('https://daitongquan-production.up.railway.app', {
         extraHeaders: {
@@ -144,24 +148,27 @@ const NotificationDropdown = (props: Props) => {
       }) // replace with your socket server URL
 
       socket.on('connect', function () {
-        console.log('connected')
         socket.emit('getSchedule')
       })
 
       socket.on('schedules', data => {
+        if (data.length === 0) return
+
         // Update event notifications list
-        console.log('Event notifications:', data)
+        toast('New event notification', { icon: <Icon icon={'tabler:bell'} />, style: { borderRadius: '10px' } })
         mutateEventNotifications()
       })
 
       socket.on('disconnect', () => {
-        console.log('Disconnected from socket server')
+        console.log('Socket disconnected from server')
       })
 
       return () => {
         socket.disconnect()
       }
     } else {
+      console.log('Role is not member')
+
       return
     }
   }, [])
