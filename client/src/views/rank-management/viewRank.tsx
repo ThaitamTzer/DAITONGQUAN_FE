@@ -29,6 +29,8 @@ const ViewRankList = () => {
     align-items: center;
   `
 
+  console.log(rankList)
+
   return (
     <>
       {isLoading && <RankSkeleton />}
@@ -41,6 +43,11 @@ const ViewRankList = () => {
                   <CardMedia component={'img'} image={rank.rankIcon} alt='rank image' loading='lazy' />
                 </Grid>
                 <Grid item container alignItems={'center'} lg={5} md={4.6} sm={5.3} xs={6}>
+                  {rank.action.length > 0 && (
+                    <Grid item lg={12} md={12} sm={12} xs={12}>
+                      <Typography variant='h6'>Action: {rank.action.join(', ')}</Typography>
+                    </Grid>
+                  )}
                   <Grid item lg={12} md={12} sm={12} xs={12}>
                     <Typography variant='h6'>Name: {rank.rankName}</Typography>
                   </Grid>

@@ -23,6 +23,7 @@ type RankActions = {
   handleOpenOptionMenu: (id: string, event: React.MouseEvent<HTMLElement>) => void
   handleCloseOptionMenu: () => void
   handleDeleteRank: (id: string) => void
+  setloading: (loading: boolean) => void
 }
 
 type RankStore = RankStates & RankActions
@@ -34,6 +35,7 @@ export const useRankStore = create<RankStore>(set => ({
   anchorEl: null,
   selectedRank: '',
   rank: {} as RankType,
+  setloading: loading => set({ loading }),
   handleOpenAddModal: () => set({ openAddModal: true }),
   handleCloseAddModal: () => set({ openAddModal: false }),
   handleOpenEditModal: (_id, rank) => {

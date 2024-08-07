@@ -38,7 +38,8 @@ export const getValidationMessages = (t: (arg0: string) => any) => ({
   },
   username: {
     required: t('Tên tài khoản không được để trống'),
-    max: t(`Tên tài khoản không được quá ${MAX_USERNAME_LENGTH} ký tự`)
+    max: t(`Tên tài khoản không được quá ${MAX_USERNAME_LENGTH} ký tự`),
+    exists: t('Tên tài khoản đã tồn tại')
   },
   firstname: {
     required: t('Họ không được để trống'),

@@ -10,6 +10,8 @@ import postService from 'src/service/post.service'
 import { PostSkeleton } from 'src/views/skeleton'
 import { useEffect } from 'react'
 import { GetPostType } from 'src/types/apps/postTypes'
+import ViewAllStory from 'src/views/apps/story/allStory'
+import ViewStoryModal from 'src/views/apps/story/viewStory'
 
 const Posts = () => {
   const { post, commentPost, openCommentModal, closeCommentModalPost, openCommentModalPost, setPageIndex, pageIndex } =
@@ -72,6 +74,10 @@ const Posts = () => {
 
   return (
     <Grid container spacing={3} justifyContent={'center'}>
+      <Grid item xs={12} md={9} sm={12} lg={8}>
+        <ViewAllStory />
+        <ViewStoryModal />
+      </Grid>
       <Grid item xs={12} md={9} sm={12} lg={8}>
         <Card>
           <AddPost />

@@ -4,6 +4,7 @@ export type RankType = {
   rankScoreGoal: number
   score: ScoreType
   rankIcon: string
+  action: string[]
 }
 
 export type ScoreType = {

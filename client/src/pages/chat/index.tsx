@@ -21,6 +21,7 @@ const ChatPage = () => {
   const { setChats } = useChatStore(state => state)
   const { getUserProfile } = useUserProfileStore()
   const { data: chats } = useSWR('GET_ALL_CHAT', ChatService.getAllChats)
+
   const mdAbove = useMediaQuery(theme.breakpoints.up('md'))
   const smAbove = useMediaQuery(theme.breakpoints.up('sm'))
   const sidebarWidth = smAbove ? 360 : 300

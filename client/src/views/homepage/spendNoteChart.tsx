@@ -8,7 +8,6 @@ import { StatisticIncomeMonth } from 'src/types/statistic/income'
 // ** Third Party Imports
 import { Line } from 'react-chartjs-2'
 import { defaults, ChartData, ChartOptions } from 'chart.js'
-import { number } from 'yup'
 import { MenuItem, TextField } from '@mui/material'
 import { useStatisticStore } from 'src/store/statistic'
 
@@ -28,28 +27,34 @@ interface LineProps {
 }
 
 const StatisticNoteChart = (props: LineProps) => {
-  const { filter, number, cateId, setNumber, setCateId, setFilter } = useStatisticStore(state => state)
+  const { filter, number, setNumber, setFilter } = useStatisticStore(state => state)
 
   // ** Props
-  const { white, primary, success, warning, labelColor, borderColor, legendColor, statisticSpend, statisticIncome } =
-    props
+  const { white, primary, warning, labelColor, borderColor, legendColor, statisticSpend, statisticIncome } = props
 
   const roundedTotalCosts = (costs: number | undefined) => {
-    const totalCosts = costs
-    const totalCostsLength = totalCosts?.toString().length
-    const totalCostsFirstDigit = totalCosts?.toString().charAt(0)
-    const totalCostsSecondtDigit = totalCosts?.toString().charAt(1)
-    if (totalCostsLength && (totalCostsSecondtDigit ?? '0') >= '5') {
-      const roundedTotalCosts = `${Number(totalCostsFirstDigit) + 1}${'0'.repeat(totalCostsLength - 1)}`
+    if (costs === 0) return (costs = 200000)
 
-      return Number(roundedTotalCosts)
-    } else if (totalCostsLength && (totalCostsSecondtDigit ?? '0') < '5') {
-      const roundedTotalCosts = `${totalCostsFirstDigit}5${'0'.repeat(totalCostsLength - 2)}`
+    if (costs) {
+      const totalCostsString = costs.toString()
+      const totalCostsLength = totalCostsString.length
+      const totalCostsFirstDigit = totalCostsString.charAt(0)
+      const totalCostsSecondDigit = totalCostsString.charAt(1) || '0'
 
-      return Number(roundedTotalCosts)
+      if (totalCostsLength > 1 && totalCostsSecondDigit >= '5') {
+        const roundedTotalCosts = `${Number(totalCostsFirstDigit) + 1}${'0'.repeat(totalCostsLength - 1)}`
+
+        return Number(roundedTotalCosts)
+      } else if (totalCostsLength > 1 && totalCostsSecondDigit < '5') {
+        const roundedTotalCosts = `${totalCostsFirstDigit}5${'0'.repeat(totalCostsLength - 2)}`
+
+        return Number(roundedTotalCosts)
+      } else if (totalCostsLength === 1) {
+        return Number(totalCostsFirstDigit) >= 5 ? 10 : 5
+      }
     }
 
-    return 0
+    return 200000
   }
 
   const options: ChartOptions<'line'> = {
@@ -64,7 +69,7 @@ const StatisticNoteChart = (props: LineProps) => {
       },
       y: {
         min: 0,
-        max: roundedTotalCosts(statisticIncome?.highestAmount),
+        max: roundedTotalCosts(statisticIncome?.highestAmount) || roundedTotalCosts(statisticSpend?.highestCosts),
         ticks: {
           stepSize: roundedTotalCosts(statisticIncome?.highestAmount) / 10,
           color: labelColor
