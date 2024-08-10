@@ -4,11 +4,13 @@ import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import { StatisticSpendMonth } from 'src/types/statistic/spend'
 import { StatisticIncomeMonth } from 'src/types/statistic/income'
+import useSWR from 'swr'
+import categoriesService from 'src/service/categories.service'
 
 // ** Third Party Imports
 import { Line } from 'react-chartjs-2'
 import { defaults, ChartData, ChartOptions } from 'chart.js'
-import { MenuItem, TextField } from '@mui/material'
+import { MenuItem, TextField, Typography } from '@mui/material'
 import { useStatisticStore } from 'src/store/statistic'
 
 defaults.maintainAspectRatio = false
@@ -27,7 +29,8 @@ interface LineProps {
 }
 
 const StatisticNoteChart = (props: LineProps) => {
-  const { filter, number, setNumber, setFilter } = useStatisticStore(state => state)
+  const { filter, number, cateId, setNumber, setFilter, setCateId } = useStatisticStore(state => state)
+  const { data: categories } = useSWR('GET_CATEGORIES', categoriesService.getAllCategories)
 
   // ** Props
   const { white, primary, warning, labelColor, borderColor, legendColor, statisticSpend, statisticIncome } = props
@@ -148,8 +151,8 @@ const StatisticNoteChart = (props: LineProps) => {
   return (
     <Card>
       <CardHeader
-        title='New Technologies Data'
-        subheader='Commercial networks & enterprises'
+        title={<Typography variant='h3'>Statistic Spending</Typography>}
+        subheader={<Typography variant='h5'></Typography>}
         action={
           <>
             <TextField
@@ -182,6 +185,25 @@ const StatisticNoteChart = (props: LineProps) => {
               {Array.from({ length: 12 }, (_, i) => (
                 <MenuItem key={i} value={i + 1}>
                   {i + 1}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              size='small'
+              sx={{
+                mr: 2
+              }}
+              select
+              value={cateId}
+              label='Category'
+              onChange={e => {
+                setCateId(e.target.value)
+              }}
+            >
+              <MenuItem value='All'>All</MenuItem>
+              {categories?.map(category => (
+                <MenuItem key={category._id} value={category._id}>
+                  {category.name}
                 </MenuItem>
               ))}
             </TextField>

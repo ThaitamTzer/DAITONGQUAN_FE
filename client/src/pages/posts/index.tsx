@@ -12,6 +12,10 @@ import { useEffect } from 'react'
 import { GetPostType } from 'src/types/apps/postTypes'
 import ViewAllStory from 'src/views/apps/story/allStory'
 import ViewStoryModal from 'src/views/apps/story/viewStory'
+import AddStoryModal from 'src/views/apps/story/addStoryModal'
+import useSWR from 'swr'
+import StoryService from 'src/service/story.service'
+import { useStoryStore } from 'src/store/apps/story'
 
 const Posts = () => {
   const { post, commentPost, openCommentModal, closeCommentModalPost, openCommentModalPost, setPageIndex, pageIndex } =
@@ -23,6 +27,7 @@ const Posts = () => {
   const deletePost = usePostStore(state => state.deletePost)
   const addPostToFavorite = usePostStore(state => state.addPostToFavorite)
   const updatePost = usePostStore(state => state.updateUserPost)
+  const setAllStories = useStoryStore(state => state.setAllStories)
 
   const fetchPosts = (pageIndex: number, previousPageData: GetPostType[] | null) => {
     if (previousPageData && previousPageData.length === 0) return null // Reached the end
@@ -37,6 +42,13 @@ const Posts = () => {
     revalidateIfStale: true,
     refreshInterval: 10000,
     errorRetryCount: 2
+  })
+
+  const { data: stories } = useSWR('/story/list-story', StoryService.getAllStories, {
+    onSuccess: data => {
+      setAllStories(data)
+    },
+    revalidateOnFocus: false
   })
 
   const handleCommentPost = async (data: any) => {
@@ -75,8 +87,9 @@ const Posts = () => {
   return (
     <Grid container spacing={3} justifyContent={'center'}>
       <Grid item xs={12} md={9} sm={12} lg={8}>
-        <ViewAllStory />
+        <ViewAllStory stories={stories} />
         <ViewStoryModal />
+        <AddStoryModal />
       </Grid>
       <Grid item xs={12} md={9} sm={12} lg={8}>
         <Card>

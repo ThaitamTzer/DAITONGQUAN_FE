@@ -1,5 +1,5 @@
 // ** React Imports
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
 
 // ** Next Imports
 import Head from 'next/head'
@@ -11,6 +11,7 @@ import { NextIntlClientProvider } from 'next-intl'
 // ** Store Imports
 import { store } from 'src/store'
 import { Provider } from 'react-redux'
+import { useUserProfileStore } from 'src/store/user'
 
 // ** Loader Import
 import NProgress from 'nprogress'
@@ -117,6 +118,13 @@ const App = (props: ExtendedAppProps) => {
   const guestGuard = Component.guestGuard ?? false
 
   const aclAbilities = Component.acl ?? defaultACLObj
+
+  const { getUserProfile } = useUserProfileStore(state => state)
+
+  useEffect(() => {
+    getUserProfile()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <Provider store={store}>

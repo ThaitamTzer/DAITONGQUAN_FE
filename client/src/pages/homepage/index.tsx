@@ -62,20 +62,20 @@ const Homepage = () => {
   const borderColor = theme.palette.divider
   const labelColor = theme.palette.text.disabled
   const legendColor = theme.palette.text.secondary
-  const { filter, number } = useStatisticStore(state => state)
+  const { filter, number, cateId } = useStatisticStore(state => state)
 
   const { data: statisticSpend } = useSWR('GET_STATISTIC_SPEND', () =>
-    statisticSpendService.getStatisticSpend(filter, number)
+    statisticSpendService.getStatisticSpend(filter, number, cateId)
   )
 
   const { data: statisticIncome } = useSWR('GET_STATISTIC_INCOME', () =>
-    incomeStatisticService.getStatisticIncome(filter, number)
+    incomeStatisticService.getStatisticIncome(filter, number, cateId)
   )
 
   return (
     <DatePickerWrapper>
       <Grid container spacing={6} className='match-height'>
-        <Grid item xs={12}>
+        <Grid item xs={8}>
           <StatisticNoteChart
             statisticSpend={statisticSpend}
             statisticIncome={statisticIncome}
