@@ -28,7 +28,7 @@ interface LineProps {
   legendColor: string
 }
 
-const StatisticNoteChart = (props: LineProps) => {
+const StatisticNoteChartByOption = (props: LineProps) => {
   const { filter, number, cateId, setNumber, setFilter, setCateId } = useStatisticStore(state => state)
   const { data: categories } = useSWR('GET_CATEGORIES', categoriesService.getAllCategories)
 
@@ -226,4 +226,4 @@ const StatisticNoteChart = (props: LineProps) => {
   )
 }
 
-export default StatisticNoteChart
+export default StatisticNoteChartByOption

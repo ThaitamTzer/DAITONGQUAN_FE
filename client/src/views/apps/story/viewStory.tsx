@@ -273,17 +273,17 @@ const ViewStoryModal = () => {
                     <Menu
                       anchorEl={anchorEl}
                       open={Boolean(anchorEl)}
-                      onClick={() => {
-                        handleOpenActionStoryModal(story._id)
-                        setAnchorEl(null)
-                      }}
                       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                       onClose={() => {
                         setAnchorEl(null)
-                        setOpen(false)
                       }}
                     >
-                      <MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          handleOpenActionStoryModal(story._id)
+                          setAnchorEl(null)
+                        }}
+                      >
                         <Box
                           sx={{
                             display: 'flex',

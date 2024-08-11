@@ -30,6 +30,7 @@ import statisticSpendService from 'src/service/statisticSpend.service'
 import incomeStatisticService from 'src/service/statisticIncome.service'
 import StatisticNoteChart from 'src/views/homepage/spendNoteChart'
 import { useStatisticStore } from 'src/store/statistic'
+import StatisticNoteChartByOption from 'src/views/homepage/spendNoteChartByOption'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
@@ -75,7 +76,20 @@ const Homepage = () => {
   return (
     <DatePickerWrapper>
       <Grid container spacing={6} className='match-height'>
-        <Grid item xs={8}>
+        <Grid item xs={6}>
+          <StatisticNoteChartByOption
+            statisticSpend={statisticSpend}
+            statisticIncome={statisticIncome}
+            white={whiteColor}
+            labelColor={labelColor}
+            success={lineChartYellow}
+            borderColor={borderColor}
+            legendColor={legendColor}
+            primary={lineChartPrimary}
+            warning={lineChartWarning}
+          />
+        </Grid>
+        <Grid item xs={12}>
           <StatisticNoteChart
             statisticSpend={statisticSpend}
             statisticIncome={statisticIncome}
