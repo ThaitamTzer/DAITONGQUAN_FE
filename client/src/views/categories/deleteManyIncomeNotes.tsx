@@ -5,25 +5,22 @@ import { LoadingButton } from '@mui/lab'
 import toast from 'react-hot-toast'
 import { mutate } from 'swr'
 import Icon from 'src/@core/components/icon'
-import { useSpendNoteStore } from 'src/store/categories/note.store'
 
 interface DeleteManyNotesDialogProps {
   rowSelectionModel: any
   data: any[]
   startDate: any
   endDate: any
-  handleDeleteMany: () => Promise<void>
 }
 
 const DeleteManyNotesDialog: React.FC<DeleteManyNotesDialogProps> = ({
+  rowSelectionModel,
   data,
   startDate,
-  endDate,
-  handleDeleteMany
+  endDate
 }) => {
   const [open, setOpen] = React.useState<boolean>(false)
   const [loading, setLoading] = React.useState<boolean>(false)
-  const rowSelectionModel = useSpendNoteStore(state => state.rowSelectionModel)
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => {
@@ -36,7 +33,7 @@ const DeleteManyNotesDialog: React.FC<DeleteManyNotesDialogProps> = ({
     setLoading(true)
 
     try {
-      await handleDeleteMany()
+      await spendNoteService.deleteManySpendNote({ spendingNoteId: rowSelectionModel })
       setOpen(false)
       setLoading(false)
       toast.success('Notes deleted successfully')

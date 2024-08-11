@@ -18,6 +18,10 @@ const incomesNoteService = {
   // Delete incomes note
   deleteIncomesNote: async (data: string) => axiosClient.delete(`incomenote/${data}`),
 
+  // Delete many incomes note
+  deleteManyIncomeNote: async (data: { incomeNoteIds: string[] }) =>
+    axiosClient.delete(`/incomenote/deleteMany`, { data }),
+
   // Get incomes by category
   getIncomesByCategory: async (data: string) => axiosClient.get(`/incomenote/get-by-cate/${data}`),
 

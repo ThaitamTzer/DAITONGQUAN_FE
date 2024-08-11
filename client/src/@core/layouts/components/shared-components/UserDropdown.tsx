@@ -84,6 +84,14 @@ const UserDropdown = (props: Props) => {
     }
   }
 
+  const handleGetName = () => {
+    if (typeof auth.user?.role === 'string') {
+      return `${auth.user.firstname} ${auth.user.lastname}`
+    } else if (auth.user?.role && Array.isArray(auth.user.role)) {
+      return auth.user.fullname
+    }
+  }
+
   const styles = {
     px: 4,
     py: 1.75,
@@ -155,7 +163,7 @@ const UserDropdown = (props: Props) => {
             </Badge>
 
             <Box sx={{ display: 'flex', ml: 2.5, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography variant='h6'>{`${auth.user?.firstname} ${auth.user?.lastname}`}</Typography>
+              <Typography variant='h6'>{handleGetName()}</Typography>
               <Typography variant='body2'>{handleGetRole()}</Typography>
             </Box>
           </Box>

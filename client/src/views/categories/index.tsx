@@ -31,15 +31,22 @@ type TableNoteProps = {
   data: NoteTypes[] | undefined
   catedata: CategoryType[] | undefined
   title: string
+  handleDeleteMany: () => Promise<void>
 }
 
 const TableNote = (props: TableNoteProps) => {
-  const { data, catedata, title } = props
-  const { handleOpenDeleteSpendNoteModal, handleOpenUpdeteIncomeNoteModal, handleOpenViewNoteModal } =
-    useSpendNoteStore(state => state)
+  const { data, catedata, title, handleDeleteMany } = props
+  const {
+    handleOpenDeleteSpendNoteModal,
+    handleOpenUpdeteIncomeNoteModal,
+    handleOpenViewNoteModal,
+    setRowSelectionModel,
+    rowSelectionModel
+  } = useSpendNoteStore(state => state)
+
+  console.log(rowSelectionModel)
 
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
-  const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>([])
   const [categoryId, setCategoryId] = useState<string>('all')
   const [searchText, setSearchText] = useState<string>('')
   const [notesToDisplay, setNotesToDisplay] = useState<NoteTypes[]>([])
@@ -243,6 +250,7 @@ const TableNote = (props: TableNoteProps) => {
                     data={notesToDisplay}
                     startDate={startDate}
                     endDate={endDate}
+                    handleDeleteMany={handleDeleteMany}
                   />
                 </Grid>
                 <Grid item lg={4} md={4} xs={6}>

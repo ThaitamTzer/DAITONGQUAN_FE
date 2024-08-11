@@ -92,6 +92,7 @@ const AddLimitDialog = () => {
             name='budget'
             rules={{ required: true }}
             control={control}
+            defaultValue={spendCategory?.budget}
             render={({ field }) => (
               <TextField
                 value={formattedValue}

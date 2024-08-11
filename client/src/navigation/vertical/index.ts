@@ -6,22 +6,10 @@ const navigation = (): VerticalNavItemsType => {
     {
       title: 'Dashboards',
       icon: 'tabler:smart-home',
-      badgeContent: 'new',
       badgeColor: 'error',
-      children: [
-        {
-          title: 'Analytics',
-          path: '/dashboards/analytics'
-        },
-        {
-          title: 'CRM',
-          path: '/dashboards/crm'
-        },
-        {
-          title: 'eCommerce',
-          path: '/dashboards/ecommerce'
-        }
-      ]
+      path: '/dashboards/analytics',
+      action: 'read',
+      subject: 'analytics'
     },
     {
       sectionTitle: 'Apps & Pages'

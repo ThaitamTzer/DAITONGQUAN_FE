@@ -14,14 +14,11 @@ const SpendNotesPage = () => {
     handleDeleteSpendNote,
     openUpdateSpendNoteModal,
     handleUpdateSpendNote,
-    handleCloseUpdateSpendNoteModal
+    handleCloseUpdateSpendNoteModal,
+    rowSelectionModel
   } = useSpendNoteStore(state => state)
 
-  const {
-    data: notes,
-    isLoading,
-    error
-  } = useSWR('GET_ALL_SPEND_NOTES', spendNoteService.getAllSpendNote, {
+  const { data: notes } = useSWR('GET_ALL_SPEND_NOTES', spendNoteService.getAllSpendNote, {
     revalidateOnFocus: false
   })
   const { data: spendsCate } = useSWR('GET_ALL_SPENDS', categoriesService.getSpendCategories, {
@@ -32,9 +29,20 @@ const SpendNotesPage = () => {
     revalidateOnFocus: false
   })
 
+  const handleDeleteManyNotes = async () => {
+    if (rowSelectionModel.length === 0) return
+    await spendNoteService.deleteManySpendNote({ spendingNoteId: rowSelectionModel })
+    handleCloseDeleteSpendNoteModal()
+  }
+
   return (
     <>
-      <TableNote title='List of Spent Notes' data={notes || undefined} catedata={categories} />
+      <TableNote
+        title='List of Spent Notes'
+        data={notes || undefined}
+        catedata={categories}
+        handleDeleteMany={handleDeleteManyNotes}
+      />
       <ViewNoteModal
         open={openDeleteSpendNoteModal}
         onClose={handleCloseDeleteSpendNoteModal}

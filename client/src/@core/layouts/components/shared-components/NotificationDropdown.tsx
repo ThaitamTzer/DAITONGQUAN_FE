@@ -139,7 +139,6 @@ const NotificationDropdown = (props: Props) => {
   useEffect(() => {
     if (ability.can('read', 'member-page')) {
       const access_token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
-      console.log('access_token:')
 
       const socket = io('https://daitongquan-production.up.railway.app', {
         extraHeaders: {
@@ -149,6 +148,7 @@ const NotificationDropdown = (props: Props) => {
 
       socket.on('connect', function () {
         socket.emit('getSchedule')
+        socket.emit('getLimit')
       })
 
       socket.on('schedules', data => {
@@ -167,7 +167,7 @@ const NotificationDropdown = (props: Props) => {
         socket.disconnect()
       }
     } else {
-      console.log('Role is not member')
+      console.log('You do not have permission to read member-page')
 
       return
     }

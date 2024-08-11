@@ -5,6 +5,7 @@ import { INote, SpendNoteTypes, NoteTypes, IncomeNoteType } from 'src/types/apps
 import { CategoryType } from 'src/types/apps/categoryTypes'
 import { mutate } from 'swr'
 import toast from 'react-hot-toast'
+import { GridRowSelectionModel } from '@mui/x-data-grid'
 
 type SpendNoteState = {
   data: NoteTypes[]
@@ -15,6 +16,7 @@ type SpendNoteState = {
   openUpdateSpendNoteModal: boolean
   openDeleteSpendNoteModal: boolean
   openViewNoteModal: boolean
+  rowSelectionModel: any
 }
 
 type SpendNoteActions = {
@@ -34,6 +36,7 @@ type SpendNoteActions = {
   handleDeleteIncomeNote: (id: string, swr: string) => Promise<void>
   handleOpenViewNoteModal: (note: NoteTypes) => void
   handleCloseViewNoteModal: () => void
+  setRowSelectionModel: (data: any) => void
 }
 
 type SpendNoteStore = SpendNoteState & SpendNoteActions
@@ -47,6 +50,8 @@ export const useSpendNoteStore = create<SpendNoteStore>(set => ({
   openUpdateSpendNoteModal: false,
   openDeleteSpendNoteModal: false,
   openViewNoteModal: false,
+  rowSelectionModel: [],
+  setRowSelectionModel: data => set({ rowSelectionModel: data }),
   handleOpenAddSpendNoteModal: category => set({ openAddSpendNoteModal: true, category }),
   handleCloseAddSpendNoteModal: () => set({ openAddSpendNoteModal: false }),
   handleOpenUpdateSpendNoteModal: note => set({ openUpdateSpendNoteModal: true, note }),
@@ -134,5 +139,5 @@ export const useSpendNoteStore = create<SpendNoteStore>(set => ({
     mutate(swr)
   },
   handleOpenViewNoteModal: note => set({ openViewNoteModal: true, note }),
-  handleCloseViewNoteModal: () => set({ openViewNoteModal: false, note: {} as NoteTypes})
+  handleCloseViewNoteModal: () => set({ openViewNoteModal: false, note: {} as NoteTypes })
 }))

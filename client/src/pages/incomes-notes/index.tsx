@@ -15,7 +15,8 @@ const IncomeNotesPage = () => {
     handleDeleteIncomeNote,
     handleCloseUpdateIncomeNoteModal,
     openUpdateSpendNoteModal,
-    handleUpdateIncomeNote
+    handleUpdateIncomeNote,
+    rowSelectionModel
   } = useSpendNoteStore(state => state)
   const {
     data: notes,
@@ -32,9 +33,20 @@ const IncomeNotesPage = () => {
     revalidateOnFocus: false
   })
 
+  const handleDeleteManyNotes = async () => {
+    if (rowSelectionModel.length === 0) return
+    await incomesNoteService.deleteManyIncomeNote({ incomeNoteIds: rowSelectionModel })
+    handleCloseDeleteSpendNoteModal()
+  }
+
   return (
     <>
-      <TableNote title='List of Income Notes' data={notes || undefined} catedata={categories} />
+      <TableNote
+        title='List of Income Notes'
+        data={notes || undefined}
+        catedata={categories}
+        handleDeleteMany={handleDeleteManyNotes}
+      />
       <ViewNoteModal
         open={openDeleteSpendNoteModal}
         onClose={handleCloseDeleteSpendNoteModal}

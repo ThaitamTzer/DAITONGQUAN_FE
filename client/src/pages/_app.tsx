@@ -30,6 +30,8 @@ import 'src/@fake-db'
 
 // ** Third Party Import
 import { Toaster } from 'react-hot-toast'
+import useSWR from 'swr'
+import cacheService from 'src/service/cache.service'
 
 // ** Component Imports
 import UserLayout from 'src/layouts/UserLayout'
@@ -125,6 +127,14 @@ const App = (props: ExtendedAppProps) => {
     getUserProfile()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useSWR('/flush-cache', cacheService.flushAll, {
+    revalidateOnFocus: true,
+    refreshInterval: 7200,
+    refreshWhenHidden: false,
+    refreshWhenOffline: false,
+    revalidateIfStale: true
+  })
 
   return (
     <Provider store={store}>

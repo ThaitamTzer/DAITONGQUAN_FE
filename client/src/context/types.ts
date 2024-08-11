@@ -51,6 +51,7 @@ export type UserDataType = {
   email: string
   hyperlink: any[]
   role: string | any
+  fullname: string
   avatar: string
   rankID: RankID
   createdAt: string
