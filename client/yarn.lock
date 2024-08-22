@@ -4076,10 +4076,10 @@ svgo@^3.0.2:
     csso "^5.0.5"
     picocolors "^1.0.0"
 
-sweetalert2@^11.12.3:
-  version "11.12.3"
-  resolved "https://registry.npmjs.org/sweetalert2/-/sweetalert2-11.12.3.tgz"
-  integrity sha512-tgGJSgfSV/xK113JEvhjwqKAuBYLXsZf0z+tGlHKQNnsLMi4eSNuzn9tt5hUdvjOVTLSPDgo0Lc+tnjy9Uj7Og==
+sweetalert2@^11.12.4:
+  version "11.12.4"
+  resolved "https://registry.npmjs.org/sweetalert2/-/sweetalert2-11.12.4.tgz"
+  integrity sha512-ZSpyaLbAmn4b7xjnV9x9BFD1UOrCAhIzm1D8dZ443kGxtVKqbTIA5SgXs4xeEtmFfEXUyC3RBgpSlu1AXmCiHA==
 
 swr@^2.2.5:
   version "2.2.5"
