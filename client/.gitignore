@@ -4,10 +4,6 @@
 /node_modules
 /.pnp
 .pnp.js
-<<<<<<< HEAD
-=======
-.yarn/install-state.gz
->>>>>>> f84caf0 (first commit)
 
 # testing
 /coverage
@@ -36,7 +32,3 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-<<<<<<< HEAD
-=======
-next-env.d.ts
->>>>>>> f84caf0 (first commit)
