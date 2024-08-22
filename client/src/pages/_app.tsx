@@ -1,5 +1,5 @@
 // ** React Imports
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
 
 // ** Next Imports
 import Head from 'next/head'
@@ -11,6 +11,7 @@ import { NextIntlClientProvider } from 'next-intl'
 // ** Store Imports
 import { store } from 'src/store'
 import { Provider } from 'react-redux'
+import { useUserProfileStore } from 'src/store/user'
 
 // ** Loader Import
 import NProgress from 'nprogress'
@@ -29,6 +30,8 @@ import 'src/@fake-db'
 
 // ** Third Party Import
 import { Toaster } from 'react-hot-toast'
+import useSWR from 'swr'
+import cacheService from 'src/service/cache.service'
 
 // ** Component Imports
 import UserLayout from 'src/layouts/UserLayout'
@@ -49,8 +52,6 @@ import ReactHotToast from 'src/@core/styles/libs/react-hot-toast'
 
 // ** Utils Imports
 import { createEmotionCache } from 'src/@core/utils/create-emotion-cache'
-
-
 
 // ** Prismjs Styles
 import 'prismjs'
@@ -120,16 +121,28 @@ const App = (props: ExtendedAppProps) => {
 
   const aclAbilities = Component.acl ?? defaultACLObj
 
+  const { getUserProfile } = useUserProfileStore(state => state)
+
+  useEffect(() => {
+    getUserProfile()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useSWR('/flush-cache', cacheService.flushAll, {
+    revalidateOnFocus: true,
+    refreshInterval: 7200,
+    refreshWhenHidden: false,
+    refreshWhenOffline: false,
+    revalidateIfStale: true
+  })
+
   return (
     <Provider store={store}>
       <CacheProvider value={emotionCache}>
         <Head>
-          <title>{`${themeConfig.templateName} - Material Design React Admin Template`}</title>
-          <meta
-            name='description'
-            content={`${themeConfig.templateName} – Material Design React Admin Dashboard Template – is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.`}
-          />
-          <meta name='keywords' content='Material Design, MUI, Admin Template, React Admin Template' />
+          <title>{`${themeConfig.templateName}`}</title>
+          <meta name='description' content={`${themeConfig.templateName}`} />
+          <meta name='keywords' content='Quản lý chi tiêu' />
           <meta name='viewport' content='initial-scale=1, width=device-width' />
         </Head>
 

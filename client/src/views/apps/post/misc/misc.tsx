@@ -1,6 +1,7 @@
 import { Avatar, Button, CardMedia, Dialog, DialogContent, Grid, IconButton, Typography, Tooltip } from '@mui/material'
 import { Box } from '@mui/system'
 import Icon from 'src/@core/components/icon'
+import { RankId } from 'src/types/apps/userTypes'
 
 export const renderRelativeTime = (date: Date | string) => {
   const currentDate = new Date()
@@ -59,13 +60,23 @@ export const RenderUser = (
   updatedAt: any,
   isShow: boolean | undefined,
   isApproved: boolean | undefined,
-  status?: string | undefined
+  status?: string | undefined,
+  rankID?: RankId | undefined
 ) => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <Typography variant='subtitle1' fontWeight={'bold'} marginRight={2}>
+      <Typography variant='subtitle1' fontWeight={'bold'} marginRight={1}>
         {userId?.firstname} {userId?.lastname}
       </Typography>
+      {rankID && (
+        <CardMedia
+          component={'img'}
+          image={rankID?.rankIcon}
+          alt={rankID?.rankName}
+          sx={{ width: '20px', height: '20px', objectFit: 'contain', borderRadius: '50%', mr: 1 }}
+          loading='lazy'
+        />
+      )}
       <Typography fontSize={'14px'} color='GrayText' marginRight={2} mt={0.6}>
         {renderRelativeTime(updatedAt)}
       </Typography>

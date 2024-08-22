@@ -21,7 +21,7 @@ const AnalyticsDashboard = () => {
   return (
     <ApexChartWrapper>
       <KeenSliderWrapper>
-        <Grid container spacing={6}>
+        {/* <Grid container spacing={6}>
           <Grid item xs={12} lg={6}>
             <AnalyticsWebsiteAnalyticsSlider />
           </Grid>
@@ -59,7 +59,7 @@ const AnalyticsDashboard = () => {
           <Grid item xs={12} lg={8}>
             <AnalyticsProject />
           </Grid>
-        </Grid>
+        </Grid> */}
       </KeenSliderWrapper>
     </ApexChartWrapper>
   )

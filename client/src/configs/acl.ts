@@ -21,20 +21,20 @@ const defineRulesFor = (user: UserDataType) => {
   if (Array.isArray(user.role) && user.role.length > 0) {
     // Handle case where user.role is an array
     permissionIDs = user.role.flatMap(role => role.permissionID)
-
     can(['read'], 'analytics')
   } else if (user.role === 'member') {
-    can(['read'], 'member-page')
-  } else {
-    console.warn('User role not found or has an invalid format.')
+    can('read', 'member-page')
+    can('read', 'view-post')
   }
 
   permissionIDs.forEach(permissionID => {
     const permission = permissions.find(p => p.id === permissionID)
     if (permission) {
+      console.log('ascasc', permission)
       can(permission.action, permission.subject)
-    } else {
-      // console.warn(`Permission with ID ${permissionID} not found.`)
+      if (permission.subject === 'report') {
+        can('read', 'view-post')
+      }
     }
   })
 

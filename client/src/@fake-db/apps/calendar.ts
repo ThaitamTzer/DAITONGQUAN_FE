@@ -16,7 +16,7 @@ const prevMonth =
 const data: { events: EventType[] } = {
   events: [
     {
-      _id: '1',
+      id: '1',
       url: '',
       title: 'Design Review',
       start: date,
@@ -27,7 +27,7 @@ const data: { events: EventType[] } = {
       }
     },
     {
-      _id: '2',
+      id: '2',
       url: '',
       title: 'Meeting With Client',
       start: new Date(date.getFullYear(), date.getMonth() + 1, -11),
@@ -38,7 +38,7 @@ const data: { events: EventType[] } = {
       }
     },
     {
-      _id: '3',
+      id: '3',
       url: '',
       title: 'Family Trip',
       allDay: true,
@@ -49,7 +49,7 @@ const data: { events: EventType[] } = {
       }
     },
     {
-      _id: '4',
+      id: '4',
       url: '',
       title: "Doctor's Appointment",
       start: new Date(date.getFullYear(), date.getMonth() + 1, -11),
@@ -60,7 +60,7 @@ const data: { events: EventType[] } = {
       }
     },
     {
-      _id: '5',
+      id: '5',
       url: '',
       title: 'Dart Game?',
       start: new Date(date.getFullYear(), date.getMonth() + 1, -13),
@@ -71,7 +71,7 @@ const data: { events: EventType[] } = {
       }
     },
     {
-      _id: '6',
+      id: '6',
       url: '',
       title: 'Meditation',
       start: new Date(date.getFullYear(), date.getMonth() + 1, -13),
@@ -82,7 +82,7 @@ const data: { events: EventType[] } = {
       }
     },
     {
-      _id: '7',
+      id: '7',
       url: '',
       title: 'Dinner',
       start: new Date(date.getFullYear(), date.getMonth() + 1, -13),
@@ -93,7 +93,7 @@ const data: { events: EventType[] } = {
       }
     },
     {
-      _id: '8',
+      id: '8',
       url: '',
       title: 'Product Review',
       start: new Date(date.getFullYear(), date.getMonth() + 1, -13),
@@ -104,7 +104,7 @@ const data: { events: EventType[] } = {
       }
     },
     {
-      _id: '9',
+      id: '9',
       url: '',
       title: 'Monthly Meeting',
       start: nextMonth,
@@ -115,7 +115,7 @@ const data: { events: EventType[] } = {
       }
     },
     {
-      _id: '10',
+      id: '10',
       url: '',
       title: 'Monthly Checkup',
       start: prevMonth,
@@ -148,7 +148,7 @@ mock.onPost('/apps/calendar/add-event').reply(config => {
   const { length } = data.events
   let lastIndex = 0
   if (length) {
-    lastIndex = data.events[length - 1]._id
+    lastIndex = Number(data.events[length - 1].id)
   }
   event.id = lastIndex + 1
 
@@ -166,7 +166,7 @@ mock.onPost('/apps/calendar/update-event').reply(config => {
   // Convert Id to number
   eventData._id = eventData._id
 
-  const event = data.events.find(ev => ev._id === eventData._id)
+  const event = data.events.find(ev => ev.id === eventData._id)
 
   if (event) {
     Object.assign(event, eventData)
@@ -187,7 +187,7 @@ mock.onDelete('/apps/calendar/remove-event').reply(config => {
   // Convert Id to number
   const eventId = _id
 
-  const eventIndex = data.events.findIndex(ev => ev._id === eventId)
+  const eventIndex = data.events.findIndex(ev => ev.id === eventId)
   data.events.splice(eventIndex, 1)
 
   return [200]

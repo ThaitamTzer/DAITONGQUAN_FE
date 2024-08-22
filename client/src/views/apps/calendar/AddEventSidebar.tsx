@@ -1,7 +1,4 @@
-// ** React Imports
 import { useState, useEffect, forwardRef, useCallback, Fragment } from 'react'
-
-// ** MUI Imports
 import Box from '@mui/material/Box'
 import Drawer from '@mui/material/Drawer'
 import Switch from '@mui/material/Switch'
@@ -11,22 +8,13 @@ import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import FormControl from '@mui/material/FormControl'
 import FormControlLabel from '@mui/material/FormControlLabel'
-
-// ** Custom Component Import
 import CustomTextField from 'src/@core/components/mui/text-field'
-
-// ** Third Party Imports
 import DatePicker from 'react-datepicker'
 import { useForm, Controller } from 'react-hook-form'
-
-// ** Icon Imports
 import Icon from 'src/@core/components/icon'
-
-// ** Styled Components
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
-
-// ** Types
-import { EventDateType, AddEventSidebarType } from 'src/types/apps/calendarTypes'
+import { AddEventSidebarType } from 'src/types/apps/calendarTypes'
+import utcToZonedTime from 'date-fns-tz/utcToZonedTime'
 
 interface PickerProps {
   label?: string
@@ -54,15 +42,14 @@ const defaultState: DefaultStateType = {
   guests: [],
   allDay: true,
   description: '',
-  endDate: new Date(),
+  endDate: new Date().toISOString(),
   calendar: 'Business',
-  startDate: new Date(),
+  startDate: new Date().toISOString(),
   location: '',
   _id: ''
 }
 
 const AddEventSidebar = (props: AddEventSidebarType) => {
-  // ** Props
   const {
     store,
     dispatch,
@@ -78,7 +65,6 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
     handleAddEventSidebarToggle
   } = props
 
-  // ** States
   const [values, setValues] = useState<DefaultStateType>(defaultState)
 
   const {
@@ -101,19 +87,36 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
       title: data.title,
       location: values.location,
       isAllDay: values.allDay,
-      startDateTime: new Date(values.startDate).toISOString(),
-      endDateTime: new Date(values.endDate).toISOString(),
+      startDateTime: new Date(
+        Date.UTC(
+          values.startDate.getFullYear(),
+          values.startDate.getMonth(),
+          values.startDate.getDate(),
+          values.startDate.getHours(),
+          values.startDate.getMinutes(),
+          values.startDate.getSeconds()
+        )
+      ) as Date,
+      endDateTime: new Date(
+        Date.UTC(
+          values.endDate.getFullYear(),
+          values.endDate.getMonth(),
+          values.endDate.getDate(),
+          values.endDate.getHours(),
+          values.endDate.getMinutes(),
+          values.endDate.getSeconds()
+        )
+      ) as Date,
       note: values.description,
       isLoop: false,
       calendars: values.calendar,
       url: values.url
     }
 
-    // Check if it's a new event or updating an existing one
     if (store.selectedEvent === null || (store.selectedEvent !== null && !store.selectedEvent.title.length)) {
       dispatch(addEvent(modifiedEvent))
+      console.log('Add Event:', modifiedEvent)
     } else {
-      // Update the event
       dispatch(
         updateEvent({
           id: store.selectedEvent.id,
@@ -122,7 +125,6 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
         })
       )
 
-      // Check the encryption state and apply encryption or decryption accordingly
       if (values.isEncrypted) {
         dispatch(encryptEvent(store.selectedEvent.id))
       } else if (!values.isEncrypted) {
@@ -138,19 +140,55 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
       dispatch(deleteEvent(store.selectedEvent.id))
     }
 
-    // calendarApi.getEventById(store.selectedEvent.id).remove()
     handleSidebarClose()
   }
 
   const handleStartDate = (date: Date) => {
-    if (date > values.endDate) {
-      setValues({ ...values, startDate: new Date(date).toISOString(), endDate: new Date(date).toISOString() })
+    if (date > new Date(values.endDate)) {
+      setValues({ ...values, startDate: date, endDate: date })
+    } else {
+      setValues({ ...values, startDate: date })
     }
   }
 
   const resetToStoredValues = useCallback(() => {
     if (store.selectedEvent !== null) {
       const event = store.selectedEvent
+
+      const inputDate = new Date(event.start) // Ensure this is a Date object
+      const endDate = new Date(event.end) // Ensure this is a Date object
+
+      // Convert the input date to UTC
+      const zonedDate = utcToZonedTime(inputDate, 'UTC')
+      const zonedEndDate = utcToZonedTime(endDate, 'UTC')
+
+      // Create a new Date object from the zonedDate directly using UTC methods
+      const formattedStartDate = new Date(
+        Date.UTC(
+          zonedDate.getUTCFullYear(),
+          zonedDate.getUTCMonth(),
+          zonedDate.getUTCDate(),
+          zonedDate.getUTCHours(),
+          zonedDate.getUTCMinutes(),
+          zonedDate.getUTCSeconds(),
+          zonedDate.getUTCMilliseconds()
+        )
+      )
+
+      // Create a new Date object from the zonedEndDate directly using UTC methods
+      const formattedEndDate = new Date(
+        Date.UTC(
+          zonedEndDate.getUTCFullYear(),
+          zonedEndDate.getUTCMonth(),
+          zonedEndDate.getUTCDate(),
+          zonedEndDate.getUTCHours(),
+          zonedEndDate.getUTCMinutes(),
+          zonedEndDate.getUTCSeconds(),
+          zonedEndDate.getUTCMilliseconds()
+        )
+      )
+
+      console.log('Formatted End Date:', formattedEndDate)
 
       setValue('title', event.title || '')
       setValues({
@@ -161,17 +199,13 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
         guests: event.extendedProps.guests || [],
         description: event.extendedProps.description || '',
         calendar: event.extendedProps.calendar || 'Business',
-        endDate: event.end !== null ? new Date(event.end).toISOString() : new Date(event.start).toISOString(),
-        startDate: event.start !== null ? new Date(event.start).toISOString() : new Date().toISOString(),
+        endDate: event.end ? formattedEndDate : formattedStartDate,
+        startDate: formattedStartDate,
         location: event.extendedProps.location || '',
         isEncrypted: event.extendedProps.isEncrypted || false
       })
     }
-
-    // eslint-disable-next-line
   }, [setValue, store.selectedEvent])
-
-  console.log(new Date(values.startDate).toISOString(), new Date(values.endDate).toISOString())
 
   const resetToEmptyValues = useCallback(() => {
     setValue('title', '')
@@ -334,10 +368,10 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
                 endDate={new Date(values.endDate)}
                 selected={values.startDate ? new Date(values.startDate) : null}
                 startDate={new Date(values.startDate)}
-                showTimeSelect={!values.allDay}
+                showTimeInput={!values.allDay}
                 dateFormat={!values.allDay ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd'}
                 customInput={<PickersComponent label='Start Date' registername='startDate' />}
-                onChange={(date: Date) => setValues({ ...values, startDate: date.toISOString() })}
+                onChange={(date: Date) => setValues({ ...values, startDate: date })}
                 onSelect={handleStartDate}
               />
             </Box>
@@ -349,10 +383,10 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
                 selected={values.endDate ? new Date(values.endDate) : null}
                 minDate={new Date(values.startDate)}
                 startDate={new Date(values.startDate)}
-                showTimeSelect={!values.allDay}
+                showTimeInput={!values.allDay}
                 dateFormat={!values.allDay ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd'}
                 customInput={<PickersComponent label='End Date' registername='endDate' />}
-                onChange={(date: Date) => setValues({ ...values, endDate: date.toISOString() })}
+                onChange={(date: Date) => setValues({ ...values, endDate: date })}
               />
             </Box>
             <FormControl sx={{ mb: 4 }}>
@@ -373,24 +407,6 @@ const AddEventSidebar = (props: AddEventSidebarType) => {
               placeholder='https://www.google.com'
               onChange={e => setValues({ ...values, url: e.target.value })}
             />
-
-            <CustomTextField
-              select
-              fullWidth
-              label='Guests'
-              sx={{ mb: 4 }}
-              SelectProps={{
-                multiple: true,
-                value: values.guests,
-                onChange: e => setValues({ ...values, guests: e.target.value as string })
-              }}
-            >
-              <MenuItem value='bruce'>Bruce</MenuItem>
-              <MenuItem value='clark'>Clark</MenuItem>
-              <MenuItem value='diana'>Diana</MenuItem>
-              <MenuItem value='john'>John</MenuItem>
-              <MenuItem value='barry'>Barry</MenuItem>
-            </CustomTextField>
             <CustomTextField
               fullWidth
               sx={{ mb: 4 }}

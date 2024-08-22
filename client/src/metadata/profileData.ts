@@ -9,7 +9,6 @@ export const getProfileData: DataType = {
     about: [
       { property: 'Full Name', value: (data?.firstname || '') + ' ' + (data?.lastname || ''), icon: 'tabler:user' },
       { property: 'Nickname', value: data?.nickname || null, icon: 'tabler:at' },
-      { property: 'Username', value: data?.dataname || null, icon: 'tabler:at' },
       { property: 'Date of Birth', value: FormatDate(data?.dateOfBirth), icon: 'tabler:cake' },
       { property: 'Gender', value: data?.gender || null, icon: 'tabler:gender-transgender' },
       { property: 'Role', value: data?.role || null, icon: 'tabler:crown' },
@@ -23,9 +22,9 @@ export const getProfileData: DataType = {
       // { property: 'Social', value: data.hyperlink, icon: 'tabler:brand-facebook' }
     ].filter(item => item.value !== null && item.value !== ''),
     overview: [
-      { property: 'Posts', value: '10022', icon: 'iconoir:post' },
-      { property: 'Likes', value: '151515', icon: 'iconamoon:like-light' },
-      { property: 'Comments', value: '123123', icon: 'material-symbols-light:comment-outline' }
+      { property: 'Posts', value: data?.rankScore?.numberOfBlog, icon: 'iconoir:post' },
+      { property: 'Likes', value: data?.rankScore?.numberOfLike, icon: 'iconamoon:like-light' },
+      { property: 'Comments', value: data?.rankScore?.numberOfComment, icon: 'basil:comment-outline' }
     ].filter(item => item.value !== null && item.value !== '')
   })
 }

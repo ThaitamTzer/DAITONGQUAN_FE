@@ -31,6 +31,7 @@ import ScheduleService from 'src/service/schedule.service'
 
 // ** Util Import
 import useSWR from 'swr'
+import toast from 'react-hot-toast'
 
 interface Props {
   settings: Settings
@@ -104,13 +105,22 @@ const NotificationDropdown = (props: Props) => {
   const { data: notifications } = useSWR('GET_ALL_NOTIFICATIONS', spendNoteService.getNotificationOutOfMoney, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
+    revalidateIfStale: false,
     revalidateOnMount: false,
-    refreshInterval: 0
+    refreshWhenHidden: false,
+    refreshWhenOffline: false
   })
   const { data: eventNotifications, mutate: mutateEventNotifications } = useSWR(
     'GET_ALL_EVENT_NOTIFICATIONS',
     ScheduleService.notifySchedule,
-    { revalidateOnFocus: false, revalidateOnReconnect: false, refreshInterval: 0, revalidateOnMount: false }
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+      revalidateOnMount: false,
+      refreshWhenHidden: false,
+      refreshWhenOffline: false
+    }
   )
 
   // ** Props
@@ -127,36 +137,38 @@ const NotificationDropdown = (props: Props) => {
 
   // ** Socket setup
   useEffect(() => {
-    const role: any = localStorage.getItem('userData')
-    if (role?.role === 'member') {
+    if (ability.can('read', 'member-page')) {
       const access_token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
 
-      const socket = io('https://daitongquan.onrender.com', {
+      const socket = io('https://daitongquan-production.up.railway.app', {
         extraHeaders: {
           Authorization: `Bearer ${access_token}`
         }
       }) // replace with your socket server URL
 
       socket.on('connect', function () {
-        console.log('connected')
         socket.emit('getSchedule')
+        socket.emit('getLimit')
       })
 
       socket.on('schedules', data => {
-        // Update event notifications list
-        console.log('Event notifications:', data)
+        if (data.length === 0) return
 
+        // Update event notifications list
+        toast('New event notification', { icon: <Icon icon={'tabler:bell'} />, style: { borderRadius: '10px' } })
         mutateEventNotifications()
       })
 
       socket.on('disconnect', () => {
-        console.log('Disconnected from socket server')
+        console.log('Socket disconnected from server')
       })
 
       return () => {
         socket.disconnect()
       }
     } else {
+      console.log('You do not have permission to read member-page')
+
       return
     }
   }, [])
@@ -275,7 +287,7 @@ const NotificationDropdown = (props: Props) => {
                       <MenuItemTitle variant='body1'>
                         Event {handleUnderline(notification.title)} is coming
                       </MenuItemTitle>
-                      <MenuItemSubtitle variant='body2'>{notification.startDateTime}</MenuItemSubtitle>
+                      <MenuItemSubtitle variant='body2'>{notification.startDateTime.toLocaleString()}</MenuItemSubtitle>
                     </Box>
                   </Box>
                 </MenuItem>

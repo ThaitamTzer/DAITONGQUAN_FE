@@ -137,7 +137,6 @@ export type UserPostState = {
   reactionUserPost: (_id: string, action: string) => Promise<void>
   deleteReactionUserPost: (_id: string) => Promise<void>
   rejectPost: (_id: string) => Promise<void>
-  
 }
 
 export type EditPostState = {
@@ -178,10 +177,12 @@ export type PostListState = {
 
 export type CommentPostState = {
   post: GetPostType | undefined
+  pageIndex?: number
   commentPost: (data: UserCommentType | undefined) => Promise<void>
   openCommentModal: boolean
   openCommentModalPost?: (data: GetPostType | undefined) => void
   closeCommentModalPost: () => void
+  setPageIndex?: (pageIndex: number) => void
   handleDeleteComment?: (_id: string) => Promise<void>
 }
 export type SetPostId = {

@@ -10,9 +10,10 @@ const SwiperSpacing = ({ direction }: { direction: Direction }) => {
   const [ref] = useKeenSlider<HTMLDivElement>({
     rtl: direction === 'rtl',
     slides: {
-      perView: 2,
+      perView: 4,
       spacing: 16
-    }
+    },
+    loop: true
   })
 
   return (

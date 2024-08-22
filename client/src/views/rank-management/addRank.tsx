@@ -7,7 +7,8 @@ import {
   Grid,
   TextField,
   Typography,
-  Alert
+  Alert,
+  MenuItem
 } from '@mui/material'
 import { useRankStore } from 'src/store/rank'
 import DialogWithCustomCloseButton from '../components/dialog/customDialog'
@@ -15,7 +16,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useTranslation } from 'react-i18next'
 import { getCreateRankValidationSchema } from 'src/configs/validationSchema'
-import { VisuallyHiddenInput } from 'src/pages/components/upload'
+import VisuallyHiddenInput from 'src/pages/components/upload'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { LoadingButton } from '@mui/lab'
@@ -26,6 +27,7 @@ const AddRank = () => {
   const handleClose = useRankStore(state => state.handleCloseAddModal)
   const addRank = useRankStore(state => state.handleAddRank)
   const loading = useRankStore(state => state.loading)
+  const setLoading = useRankStore(state => state.setloading)
   const [previewImage, setPreviewImage] = useState<string>('')
   const [image, setImage] = useState<File | null>(null)
 
@@ -36,6 +38,7 @@ const AddRank = () => {
     numberOfBlog: number
     numberOfLike: number
     alert: string
+    action: string[]
   }
 
   const {
@@ -58,6 +61,20 @@ const AddRank = () => {
     }
   }
 
+  const handleCloseAddModal = () => {
+    handleClose()
+    reset({
+      rankName: '',
+      attendanceScore: 0,
+      numberOfComment: 0,
+      numberOfBlog: 0,
+      numberOfLike: 0,
+      action: []
+    })
+    setPreviewImage('')
+    setImage(null)
+  }
+
   const onSubmit = (data: AddRankForm) => {
     if (image) {
       const formData = new FormData()
@@ -67,14 +84,15 @@ const AddRank = () => {
       formData.append('numberOfComment', data.numberOfComment.toString())
       formData.append('numberOfBlog', data.numberOfBlog.toString())
       formData.append('numberOfLike', data.numberOfLike.toString())
+      formData.append('action', data.action.toString())
       addRank(formData)
         .then(() => {
-          handleClose()
-          reset()
+          handleCloseAddModal()
           toast.success('Rank added successfully')
         })
         .catch(error => {
-          setError('rankName', { type: 'manual', message: error.message })
+          setError('rankName', { type: 'manual', message: 'Rank existed' })
+          setLoading(false)
         })
     } else {
       setError('alert', { type: 'manual', message: 'Please upload rank icon' })
@@ -98,7 +116,7 @@ const AddRank = () => {
           <Typography variant='h3'>Add Rank</Typography>
         </DialogTitle>
         {errors.alert && <Alert severity='error'>{errors.alert.message}</Alert>}
-        <DialogWithCustomCloseButton handleClose={handleClose}>
+        <DialogWithCustomCloseButton handleClose={handleCloseAddModal}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Controller
@@ -137,27 +155,6 @@ const AddRank = () => {
                     onBlur={onBlur}
                     error={Boolean(errors.attendanceScore)}
                     {...(errors.attendanceScore && { helperText: String(errors.attendanceScore.message) })}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Controller
-                name='numberOfComment'
-                control={control}
-                rules={{ required: true }}
-                render={({ field: { value, onChange, onBlur } }) => (
-                  <TextField
-                    size='small'
-                    fullWidth
-                    type='number'
-                    label='Number of Comment'
-                    variant='outlined'
-                    value={value}
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    error={Boolean(errors.numberOfComment)}
-                    {...(errors.numberOfComment && { helperText: String(errors.numberOfComment.message) })}
                   />
                 )}
               />
@@ -204,6 +201,51 @@ const AddRank = () => {
                 )}
               />
             </Grid>
+            <Grid item xs={12}>
+              <Controller
+                name='numberOfComment'
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <TextField
+                    size='small'
+                    fullWidth
+                    type='number'
+                    label='Number of Comment'
+                    variant='outlined'
+                    value={value}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    error={Boolean(errors.numberOfComment)}
+                    {...(errors.numberOfComment && { helperText: String(errors.numberOfComment.message) })}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Controller
+                name='action'
+                control={control}
+                rules={{ required: false }}
+                defaultValue={[]}
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <TextField
+                    size='small'
+                    fullWidth
+                    select
+                    type='string'
+                    label='Action'
+                    variant='outlined'
+                    SelectProps={{ multiple: true }}
+                    value={Array.isArray(value) ? value : []}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                  >
+                    <MenuItem value='story'>Story</MenuItem>
+                  </TextField>
+                )}
+              />
+            </Grid>
             {previewImage && (
               <Grid item xs={12}>
                 <CardMedia
@@ -228,7 +270,7 @@ const AddRank = () => {
           </Grid>
         </DialogWithCustomCloseButton>
         <DialogActions>
-          <Button variant='outlined' onClick={handleClose} color='error'>
+          <Button variant='outlined' onClick={handleCloseAddModal} color='error'>
             Cancel
           </Button>
           <LoadingButton

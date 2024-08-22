@@ -7,6 +7,8 @@ import { repliesCommentState, commentPostState, editCommentState } from 'src/sto
 import toast from 'react-hot-toast'
 import EditComment from './EditComment'
 import { renderContent } from './misc/misc'
+import { useContext } from 'react'
+import { AbilityContext } from 'src/layouts/components/acl/Can'
 
 type CommentProps = {
   comments: CommentType[] | undefined
@@ -43,6 +45,7 @@ export const RenderRelativeTime = (date: Date | string) => {
 }
 
 const AllComment = (props: CommentProps) => {
+  const ability = useContext(AbilityContext)
   const [visibleReplies, setVisibleReplies] = React.useState<{ [key: string]: number }>({})
   const { comments } = props
   const { openReplies, comment, handleOpenReplies, handleCloseReplies, handleReplyComment } = repliesCommentState(
@@ -177,7 +180,7 @@ const AllComment = (props: CommentProps) => {
                         </Typography>
                       </Box>
                       <Box>
-                        {currentUser === comment.userId._id ? (
+                        {currentUser === comment.userId?._id ? (
                           <>
                             <IconButton onClick={event => handleMoreOptions(event, comment._id)}>
                               <Icon icon='ri:more-fill' />
@@ -225,17 +228,19 @@ const AllComment = (props: CommentProps) => {
                   >
                     {renderContent(comment.content)}
                   </Grid>
-                  <Grid container>
-                    <Button
-                      key={comment._id}
-                      onClick={() => handleOpenReplies && handleOpenReplies(comment)}
-                      color='inherit'
-                      sx={{ borderRadius: '40%' }}
-                      startIcon={<Icon icon='teenyicons:chat-outline' />}
-                    >
-                      {comment.repliesComment?.length || 0}
-                    </Button>
-                  </Grid>
+                  {ability.can('read', 'member-page') && (
+                    <Grid container>
+                      <Button
+                        key={comment._id}
+                        onClick={() => handleOpenReplies && handleOpenReplies(comment)}
+                        color='inherit'
+                        sx={{ borderRadius: '40%' }}
+                        startIcon={<Icon icon='teenyicons:chat-outline' />}
+                      >
+                        {comment.repliesComment?.length || 0}
+                      </Button>
+                    </Grid>
+                  )}
                 </Grid>
               </Grid>
             </Grid>

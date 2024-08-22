@@ -14,7 +14,7 @@ import {
 import { Box } from '@mui/system'
 import { CommentType, GetPostType, UpdatePostType } from 'src/types/apps/postTypes'
 import Icon from 'src/@core/components/icon'
-import { useContext, useState } from 'react'
+import { useContext, useState, useCallback, useEffect } from 'react'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import AllComment from './AllComment'
 import { commentPostState, usePostStore } from 'src/store/apps/posts'
@@ -24,6 +24,7 @@ import { editPostState } from 'src/store/apps/posts'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/router'
 import { renderContent } from './misc/misc'
+import { debounce } from 'lodash'
 
 type PostProps = {
   post: GetPostType | undefined
@@ -34,10 +35,20 @@ type PostProps = {
 }
 
 const ViewPost = (props: PostProps) => {
+  const userData = JSON.parse(localStorage.getItem('userData') || '{}')
+  const idUser: string = userData._id
   const { post, comments } = props
   const [openImage, setOpenImage] = useState<string | null>(null)
   const [selectedPostId, setSelectedPostId] = useState<string | undefined>(undefined)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [localLiked, setLocalLiked] = useState(post?.userReaction?.some(reaction => reaction.userId?._id === idUser))
+  const [localReactionCount, setLocalReactionCount] = useState(post?.reactionCount || 0)
+
+  useEffect(() => {
+    setLocalLiked(post?.userReaction?.some(reaction => reaction.userId?._id === idUser))
+    setLocalReactionCount(post?.reactionCount || 0)
+  }, [post])
+
   const reactionPost = usePostStore(state => state.reactionPost)
   const deleteReactionPost = usePostStore(state => state.deleteReactionPost)
   const updatePost = usePostStore(state => state.updateUserPost)
@@ -50,9 +61,6 @@ const ViewPost = (props: PostProps) => {
   const { handleOpenReportModal } = useReportStore(state => state)
   const ability = useContext(AbilityContext)
   const router = useRouter()
-
-  const userData = JSON.parse(localStorage.getItem('userData') || '{}')
-  const idUser: string = userData._id
 
   const handleOpenImage = (id: string) => {
     setOpenImage(id)
@@ -85,24 +93,42 @@ const ViewPost = (props: PostProps) => {
     }
   }
 
-  const RenderButtonReaction = ({ isLiked, post }: { isLiked: boolean | undefined; post: any }) => {
-    return isLiked ? (
+  // Immediate UI update and background API request for liking a post
+  const handleReaction = (_id: string, action: string) => {
+    setLocalLiked(true)
+    setLocalReactionCount(localReactionCount + 1)
+    debouncedReactionPost(_id, action)
+  }
+
+  // Immediate UI update and background API request for unliking a post
+  const handleDeleteReaction = (_id: string) => {
+    setLocalLiked(false)
+    setLocalReactionCount(localReactionCount - 1)
+    debouncedDeleteReactionPost(_id)
+  }
+
+  // Debounced handlers to limit the rate of sending requests
+  const debouncedReactionPost = useCallback(debounce(reactionPost, 200), [])
+  const debouncedDeleteReactionPost = useCallback(debounce(deleteReactionPost, 200), [])
+
+  const RenderButtonReaction = () => {
+    return localLiked ? (
       <Button
-        onClick={() => deleteReactionPost(post?._id)}
+        onClick={() => handleDeleteReaction(post?._id || '')}
         color='inherit'
         sx={{ borderRadius: '40%' }}
         startIcon={<Icon icon='bi:heart-fill' color='#ff0000' />}
       >
-        {post?.reactionCount}
+        {localReactionCount}
       </Button>
     ) : (
       <Button
-        onClick={() => reactionPost(post?._id, 'like')}
+        onClick={() => handleReaction(post?._id || '', 'like')}
         color='inherit'
         sx={{ borderRadius: '40%' }}
         startIcon={<Icon icon='bi:heart' color='error' />}
       >
-        {post?.reactionCount}
+        {localReactionCount}
       </Button>
     )
   }
@@ -111,6 +137,7 @@ const ViewPost = (props: PostProps) => {
     setAnchorEl(event.currentTarget)
     setSelectedPostId(postId)
   }
+
   const handleCloseOptions = () => {
     setAnchorEl(null)
     setSelectedPostId(undefined)
@@ -146,7 +173,7 @@ const ViewPost = (props: PostProps) => {
     return `${Math.floor(seconds)} seconds ago`
   }
 
-  const ImageDialog = (post: any) => {
+  const ImageDialog = (post: GetPostType | undefined) => {
     return (
       <Dialog fullScreen key={post?._id} open={openImage === post?._id} onClose={handleCloseImage}>
         <DialogContent sx={{ py: '0px !important', px: '60px !important' }} onClick={() => handleCloseImage()}>
@@ -207,111 +234,122 @@ const ViewPost = (props: PostProps) => {
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant='subtitle1' fontWeight={'bold'} marginRight={2}>
+                <Typography variant='subtitle1' fontWeight={'bold'} marginRight={1}>
                   {post?.userId?.firstname} {post?.userId?.lastname}
                 </Typography>
+                {post?.userId?.rankID?.rankIcon && (
+                  <CardMedia
+                    component={'img'}
+                    image={post?.userId.rankID.rankIcon}
+                    alt={post?.userId.rankID.rankIcon}
+                    sx={{ width: '20px', height: '20px', objectFit: 'contain', borderRadius: '50%', mr: 1 }}
+                    loading='lazy'
+                  />
+                )}
                 <Typography fontSize={'14px'} color='GrayText' marginRight={2} mt={0.6}>
                   {renderRelativeTime(post?.createdAt)}
                 </Typography>
               </Box>
-              <>
-                <IconButton onClick={event => handleMoreOptions(event, post?._id)} size='small'>
-                  <Icon icon='ri:more-fill' />
-                </IconButton>
-                <Menu
-                  PaperProps={{
-                    sx: { width: '200px' }
-                  }}
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl) && selectedPostId === post?._id}
-                  onClose={handleCloseOptions}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right'
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right'
-                  }}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      addPostToFavorite(post?._id)
-                      handleCloseOptions()
+              {ability.can('read', 'member-page') && (
+                <>
+                  <IconButton onClick={event => handleMoreOptions(event, post?._id)} size='small'>
+                    <Icon icon='ri:more-fill' />
+                  </IconButton>
+                  <Menu
+                    PaperProps={{
+                      sx: { width: '200px' }
+                    }}
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl) && selectedPostId === post?._id}
+                    onClose={handleCloseOptions}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'right'
+                    }}
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right'
                     }}
                   >
-                    <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                      <Typography variant='body1'>Favorite</Typography>
-                      <Icon icon='mdi:star' color='yellow' />
-                    </Box>
-                  </MenuItem>
-                  {post?.userId?._id !== idUser && (
                     <MenuItem
                       onClick={() => {
-                        handleOpenReportModal(post?._id)
+                        addPostToFavorite(post?._id)
                         handleCloseOptions()
                       }}
                     >
                       <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                        <Typography variant='body1'>Report</Typography>
-                        <Icon icon='fxemoji:loudspeaker' />
+                        <Typography variant='body1'>Favorite</Typography>
+                        <Icon icon='mdi:star' color='yellow' />
                       </Box>
                     </MenuItem>
-                  )}
-                  {post?.userId?._id === idUser && (
-                    <>
+                    {post?.userId?._id !== idUser && (
                       <MenuItem
                         onClick={() => {
-                          openEditPost && openEditPost(post)
+                          handleOpenReportModal(post?._id)
                           handleCloseOptions()
                         }}
                       >
                         <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                          <Typography variant='body1'>Edit</Typography>
-                          <Icon icon='eva:edit-2-fill' />
+                          <Typography variant='body1'>Report</Typography>
+                          <Icon icon='fxemoji:loudspeaker' />
                         </Box>
                       </MenuItem>
-                      {post?.isShow ? (
+                    )}
+                    {post?.userId?._id === idUser && (
+                      <>
                         <MenuItem
                           onClick={() => {
-                            handleHidePost(post?._id, {
-                              isShow: false
-                            })
+                            openEditPost && openEditPost(post)
+                            handleCloseOptions()
                           }}
                         >
                           <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                            <Typography variant='body1'>Hide Post</Typography>
-                            <Icon icon='eva:eye-off-fill' />
+                            <Typography variant='body1'>Edit</Typography>
+                            <Icon icon='eva:edit-2-fill' />
                           </Box>
                         </MenuItem>
-                      ) : (
+                        {post?.isShow ? (
+                          <MenuItem
+                            onClick={() => {
+                              handleHidePost(post?._id, {
+                                isShow: false
+                              })
+                            }}
+                          >
+                            <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                              <Typography variant='body1'>Hide Post</Typography>
+                              <Icon icon='eva:eye-off-fill' />
+                            </Box>
+                          </MenuItem>
+                        ) : (
+                          <MenuItem
+                            onClick={() => {
+                              handleHidePost(post?._id, {
+                                isShow: true
+                              })
+                            }}
+                          >
+                            <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                              <Typography variant='body1'>Show Post</Typography>
+                              <Icon icon='eva:eye-fill' />
+                            </Box>
+                          </MenuItem>
+                        )}
                         <MenuItem
                           onClick={() => {
-                            handleHidePost(post?._id, {
-                              isShow: true
-                            })
+                            handleDeletePost(post?._id)
                           }}
                         >
                           <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                            <Typography variant='body1'>Show Post</Typography>
-                            <Icon icon='eva:eye-fill' />
+                            <Typography variant='body1'>Delete Post</Typography>
+                            <Icon icon='gg:trash' color='red' />
                           </Box>
                         </MenuItem>
-                      )}
-                      <MenuItem
-                        onClick={() => {
-                          handleDeletePost(post?._id)
-                        }}
-                      >
-                        <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                          <Typography variant='body1'>Delete Post</Typography>
-                          <Icon icon='gg:trash' color='red' />
-                        </Box>
-                      </MenuItem>
-                    </>
-                  )}
-                </Menu>
-              </>
+                      </>
+                    )}
+                  </Menu>
+                </>
+              )}
             </Grid>
             <Grid
               item
@@ -354,20 +392,19 @@ const ViewPost = (props: PostProps) => {
               ) : null}
               {ImageDialog(post)}
             </Grid>
-            <Grid item sx={{ paddingLeft: '0px !important' }}>
-              <RenderButtonReaction
-                isLiked={post?.userReaction?.some((reaction: any) => reaction.userId._id === idUser)}
-                post={post}
-              />
-              <Button
-                onClick={() => openCommentModalPost && openCommentModalPost(post)}
-                color='inherit'
-                sx={{ borderRadius: '40%' }}
-                startIcon={<Icon icon='teenyicons:chat-outline' />}
-              >
-                {post?.commentCount}
-              </Button>
-            </Grid>
+            {ability.can('read', 'member-page') && (
+              <Grid item sx={{ paddingLeft: '0px !important' }}>
+                <RenderButtonReaction />
+                <Button
+                  onClick={() => openCommentModalPost && openCommentModalPost(post)}
+                  color='inherit'
+                  sx={{ borderRadius: '40%' }}
+                  startIcon={<Icon icon='teenyicons:chat-outline' />}
+                >
+                  {post?.commentCount}
+                </Button>
+              </Grid>
+            )}
           </Grid>
         </Grid>
         <Grid item xs={12}>

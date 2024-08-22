@@ -84,6 +84,14 @@ const UserDropdown = (props: Props) => {
     }
   }
 
+  const handleGetName = () => {
+    if (typeof auth.user?.role === 'string') {
+      return `${auth.user.firstname} ${auth.user.lastname}`
+    } else if (auth.user?.role && Array.isArray(auth.user.role)) {
+      return auth.user.fullname
+    }
+  }
+
   const styles = {
     px: 4,
     py: 1.75,
@@ -102,14 +110,6 @@ const UserDropdown = (props: Props) => {
   const handleLogout = () => {
     logout(window.localStorage.getItem('refreshToken') || '')
     handleDropdownClose()
-  }
-
-  const handleFullname = () => {
-    if (auth.user?.fullname) {
-      return auth.user?.fullname
-    } else {
-      return `${auth.user?.firstname} ${auth.user?.lastname}`
-    }
   }
 
   return (
@@ -161,8 +161,9 @@ const UserDropdown = (props: Props) => {
                 sx={{ width: '2.5rem', height: '2.5rem' }}
               />
             </Badge>
+
             <Box sx={{ display: 'flex', ml: 2.5, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 500 }}>{handleFullname()}</Typography>
+              <Typography variant='h6'>{handleGetName()}</Typography>
               <Typography variant='body2'>{handleGetRole()}</Typography>
             </Box>
           </Box>
@@ -176,38 +177,6 @@ const UserDropdown = (props: Props) => {
             </Box>
           </MenuItemStyled>
         )}
-        <MenuItemStyled sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/account-settings/account')}>
-          <Box sx={styles}>
-            <Icon icon='tabler:settings' />
-            Settings
-          </Box>
-        </MenuItemStyled>
-        <MenuItemStyled sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/account-settings/billing')}>
-          <Box sx={styles}>
-            <Icon icon='tabler:credit-card' />
-            Billing
-          </Box>
-        </MenuItemStyled>
-        <Divider sx={{ my: theme => `${theme.spacing(2)} !important` }} />
-        <MenuItemStyled sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/help-center')}>
-          <Box sx={styles}>
-            <Icon icon='tabler:lifebuoy' />
-            Help
-          </Box>
-        </MenuItemStyled>
-        <MenuItemStyled sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/faq')}>
-          <Box sx={styles}>
-            <Icon icon='tabler:info-circle' />
-            FAQ
-          </Box>
-        </MenuItemStyled>
-        <MenuItemStyled sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/pricing')}>
-          <Box sx={styles}>
-            <Icon icon='tabler:currency-dollar' />
-            Pricing
-          </Box>
-        </MenuItemStyled>
-        <Divider sx={{ my: theme => `${theme.spacing(2)} !important` }} />
         <MenuItemStyled sx={{ p: 0 }} onClick={handleLogout}>
           <Box sx={styles}>
             <Icon icon='tabler:logout' />

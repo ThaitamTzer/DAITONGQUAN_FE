@@ -38,7 +38,6 @@ export const usePostStore = create<UserPostState>(set => ({
   addPost: async (data: AddPostType) => {
     set({ loading: true })
     await postService.addPost(data)
-    mutate('GetAllPosts', async () => await postService.getAllPosts(), true)
     mutate('GetAllUserPosts')
 
     set({ loading: false })
@@ -66,25 +65,19 @@ export const usePostStore = create<UserPostState>(set => ({
     const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.reactionToPost(_id, action)
-    mutate('GetAllPosts')
-
-    // usePostStore.getState().getAllUserPosts()
     if (postId) {
-      mutate(['GetCommentByPostId', postId])
-      mutate(['GetPostById', postId])
+      mutate(['GetPostById', postId], async () => await postService.getPostById(postId), true)
+      mutate(['GetCommentByPostId', postId], async () => await postService.getCommentByPostId(postId), true)
     }
   },
   deleteReactionPost: async (_id: string) => {
     const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.deleteReactionToPost(_id)
-    mutate('GetAllPosts', async () => await postService.getAllPosts(), true)
-
     if (postId) {
       usePostStore.getState().getPostById(postId)
     } else {
       usePostStore.getState().getAllUserPosts()
-      viewAllPostStore.getState().getAllPosts()
     }
   },
   addPostToFavorite: async (_id: string | undefined) => {
@@ -148,7 +141,9 @@ export const approvePostStore = create<PostListState>(set => ({
 
 export const commentPostState = create<CommentPostState>(set => ({
   post: {} as GetPostType,
+  pageIndex: 0,
   openCommentModal: false,
+  setPageIndex: (pageIndex: number) => set({ pageIndex }),
   openCommentModalPost: (data: GetPostType | undefined) => set(() => ({ openCommentModal: true, post: data })),
   closeCommentModalPost: () => {
     set(state => ({ openCommentModal: false, post: state.post }))
@@ -156,10 +151,9 @@ export const commentPostState = create<CommentPostState>(set => ({
   commentPost: async (data: UserCommentType | undefined) => {
     set({ post: {} as GetPostType })
     await postService.commentToPost(data)
-    usePostStore.getState().getAllUserPosts()
-    mutate('GetAllPosts')
+
     mutate('GetAllUserPosts')
-    mutate('GetAllFavorite')
+    mutate('GetAllFavorite', async () => await postService.getFavoritedPosts(), true)
     const postId = postIdStore.getState().postId
     if (postId) {
       mutate(['GetCommentByPostId', postId])

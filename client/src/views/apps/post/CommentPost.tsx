@@ -34,7 +34,7 @@ const CommentPost = (props: CommentPostState) => {
   const { post, openCommentModal, closeCommentModalPost, commentPost } = props
   const [open, setOpen] = React.useState<boolean>(false)
   const [comment, setComment] = React.useState('')
-  const debouncedComment = useDebounce(comment, 500)
+  const debouncedComment = useDebounce(comment, 100)
   const [scroll] = React.useState<DialogProps['scroll']>('paper')
 
   const userData = JSON.parse(localStorage.getItem('userData') || '{}')

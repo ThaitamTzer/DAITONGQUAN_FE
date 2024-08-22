@@ -8,6 +8,7 @@ import ReportPost from 'src/views/apps/post/ReportPost'
 import EditPost from 'src/views/apps/post/EditPost'
 import useSWR from 'swr'
 import postService from 'src/service/post.service'
+import { APostSkeleton } from 'src/views/skeleton'
 
 const PostDetail = () => {
   const { openEditModal, editPost, closeEditPost, loading } = editPostState(state => state)
@@ -19,7 +20,8 @@ const PostDetail = () => {
     revalidateOnFocus: true,
     revalidateIfStale: true
   })
-  const { data: comments } = useSWR(
+
+  const { data: comments, isLoading } = useSWR(
     ['GetCommentByPostId', postId],
     () => postService.getCommentByPostId(postId as string),
     {
@@ -37,11 +39,11 @@ const PostDetail = () => {
 
   return (
     <Grid container justifyContent={'center'} pt={'0px !important'}>
-      <Grid item xs={12} md={9} sm={12} lg={7}>
+      <Grid item xs={12} md={9} sm={12} lg={8}>
         <IconButton onClick={() => router.back()} sx={{ mb: 2 }}>
           <Icon icon='ep:back' />
         </IconButton>
-        <ViewPost post={post} postId={postId as string} comments={comments} />
+        {isLoading ? <APostSkeleton /> : <ViewPost post={post} postId={postId as string} comments={comments} />}
       </Grid>
       <ReportPost />
       <EditPost
@@ -57,6 +59,6 @@ const PostDetail = () => {
 
 PostDetail.acl = {
   action: 'read',
-  subject: 'member-page'
+  subject: 'view-post'
 }
 export default PostDetail

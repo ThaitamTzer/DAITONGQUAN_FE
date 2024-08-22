@@ -1,10 +1,10 @@
 import axiosClient from 'src/lib/axios'
-import { ReportListType, ReportType } from 'src/types/apps/reportTypes'
+import { ReportPostType, ReportType } from 'src/types/apps/reportTypes'
 
 const reportService = {
   // Get all reports
   getReportList: async (): Promise<ReportType[]> => {
-    const response: ReportListType = await axiosClient.get('/report/list-report')
+    const response: ReportPostType = await axiosClient.get('/report/list-report')
 
     return response.reports
   },

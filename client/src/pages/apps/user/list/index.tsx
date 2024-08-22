@@ -62,7 +62,10 @@ const RowOptions = ({ id }: { id: string }) => {
   const [userId, setUserId] = useState<string | null>(null)
   const ability = useContext(AbilityContext)
 
-  const { data }: any = useSWR('GET_ALL_USERS', userAdminService.getAllUser)
+  const { data }: any = useSWR('GET_ALL_USERS', userAdminService.getAllUser, {
+    revalidateOnFocus: true,
+    revalidateIfStale: true
+  })
 
   const handleOpenDialog = (id: string) => {
     setUserId(id)

@@ -50,7 +50,8 @@ export type UserDataType = {
   lastname: string
   email: string
   hyperlink: any[]
-  role: string
+  role: string | any
+  fullname: string
   avatar: string
   rankID: RankID
   createdAt: string
@@ -76,7 +77,7 @@ export type ResetPassParams = {
 export type AuthValuesType = {
   loading: boolean
   logout: (value: string) => void
-  user: UserDataType
+  user: UserDataType | null
   setLoading: (value: boolean) => void
   setUser: (value: UserDataType | null) => void
   login: (params: LoginParams, errorCallback?: ErrCallbackType) => void

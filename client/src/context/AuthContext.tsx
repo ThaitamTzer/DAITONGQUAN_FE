@@ -25,7 +25,7 @@ import { JwtPayload } from 'jsonwebtoken' // Import JwtPayload from 'jsonwebtoke
 
 // ** Defaults
 const defaultProvider: AuthValuesType = {
-  user: null,
+  user: {} as UserDataType,
   loading: true,
   setUser: () => null,
   setLoading: () => Boolean,
@@ -150,7 +150,10 @@ const AuthProvider = ({ children }: Props) => {
           sessionStorage.clear()
         })
         .catch(err => {
-          if (errorCallback) errorCallback(err)
+          router.push('/login')
+          setUser(null)
+          localStorage.clear()
+          sessionStorage.clear()
         })
     } catch (error) {
       // console.error(error)

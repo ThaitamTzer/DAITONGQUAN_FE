@@ -1,17 +1,26 @@
 import axiosClient from 'src/lib/axios'
+import { INote, IncomeNoteTypes, NoteTypes } from 'src/types/apps/noteTypes'
 
 const incomesNoteService = {
   // Create new incomes note
-  createIncomesNote: async (data: any) => axiosClient.post('incomenote', data),
+  createIncomesNote: async (data: INote) => axiosClient.post('/incomenote', data),
 
   // Get all incomes note
-  getAllIncomesNote: async (): Promise<any> => axiosClient.get('incomenote'),
+  getAllIncomesNote: async (): Promise<NoteTypes[]> => {
+    const res: IncomeNoteTypes = await axiosClient.get('/incomenote')
+
+    return res.incomeNotes
+  },
 
   // Update incomes note
-  updateIncomesNote: async (incomeNoteId: string, data: any) => axiosClient.put(`incomenote/${incomeNoteId}`, data),
+  updateIncomesNote: async (incomeNoteId: string, data: INote) => axiosClient.put(`incomenote/${incomeNoteId}`, data),
 
   // Delete incomes note
-  deleteIncomesNote: async (data: any) => axiosClient.delete(`incomenote/${data}`),
+  deleteIncomesNote: async (data: string) => axiosClient.delete(`incomenote/${data}`),
+
+  // Delete many incomes note
+  deleteManyIncomeNote: async (data: { incomeNoteIds: string[] }) =>
+    axiosClient.delete(`/incomenote/deleteMany`, { data }),
 
   // Get incomes by category
   getIncomesByCategory: async (data: string) => axiosClient.get(`/incomenote/get-by-cate/${data}`),

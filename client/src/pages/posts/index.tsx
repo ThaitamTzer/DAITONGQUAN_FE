@@ -10,29 +10,61 @@ import postService from 'src/service/post.service'
 import { PostSkeleton } from 'src/views/skeleton'
 import { useEffect } from 'react'
 import { GetPostType } from 'src/types/apps/postTypes'
+import ViewAllStory from 'src/views/apps/story/allStory'
+import ViewStoryModal from 'src/views/apps/story/viewStory'
+import AddStoryModal from 'src/views/apps/story/addStoryModal'
+import useSWR from 'swr'
+import StoryService from 'src/service/story.service'
+import { useStoryStore } from 'src/store/apps/story'
 
 const Posts = () => {
-  const { post, commentPost, openCommentModal, closeCommentModalPost, openCommentModalPost } = commentPostState(
-    state => state
-  )
+  const { post, commentPost, openCommentModal, closeCommentModalPost, openCommentModalPost, setPageIndex, pageIndex } =
+    commentPostState(state => state)
+
   const reactionPost = usePostStore(state => state.reactionPost)
   const deleteReactionPost = usePostStore(state => state.deleteReactionPost)
   const { openEditModal, editPost, openEditPost, closeEditPost, loading } = editPostState(state => state)
   const deletePost = usePostStore(state => state.deletePost)
   const addPostToFavorite = usePostStore(state => state.addPostToFavorite)
   const updatePost = usePostStore(state => state.updateUserPost)
+  const setAllStories = useStoryStore(state => state.setAllStories)
 
   const fetchPosts = (pageIndex: number, previousPageData: GetPostType[] | null) => {
     if (previousPageData && previousPageData.length === 0) return null // Reached the end
 
-    return `/pagination?limit=10&page=${pageIndex + 1}`
+    const newPageIndex = pageIndex + 1
+
+    return `/pagination?limit=10&page=${newPageIndex}`
   }
 
-  const { data, error, size, setSize } = useSWRInfinite(fetchPosts, postService.getAllPostsPagination, {
-    revalidateOnFocus: false,
-    revalidateIfStale: false,
+  const { data, error, size, setSize, mutate } = useSWRInfinite(fetchPosts, postService.getAllPostsPagination, {
+    revalidateOnFocus: true,
+    revalidateIfStale: true,
+    refreshInterval: 10000,
     errorRetryCount: 2
   })
+
+  const { data: stories } = useSWR('/story/list-story', StoryService.getAllStories, {
+    onSuccess: data => {
+      setAllStories(data)
+    },
+    revalidateOnFocus: false
+  })
+
+  const handleCommentPost = async (data: any) => {
+    await commentPost(data)
+    await mutate()
+  }
+
+  const handleReaction = async (postId: string, action: string) => {
+    await reactionPost(postId, action)
+    await mutate()
+  }
+
+  const handleDeleteReactionPost = async (postId: string) => {
+    await deleteReactionPost(postId)
+    await mutate()
+  }
 
   const posts = data ? data.flat() : []
   const isLoading = !data && !error
@@ -55,6 +87,11 @@ const Posts = () => {
   return (
     <Grid container spacing={3} justifyContent={'center'}>
       <Grid item xs={12} md={9} sm={12} lg={8}>
+        <ViewAllStory stories={stories} />
+        <ViewStoryModal />
+        <AddStoryModal />
+      </Grid>
+      <Grid item xs={12} md={9} sm={12} lg={8}>
         <Card>
           <AddPost />
         </Card>
@@ -64,8 +101,8 @@ const Posts = () => {
           {isLoading ? <PostSkeleton /> : null}
           <PostsPage
             posts={posts}
-            reactionPost={reactionPost}
-            deleteReactionPost={deleteReactionPost}
+            reactionPost={handleReaction}
+            deleteReactionPost={handleDeleteReactionPost}
             openCommentModalPost={openCommentModalPost}
             addPostToFavorite={addPostToFavorite}
             openEditPost={openEditPost}
@@ -79,7 +116,7 @@ const Posts = () => {
         post={post}
         closeCommentModalPost={closeCommentModalPost}
         openCommentModal={openCommentModal}
-        commentPost={commentPost}
+        commentPost={handleCommentPost}
       />
       <EditPost
         editPost={editPost}

@@ -13,6 +13,11 @@ import EditPost from 'src/views/apps/post/EditPost'
 import AddPost from 'src/views/apps/post/AddPost'
 import useSWR from 'swr'
 import postService from 'src/service/post.service'
+import { Card } from '@mui/material'
+import ViewAllStory from 'src/views/apps/story/allStory'
+import ViewStoryModal from 'src/views/apps/story/viewStory'
+import AddStoryModal from 'src/views/apps/story/addStoryModal'
+import StoryService from 'src/service/story.service'
 
 const Profile = () => {
   const reactionPost = usePostStore(state => state.reactionPost)
@@ -31,6 +36,10 @@ const Profile = () => {
     errorRetryCount: 2
   })
 
+  const { data: stories } = useSWR('/story/list-story', StoryService.getPersonalStories, {
+    revalidateOnFocus: false
+  })
+
   return (
     <Grid container spacing={6}>
       <Grid item lg={4} md={5} xs={12}>
@@ -38,6 +47,16 @@ const Profile = () => {
       </Grid>
       <Grid item lg={8} md={7} xs={12}>
         <Grid container spacing={6}>
+          <Grid item xs={12}>
+            <ViewAllStory stories={stories} />
+            <ViewStoryModal />
+            <AddStoryModal />
+          </Grid>
+          <Grid item xs={12}>
+            <Card>
+              <AddPost />
+            </Card>
+          </Grid>
           <Grid item xs={12}>
             <Posts
               posts={posts}
@@ -48,9 +67,8 @@ const Profile = () => {
               openEditPost={openEditPost}
               updatePost={updatePost}
               deletePost={deletePost}
-            >
-              <AddPost />
-            </Posts>
+            />
+
             <CommentPost
               post={post}
               closeCommentModalPost={closeCommentModalPost}

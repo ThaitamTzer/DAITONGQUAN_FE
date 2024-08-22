@@ -40,8 +40,6 @@ const Img = styled('img')(({ theme }) => ({
 const Error401 = () => {
   const router = useRouter()
   const handleGoBack = () => {
-    window.localStorage.clear()
-    window.sessionStorage.clear()
     router.push('/')
   }
 

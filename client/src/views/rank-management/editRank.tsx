@@ -1,11 +1,21 @@
-import { Button, CardMedia, Dialog, DialogActions, DialogTitle, Grid, TextField, Typography } from '@mui/material'
+import {
+  Button,
+  CardMedia,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  Grid,
+  MenuItem,
+  TextField,
+  Typography
+} from '@mui/material'
 import { useRankStore } from 'src/store/rank'
 import DialogWithCustomCloseButton from '../components/dialog/customDialog'
 import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useTranslation } from 'react-i18next'
 import { getCreateRankValidationSchema } from 'src/configs/validationSchema'
-import { VisuallyHiddenInput } from 'src/pages/components/upload'
+import VisuallyHiddenInput from 'src/pages/components/upload'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { LoadingButton } from '@mui/lab'
@@ -16,16 +26,18 @@ interface EditRankForm {
   numberOfComment: number
   numberOfBlog: number
   numberOfLike: number
+  action: string[]
 }
 
 const EditRank = () => {
   const { t } = useTranslation()
   const openEditModal = useRankStore(state => state.openEditModal)
-  const handleClose = useRankStore(state => state.handleCloseEditModal)
+  const onCloseModal = useRankStore(state => state.handleCloseEditModal)
   const editRank = useRankStore(state => state.handleEditRank)
   const rank = useRankStore(state => state.rank)
   const selectedRank = useRankStore(state => state.selectedRank)
   const loading = useRankStore(state => state.loading)
+  const setLoading = useRankStore(state => state.setloading)
   const [previewImage, setPreviewImage] = useState<string>(rank.rankIcon)
   const [image, setImage] = useState<File | null>(null)
 
@@ -64,32 +76,47 @@ const EditRank = () => {
 
   console.log(rank)
 
+  const handleClose = () => {
+    onCloseModal()
+    reset({
+      rankName: '',
+      attendanceScore: 0,
+      numberOfComment: 0,
+      numberOfBlog: 0,
+      numberOfLike: 0,
+      action: []
+    })
+    setPreviewImage('')
+    setImage(null)
+  }
+
   const onSubmit = (data: EditRankForm) => {
-    const formData = new FormData();
+    const formData = new FormData()
     if (image) {
-      formData.append('image', image);
+      formData.append('image', image)
     }
-    formData.append('rankName', data.rankName);
-    formData.append('attendanceScore', data.attendanceScore.toString());
-    formData.append('numberOfComment', data.numberOfComment.toString());
-    formData.append('numberOfBlog', data.numberOfBlog.toString());
-    formData.append('numberOfLike', data.numberOfLike.toString());
-  
+    formData.append('rankName', data.rankName)
+    formData.append('attendanceScore', data.attendanceScore.toString())
+    formData.append('numberOfComment', data.numberOfComment.toString())
+    formData.append('numberOfBlog', data.numberOfBlog.toString())
+    formData.append('numberOfLike', data.numberOfLike.toString())
+    formData.append('action', data.action.toString())
+
     editRank(selectedRank, formData)
       .then(() => {
-        handleClose();
-        reset();
-        toast.success('Rank added successfully');
+        handleClose()
+        toast.success('Rank edit successfully')
       })
       .catch(error => {
-        setError('rankName', { type: 'manual', message: error.message });
-      });
-  };
+        setError('rankName', { type: 'manual', message: 'Rank name existed' })
+        setLoading(false)
+      })
+  }
 
   return (
     <Dialog
       open={openEditModal}
-      onClose={handleClose}
+      onClose={onCloseModal}
       fullWidth
       maxWidth='sm'
       sx={{
@@ -102,7 +129,7 @@ const EditRank = () => {
         <DialogTitle>
           <Typography variant='h3'>Edit Rank</Typography>
         </DialogTitle>
-        <DialogWithCustomCloseButton handleClose={handleClose}>
+        <DialogWithCustomCloseButton handleClose={onCloseModal}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Controller
@@ -149,28 +176,6 @@ const EditRank = () => {
             </Grid>
             <Grid item xs={12}>
               <Controller
-                name='numberOfComment'
-                control={control}
-                rules={{ required: true }}
-                defaultValue={rank.score?.numberOfComment}
-                render={({ field: { value, onChange, onBlur } }) => (
-                  <TextField
-                    size='small'
-                    fullWidth
-                    type='number'
-                    label='Number of Comment'
-                    variant='outlined'
-                    value={value}
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    error={Boolean(errors.numberOfComment)}
-                    {...(errors.numberOfComment && { helperText: String(errors.numberOfComment.message) })}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Controller
                 name='numberOfBlog'
                 control={control}
                 rules={{ required: true }}
@@ -210,6 +215,54 @@ const EditRank = () => {
                     error={Boolean(errors.numberOfLike)}
                     {...(errors.numberOfLike && { helperText: String(errors.numberOfLike.message) })}
                   />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Controller
+                name='numberOfComment'
+                control={control}
+                rules={{ required: true }}
+                defaultValue={rank.score?.numberOfComment}
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <TextField
+                    size='small'
+                    fullWidth
+                    type='number'
+                    label='Number of Comment'
+                    variant='outlined'
+                    value={value}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    error={Boolean(errors.numberOfComment)}
+                    {...(errors.numberOfComment && { helperText: String(errors.numberOfComment.message) })}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Controller
+                name='action'
+                control={control}
+                rules={{ required: false }}
+                defaultValue={rank.action?.map(action => {
+                  return action
+                })}
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <TextField
+                    size='small'
+                    fullWidth
+                    select
+                    type='string'
+                    label='Action'
+                    variant='outlined'
+                    SelectProps={{ multiple: true }}
+                    value={Array.isArray(value) ? value : []}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                  >
+                    <MenuItem value='story'>Story</MenuItem>
+                  </TextField>
                 )}
               />
             </Grid>

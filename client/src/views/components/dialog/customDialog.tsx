@@ -1,5 +1,4 @@
-import styled from '@emotion/styled'
-import { DialogContent, IconButton, IconButtonProps } from '@mui/material'
+import { DialogContent, IconButton, IconButtonProps, styled } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 
 export const CustomCloseButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({

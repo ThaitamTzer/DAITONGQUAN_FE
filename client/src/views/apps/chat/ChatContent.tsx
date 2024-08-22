@@ -54,7 +54,7 @@ const ChatContent = (props: ChatContentType) => {
     if (!mdAbove) {
       handleLeftSidebarToggle()
     }
-  }
+}
 
   const renderContent = () => {
     if (store) {
