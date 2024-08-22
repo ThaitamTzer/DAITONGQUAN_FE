@@ -6,8 +6,14 @@ export type User = {
   firstname: string
   lastname: string
   avatar: string
-  rankID: null
+  rankID: RankId
   isBlock: boolean
+}
+
+type RankId = {
+  _id: string
+  rankName: string
+  rankIcon: string
 }
 
 export type UsersType = {

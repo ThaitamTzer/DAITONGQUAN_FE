@@ -15,8 +15,10 @@ import {
   RepliesCommentState,
   SetPostId,
   ViewAllPostState,
-  viewFavoritePostState
+  viewFavoritePostState,
+  previewImage
 } from 'src/types/apps/postTypes'
+import { mutate } from 'swr'
 import postService from 'src/service/post.service'
 
 export const userDataStore = create<UserObj>(() => ({
@@ -36,24 +38,25 @@ export const usePostStore = create<UserPostState>(set => ({
   addPost: async (data: AddPostType) => {
     set({ loading: true })
     await postService.addPost(data)
-    await usePostStore.getState().getAllUserPosts()
+    mutate('GetAllPosts', async () => await postService.getAllPosts(), true)
+    mutate('GetAllUserPosts')
+
     set({ loading: false })
   },
   updateUserPost: async (_id: string, data: UpdatePostType) => {
     const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.updatePost(_id, data)
-    usePostStore.getState().getAllUserPosts()
-    viewAllPostStore.getState().getAllPosts()
+    mutate('GetAllUserPosts')
     if (postId) {
-      usePostStore.getState().getPostById(postId)
+      mutate(['GetPostById', postId])
     }
   },
   deletePost: async (_id: string) => {
     const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.deletePost(_id)
-    usePostStore.getState().getAllUserPosts()
+    mutate('GetAllPosts', async () => await postService.getAllPosts(), true)
     viewAllPostStore.getState().getAllPosts()
     if (postId) {
       usePostStore.getState().getPostById(postId)
@@ -63,18 +66,20 @@ export const usePostStore = create<UserPostState>(set => ({
     const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.reactionToPost(_id, action)
-    usePostStore.getState().getAllUserPosts()
-    viewAllPostStore.getState().getAllPosts()
+    mutate('GetAllPosts')
+
+    // usePostStore.getState().getAllUserPosts()
     if (postId) {
-      usePostStore.getState().getPostById(postId)
-      usePostStore.getState().getAllUserPosts()
-      viewAllPostStore.getState().getAllPosts()
+      mutate(['GetCommentByPostId', postId])
+      mutate(['GetPostById', postId])
     }
   },
   deleteReactionPost: async (_id: string) => {
     const postId = postIdStore.getState().postId
     set({ loading: true })
     await postService.deleteReactionToPost(_id)
+    mutate('GetAllPosts', async () => await postService.getAllPosts(), true)
+
     if (postId) {
       usePostStore.getState().getPostById(postId)
     } else {
@@ -82,11 +87,10 @@ export const usePostStore = create<UserPostState>(set => ({
       viewAllPostStore.getState().getAllPosts()
     }
   },
-  addPostToFavorite: async (_id: string) => {
+  addPostToFavorite: async (_id: string | undefined) => {
     set({ loading: true })
     await postService.addPostToFavorite(_id)
-    usePostStore.getState().getAllUserPosts()
-    viewAllPostStore.getState().getAllPosts()
+    mutate('GetAllFavorite', async () => await postService.getFavoritedPosts(), true)
   },
   getPostById: async (_id: string) => {
     set({ loading: true })
@@ -102,7 +106,22 @@ export const usePostStore = create<UserPostState>(set => ({
   deleteFavoritePost: async (_id: string) => {
     set({ loading: true })
     await postService.deletePostFromFavorite(_id)
-    viewFavoritePostStore.getState().getFavoritePosts()
+    mutate('GetAllFavorite', async () => await postService.getFavoritedPosts(), true)
+  },
+  reactionUserPost: async (_id: string, action: string) => {
+    set({ loading: true })
+    await postService.reactionToPost(_id, action)
+    mutate('GetAllUserPosts')
+  },
+  deleteReactionUserPost: async (_id: string) => {
+    set({ loading: true })
+    await postService.deleteReactionToPost(_id)
+    mutate('GetAllUserPosts')
+  },
+  rejectPost: async (_id: string) => {
+    set({ loading: true })
+    await postService.rejectPost(_id)
+    mutate('GetListPost')
   }
 }))
 
@@ -119,7 +138,7 @@ export const approvePostStore = create<PostListState>(set => ({
   approvePost: async (_id: string, isApproved: boolean) => {
     set({ loading: true })
     await postService.approvePost(_id, isApproved)
-    approvePostStore.getState().getListPost()
+    mutate('GetListPost')
   },
   openModalPost: (data: GetPostType) => set({ openModal: true, modalPost: data }),
   closeModalPost: () => {
@@ -130,27 +149,28 @@ export const approvePostStore = create<PostListState>(set => ({
 export const commentPostState = create<CommentPostState>(set => ({
   post: {} as GetPostType,
   openCommentModal: false,
-  openCommentModalPost: (data: GetPostType) => set(() => ({ openCommentModal: true, post: data })),
+  openCommentModalPost: (data: GetPostType | undefined) => set(() => ({ openCommentModal: true, post: data })),
   closeCommentModalPost: () => {
     set(state => ({ openCommentModal: false, post: state.post }))
   },
-  commentPost: async (data: UserCommentType) => {
+  commentPost: async (data: UserCommentType | undefined) => {
     set({ post: {} as GetPostType })
     await postService.commentToPost(data)
     usePostStore.getState().getAllUserPosts()
-    viewAllPostStore.getState().getAllPosts()
-    viewFavoritePostStore.getState().getFavoritePosts()
+    mutate('GetAllPosts')
+    mutate('GetAllUserPosts')
+    mutate('GetAllFavorite')
     const postId = postIdStore.getState().postId
     if (postId) {
-      usePostStore.getState().getPostById(postId)
-      usePostStore.getState().getAllComments(postId)
+      mutate(['GetCommentByPostId', postId])
+      mutate(['GetPostById', postId])
     }
   },
   handleDeleteComment: async (_id: string) => {
+    const postId = postIdStore.getState().postId
     await postService.deleteComment(_id)
-    const postId = await postIdStore.getState().postId
-    await usePostStore.getState().getPostById(postId)
-    usePostStore.getState().getAllComments(postId)
+    mutate(['GetCommentByPostId', postId])
+    mutate(['GetPostById', postId])
   }
 }))
 
@@ -174,18 +194,18 @@ export const editCommentState = create<EditCommentState>(set => ({
   updateComment: async (_id: string, comment: string) => {
     await postService.editComment(_id, comment)
     const postId = postIdStore.getState().postId
-    usePostStore.getState().getAllComments(postId)
+    mutate(['GetCommentByPostId', postId])
   },
   updateReplyComment: async (commentId: string, replyId: string, content: string) => {
     await postService.editReplyComment(commentId, replyId, content)
-    const postId = await postIdStore.getState().postId
-    usePostStore.getState().getAllComments(postId)
+    const postId = postIdStore.getState().postId
+    mutate(['GetCommentByPostId', postId])
   },
   deleteReplyComment: async (commentId: string, replyId: string) => {
+    const postId = postIdStore.getState().postId
     await postService.deleteReplyComment(commentId, replyId)
-    const postId = await postIdStore.getState().postId
     await usePostStore.getState().getPostById(postId)
-    usePostStore.getState().getAllComments(postId)
+    mutate(['GetCommentByPostId', postId])
   }
 }))
 
@@ -200,7 +220,7 @@ export const editPostState = create<EditPostState>(set => ({
   updateUserPost: async (_id: string, data: UpdatePostType) => {
     set({ loading: true })
     await postService.updatePost(_id, data)
-    await usePostStore.getState().getAllUserPosts()
+    mutate('GetAllUserPosts')
   }
 }))
 
@@ -215,10 +235,10 @@ export const repliesCommentState = create<RepliesCommentState>(set => ({
   handleOpenReplies: (comment: CommentType | RepliesComment) => set({ openReplies: true, comment: comment }),
   handleCloseReplies: () => set({ openReplies: false, comment: {} as CommentType }),
   handleReplyComment: async (_id: string, comment: string) => {
+    const postId = postIdStore.getState().postId
     await postService.replyComment(_id, comment)
-    const postId = await postIdStore.getState().postId
-    usePostStore.getState().getPostById(postId)
-    usePostStore.getState().getAllComments(postId)
+    mutate(['GetCommentByPostId', postId])
+    mutate(['GetPostById', postId])
   }
 }))
 
@@ -235,5 +255,19 @@ export const viewFavoritePostStore = create<viewFavoritePostState>(set => ({
   getFavoritePosts: async () => {
     const response = await postService.getFavoritedPosts()
     set({ posts: response })
+  },
+  reactionPost: async (_id: string, action: string) => {
+    await postService.reactionToPost(_id, action)
+    mutate('GetAllFavorite', async () => await postService.getFavoritedPosts(), true)
+  },
+  deleteReactionPost: async (_id: string) => {
+    await postService.deleteReactionToPost(_id)
+    mutate('GetAllFavorite', async () => await postService.getFavoritedPosts(), true)
   }
+}))
+
+export const previewImageStore = create<previewImage>(set => ({
+  openImage: '',
+  handleOpenImage: (image: string) => set({ openImage: image }),
+  handleCloseImage: () => set({ openImage: '' })
 }))

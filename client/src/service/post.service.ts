@@ -24,6 +24,13 @@ const postService = {
     return response
   },
 
+  //Get all posts pagination service
+  getAllPostsPagination: async (limit: number, page: number): Promise<GetPostType[]> => {
+    const response: GetPostType[] = await axiosClient.get(`/post${limit}`)
+
+    return response
+  },
+
   // Get a post by id
   getPostById: async (_id: string): Promise<GetPostType> => {
     const response: GetPostType = await axiosClient.get(`/post/${_id}`)
@@ -77,11 +84,11 @@ const postService = {
   },
 
   // Add post to favorite
-  addPostToFavorite: async (_id: string): Promise<void> => {
+  addPostToFavorite: async (_id: string | undefined): Promise<void> => {
     await axiosClient.post(`/post/favorite/${_id}`)
   },
 
-  commentToPost: async (data: UserCommentType): Promise<void> => {
+  commentToPost: async (data: UserCommentType | undefined): Promise<void> => {
     await axiosClient.post(`/comment`, data)
   },
 
@@ -156,6 +163,11 @@ const postService = {
   // Approve a post as parameter
   approvePost: async (_id: string, isApproved: boolean): Promise<void> => {
     await axiosClient.patch(`/post/approve/${_id}?isApproved=${isApproved}`)
+  },
+
+  // Reject a post
+  rejectPost: async (_id: string): Promise<void> => {
+    await axiosClient.patch(`/post/rejection/${_id}`)
   }
 }
 

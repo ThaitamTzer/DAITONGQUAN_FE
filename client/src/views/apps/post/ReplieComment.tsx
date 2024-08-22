@@ -33,9 +33,6 @@ type RepliesCommentProps = {
 
 const ReplyCommentModal = (props: RepliesCommentProps) => {
   const { openReplies, handleCloseReplies, handleReplyComment, comment } = props
-  console.log('component: ', comment)
-  const { updateComment, updateReplyComment, replyId, commentId, closeEditReplyModal, closeEditCommentModal } =
-    editCommentState(state => state)
   const [scroll] = React.useState<DialogProps['scroll']>('paper')
   const [open, setOpen] = React.useState<boolean>(false)
   const [replyComment, setReplyComment] = React.useState('')
@@ -43,7 +40,6 @@ const ReplyCommentModal = (props: RepliesCommentProps) => {
 
   const userData = JSON.parse(localStorage.getItem('userData') || '{}')
   const userLocal = userData
-  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'))
 
   const { settings } = useSettings()
   const handleClickOpen = () => {

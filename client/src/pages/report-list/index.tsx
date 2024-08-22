@@ -1,11 +1,9 @@
-import { useEffect } from 'react'
 import { useReportStore } from 'src/store/apps/posts/report'
 import DialogConfirm from 'src/views/report-list/dialog'
 import TabelReportList from 'src/views/report-list/table'
 
 export default function ReportListPage() {
   const {
-    getAllReports,
     openReportModal,
     openBlockPostModal,
     openAlreadyBlockedPostModal,
@@ -24,11 +22,6 @@ export default function ReportListPage() {
     handleRejectReport,
     reportId
   } = useReportStore()
-
-  useEffect(() => {
-    getAllReports()
-    // eslint-disable-next-line
-  }, [])
 
   return (
     <>

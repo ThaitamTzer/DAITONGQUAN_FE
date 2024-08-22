@@ -28,11 +28,13 @@ import masterAdminService from 'src/service/masterAdmin.service'
 import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { getRoleValidationSchema } from 'src/configs/validationSchema'
-import { mutate } from 'swr'
+import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'
+import toast from 'react-hot-toast'
 
 interface TableHeaderProps {
   value: string
   handleFilter: (val: string) => void
+  mutateData: () => void
 }
 
 const TableHeader = (props: TableHeaderProps) => {
@@ -84,7 +86,8 @@ const TableHeader = (props: TableHeaderProps) => {
       permissionID: selectedPermissions
     }
     masterAdminService.createRole(payload)
-    mutate('GET_ALL_ROLES')
+    toast.success(t('Thêm vai trò thành công'))
+    props.mutateData()
     handleDialogToggle()
     setSelectedPermissions([])
     reset() // add this line
@@ -102,10 +105,10 @@ const TableHeader = (props: TableHeaderProps) => {
           onChange={e => handleFilter(e.target.value)}
         />
         <Button sx={{ mb: 2 }} variant='contained' onClick={handleDialogToggle}>
-          {t('Thêm quyền hạn')}
+          {t('Thêm vai trò')}
         </Button>
       </Box>
-      <Dialog maxWidth='sm' onClose={handleDialogToggle} open={open}>
+      <Dialog maxWidth='lg' fullWidth onClose={handleDialogToggle} open={open}>
         <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
           <DialogTitle
             component='div'
@@ -116,7 +119,7 @@ const TableHeader = (props: TableHeaderProps) => {
             }}
           >
             <Typography variant='h3' sx={{ mb: 2 }}>
-              {t('Thêm quyền hạn')}
+              {t('Thêm vai trò')}
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
               <Button type='submit' variant='contained' disabled={!isValid || selectedPermissions.length === 0}>
@@ -129,8 +132,8 @@ const TableHeader = (props: TableHeaderProps) => {
           </DialogTitle>
           <DialogContent
             sx={{
-              px: theme => [`${theme.spacing(5)} !important`, `${theme.spacing(13)} !important`],
-              pb: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
+              px: theme => [`${theme.spacing(5)} !important`, `${theme.spacing(5)} !important`],
+              pb: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(5)} !important`]
             }}
           >
             <Box
@@ -138,7 +141,7 @@ const TableHeader = (props: TableHeaderProps) => {
                 mt: 4,
                 mx: 'auto',
                 width: '100%',
-                maxWidth: 480,
+                maxWidth: 1000,
                 display: 'flex',
                 alignItems: 'center',
                 flexDirection: 'column'
@@ -155,35 +158,48 @@ const TableHeader = (props: TableHeaderProps) => {
                     onChange={onChange}
                     onBlur={onBlur}
                     sx={{ mb: 3 }}
-                    label={t('Tên quyền hạn')}
-                    placeholder={t('Nhập tên quyền hạn') ?? ''}
+                    label={t('Tên vai trò')}
+                    placeholder={t('Nhập tên vai trò') ?? ''}
                     error={Boolean(errors.name)}
                     {...(errors.name && { helperText: errors.name.message })}
                   />
                 )}
               />
-              {Object.entries(permissionsBySubject).map(([subject, permissions]) => (
-                <Box key={subject} sx={{ mb: 3, width: '100%' }}>
-                  <Typography variant='h6' sx={{ mb: 1 }}>
-                    {subject}
-                  </Typography>
-                  <FormGroup>
-                    {(permissions as any[]).map(permission => (
-                      <FormControlLabel
-                        key={permission.id}
-                        control={
-                          <Checkbox
-                            checked={selectedPermissions.includes(permission.id)}
-                            onChange={handleCheckboxChange}
-                            name={String(permission.id)}
-                          />
-                        }
-                        label={permission.namePermission}
-                      />
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Permission</TableCell>
+                      <TableCell>Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {Object.entries(permissionsBySubject).map(([subject, permissions]) => (
+                      <TableRow key={subject}>
+                        <TableCell>{subject.toUpperCase()}</TableCell>
+                        {permissions.map((permission: any) => (
+                          // eslint-disable-next-line react/jsx-key
+                          <TableCell>
+                            <FormGroup row>
+                              <FormControlLabel
+                                key={permission.id}
+                                control={
+                                  <Checkbox
+                                    checked={selectedPermissions.includes(permission.id)}
+                                    onChange={handleCheckboxChange}
+                                    name={permission.id.toString()}
+                                  />
+                                }
+                                label={permission.namePermission.toUpperCase()}
+                              />
+                            </FormGroup>
+                          </TableCell>
+                        ))}
+                      </TableRow>
                     ))}
-                  </FormGroup>
-                </Box>
-              ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </Box>
           </DialogContent>
         </form>

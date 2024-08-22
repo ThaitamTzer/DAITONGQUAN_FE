@@ -1,7 +1,7 @@
 // Define types
 
-import { User } from "./userTypes"
-
+import { ViewOptionsRefined } from '@fullcalendar/core/internal'
+import { User } from './userTypes'
 
 export type ReplyComment = {
   commentId: string
@@ -41,7 +41,7 @@ export type UserReactionType = [
 
 export type UserCommentType = {
   content: string
-  postId: string
+  postId: string | undefined
 }
 
 export type GetPostType = {
@@ -129,11 +129,15 @@ export type UserPostState = {
   deletePost: (_id: string) => Promise<void>
   reactionPost: (_id: string, action: string) => Promise<void>
   deleteReactionPost: (_id: string) => Promise<void>
-  addPostToFavorite: (_id: string) => Promise<void>
+  addPostToFavorite: (_id: string | undefined) => Promise<void>
   getPostById: (_id: string) => Promise<void>
   clearPostData: () => void
   getAllComments: (postId: string) => Promise<void>
   deleteFavoritePost: (_id: string) => Promise<void>
+  reactionUserPost: (_id: string, action: string) => Promise<void>
+  deleteReactionUserPost: (_id: string) => Promise<void>
+  rejectPost: (_id: string) => Promise<void>
+  
 }
 
 export type EditPostState = {
@@ -173,10 +177,10 @@ export type PostListState = {
 }
 
 export type CommentPostState = {
-  post: GetPostType
-  commentPost: (data: UserCommentType) => Promise<void>
+  post: GetPostType | undefined
+  commentPost: (data: UserCommentType | undefined) => Promise<void>
   openCommentModal: boolean
-  openCommentModalPost?: (data: GetPostType) => void
+  openCommentModalPost?: (data: GetPostType | undefined) => void
   closeCommentModalPost: () => void
   handleDeleteComment?: (_id: string) => Promise<void>
 }
@@ -218,4 +222,12 @@ export type ViewAllPostState = {
 export type viewFavoritePostState = {
   posts: GetPostType[]
   getFavoritePosts: () => Promise<void>
+  reactionPost: (_id: string, action: string) => Promise<void>
+  deleteReactionPost: (_id: string) => Promise<void>
+}
+
+export type previewImage = {
+  openImage: string
+  handleOpenImage: (image: string) => void
+  handleCloseImage: () => void
 }

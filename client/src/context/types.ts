@@ -25,25 +25,43 @@ export type RegisterParams = {
 //   address?: string | null
 // }
 
+type RankID = {
+  _id: string
+  rankName: string
+  rankIcon: string
+}
+
+type Attendance = {
+  attendanceScore: number
+  dateAttendance: string | Date
+}
+
+type RankScore = {
+  attendance: Attendance
+  numberOfComment: number
+  numberOfBlog: number
+  numberOfLike: number
+  _id: string
+}
+
 export type UserDataType = {
-  username: string
+  _id: string
   firstname: string
   lastname: string
-  name: string
   email: string
-  nickname: string | null
-  status: string
-  gender: string | null
-  phone: string
-  description: string
-  rank: string
+  hyperlink: any[]
+  role: string
   avatar: string
-  dateOfBirth: Date | undefined
-  address?: string | null
-  role: any
-  permissionIDs: number[]
+  rankID: RankID
   createdAt: string
-  _id: string
+  address: string
+  dateOfBirth: string
+  description: string
+  dateAttendance?: string
+  gender: string
+  nickname: string
+  phone: string
+  rankScore: RankScore
 }
 
 export type ForgotPassParams = {
@@ -58,7 +76,7 @@ export type ResetPassParams = {
 export type AuthValuesType = {
   loading: boolean
   logout: (value: string) => void
-  user: UserDataType | any
+  user: UserDataType
   setLoading: (value: boolean) => void
   setUser: (value: UserDataType | null) => void
   login: (params: LoginParams, errorCallback?: ErrCallbackType) => void

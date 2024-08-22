@@ -1,113 +1,19 @@
-import {
-  Card,
-  Typography,
-  CardMedia,
-  Divider,
-  Grid,
-  IconButton,
-  Button,
-  Menu,
-  MenuItem,
-  Dialog,
-  DialogContent
-} from '@mui/material'
+import { Card, Typography, CardMedia, Divider, Grid, IconButton, Button, Menu, MenuItem } from '@mui/material'
 import { Box } from '@mui/system'
-import Avatar from 'src/@core/components/mui/avatar'
 import Icon from 'src/@core/components/icon'
 import { GetPostType, UpdatePostType } from 'src/types/apps/postTypes'
 import { useReportStore } from 'src/store/apps/posts/report'
-import React, { Fragment, useContext, useEffect } from 'react'
+import React, { Fragment, useContext, useEffect, useState } from 'react'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/router'
-import { usePostStore } from 'src/store/apps/posts'
-
-type UserPostsPageProps = {
-  posts: GetPostType[]
-  post?: GetPostType
-  children?: React.ReactNode
-  approvePost?: (_id: string, isApproved: boolean) => Promise<void>
-  reactionPost?: (_id: string, action: string) => Promise<void>
-  deleteReactionPost?: (_id: string) => Promise<void>
-  openCommentModalPost?: (data: GetPostType) => void
-  addPostToFavorite?: (_id: string) => Promise<void>
-  updatePost?: (_id: string, data: UpdatePostType) => Promise<void>
-  deletePost?: (_id: string) => Promise<void>
-  openEditPost?: (data: GetPostType) => void
-}
-
-const renderRelativeTime = (date: Date | string) => {
-  const currentDate = new Date()
-  const postDate = new Date(date)
-  const diff = currentDate.getTime() - postDate.getTime()
-  const seconds = diff / 1000
-  const minutes = seconds / 60
-  const hours = minutes / 60
-  const days = hours / 24
-  const months = days / 30
-  const years = months / 12
-
-  if (years >= 1) {
-    return `${postDate.getDate()}/${postDate.getMonth() + 1}/${postDate.getFullYear()}`
-  }
-  if (months >= 1) {
-    return `${Math.floor(months)} months ago`
-  }
-  if (days >= 1) {
-    return `${Math.floor(days)} days ago`
-  }
-  if (hours >= 1) {
-    return `${Math.floor(hours)} hours ago`
-  }
-  if (minutes >= 1) {
-    return `${Math.floor(minutes)} minutes ago`
-  }
-
-  return `${Math.floor(seconds)} seconds ago`
-}
-
-const renderHidePost = (isShow: boolean) => {
-  return !isShow ? <Icon icon='ic:outline-lock' color='GrayText' /> : null
-}
-
-const renderIsApproved = (isApproved: boolean) => {
-  return !isApproved ? <Icon icon='iconamoon:clock-thin' color='#ffcc00' /> : null
-}
-
-export const RenderUser = (userId: any, updatedAt: Date | string, isShow: boolean, isApproved: boolean) => {
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <Typography variant='subtitle1' fontWeight={'bold'} marginRight={2}>
-        {userId?.firstname} {userId?.lastname}
-      </Typography>
-      <Typography fontSize={'14px'} color='GrayText' marginRight={2} mt={0.6}>
-        {renderRelativeTime(updatedAt)}
-      </Typography>
-      {renderHidePost(isShow)}
-      {renderIsApproved(isApproved)}
-    </Box>
-  )
-}
-
-export const renderContent = (content: string) => {
-  return content ? (
-    <Typography
-      variant='body1'
-      sx={{
-        wordWrap: 'break-word',
-        whiteSpace: 'pre-wrap',
-        minWidth: '100%'
-      }}
-    >
-      {content}
-    </Typography>
-  ) : null
-}
+import { usePostStore, previewImageStore } from 'src/store/apps/posts'
+import { UserPostsPageProps } from 'src/types/postpage'
+import { ButtonApprove, ImageDialog, renderContent, RenderUser, userAvatar } from './misc/misc'
 
 const PostsPage = (props: UserPostsPageProps) => {
   const {
     posts,
-    children,
     approvePost,
     reactionPost,
     deleteReactionPost,
@@ -117,32 +23,49 @@ const PostsPage = (props: UserPostsPageProps) => {
     updatePost,
     openEditPost
   } = props
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const [openImage, setOpenImage] = React.useState<string>('')
-  const [selectedPostId, setSelectedPostId] = React.useState<string | null>(null)
-  const { handleOpenReportModal } = useReportStore(state => state)
-  const deleteFavorite = usePostStore(state => state.deleteFavoritePost)
-  const ability = useContext(AbilityContext)
-  const router = useRouter()  
 
-  const RenderButtonReaction = ({ isLiked, post }: { isLiked: boolean; post: any }) => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
+  const { handleOpenReportModal } = useReportStore(state => state)
+  const [likedPosts, setLikedPosts] = useState<{ [key: string]: boolean }>({})
+  const [reactionsCount, setReactionsCount] = useState<{ [key: string]: number }>({})
+  const deleteFavorite = usePostStore(state => state.deleteFavoritePost)
+  const { openImage, handleOpenImage, handleCloseImage } = previewImageStore()
+  const rejectPost = usePostStore(state => state.rejectPost)
+  const ability = useContext(AbilityContext)
+  const router = useRouter()
+
+  useEffect(() => {
+    const initialLikedPosts: { [key: string]: boolean } = {}
+    const initialReactionsCount: { [key: string]: number } = {}
+    posts?.forEach(post => {
+      initialLikedPosts[post._id] = post.userReaction.some(reaction => reaction.userId._id === idUser)
+      initialReactionsCount[post._id] = post.reactionCount
+    })
+    setLikedPosts(initialLikedPosts)
+    setReactionsCount(initialReactionsCount)
+  }, [posts])
+
+  const RenderButtonReaction = ({ postId }: { postId: string }) => {
+    const isLiked = likedPosts[postId]
+
     return isLiked ? (
       <Button
-        onClick={() => handleDeleteReaction(post._id)}
+        onClick={() => handleDeleteReaction(postId)}
         color='inherit'
         sx={{ borderRadius: '40%' }}
         startIcon={<Icon icon='bi:heart-fill' color='#ff0000' />}
       >
-        {post.reactionCount}
+        {reactionsCount[postId]}
       </Button>
     ) : (
       <Button
-        onClick={() => handleReaction(post._id, 'like')}
+        onClick={() => handleReaction(postId, 'like')}
         color='inherit'
         sx={{ borderRadius: '40%' }}
         startIcon={<Icon icon='bi:heart' color='error' />}
       >
-        {post.reactionCount}
+        {reactionsCount[postId]}
       </Button>
     )
   }
@@ -157,15 +80,31 @@ const PostsPage = (props: UserPostsPageProps) => {
     }
   }
 
-  const handleReaction = async (_id: string, action: string) => {
+  const handleReaction = (_id: string, action: string) => {
+    setLikedPosts(prevState => ({
+      ...prevState,
+      [_id]: true
+    }))
+    setReactionsCount(prevState => ({
+      ...prevState,
+      [_id]: (prevState[_id] ?? 0) + 1
+    }))
     if (reactionPost) {
-      await reactionPost(_id, action)
+      reactionPost(_id, action)
     }
   }
 
-  const handleDeleteReaction = async (_id: string) => {
+  const handleDeleteReaction = (_id: string) => {
+    setLikedPosts(prevState => ({
+      ...prevState,
+      [_id]: false
+    }))
+    setReactionsCount(prevState => ({
+      ...prevState,
+      [_id]: (prevState[_id] ?? 1) - 1
+    }))
     if (deleteReactionPost) {
-      await deleteReactionPost(_id)
+      deleteReactionPost(_id)
     }
   }
 
@@ -188,24 +127,13 @@ const PostsPage = (props: UserPostsPageProps) => {
       })
     }
   }
+
   const handleDeleteFavorite = async (_id: string) => {
     toast.promise(deleteFavorite(_id), {
       loading: 'Deleting from favorite...',
       success: 'Deleted from favorite!',
       error: 'Error deleting from favorite'
     })
-  }
-
-  const userAvatar = (userId: any) => {
-    return <Avatar src={userId?.avatar} alt={`${userId?.firstname} ${userId?.lastname}`} />
-  }
-
-  const handleOpenImage = (id: string) => {
-    setOpenImage(id)
-  }
-
-  const handleCloseImage = () => {
-    setOpenImage('')
   }
 
   const handleOpenEditPost = (data: GetPostType) => {
@@ -246,7 +174,6 @@ const PostsPage = (props: UserPostsPageProps) => {
 
   useEffect(() => {
     const handleRouteChange = () => {
-      // Lấy vị trí cuộn đã lưu
       const scrollPosition = localStorage.getItem('scrollPosition')
       if (scrollPosition) {
         window.scrollTo(0, parseInt(scrollPosition, 10))
@@ -254,330 +181,276 @@ const PostsPage = (props: UserPostsPageProps) => {
       }
     }
 
-    // Lắng nghe sự kiện route change
     router.events.on('routeChangeComplete', handleRouteChange)
 
-    // Cleanup khi component unmount
     return () => {
       router.events.off('routeChangeComplete', handleRouteChange)
     }
   }, [router.events])
-
-  const ImageDialog = (post: any) => {
-    // Assuming handleCloseImage is defined to set openImage to null or false
-    return (
-      <Dialog
-        fullScreen
-        key={post._id}
-        open={openImage === post._id}
-        onClose={handleCloseImage} // This will trigger on clicking outside or pressing escape
-      >
-        <DialogContent sx={{ py: '0px !important', px: '60px !important' }} onClick={() => handleCloseImage()}>
-          {/* Close Button */}
-          <IconButton
-            onClick={handleCloseImage}
-            sx={{ 
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              margin: 1
-            }}
-          >
-            <Icon icon='eva:close-fill' width={40} height={40} />
-          </IconButton>
-          {/* Image */}
-          <CardMedia
-            sx={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain'
-            }}
-            component='img'
-            image={post.postImage}
-            alt='post image'
-          />
-        </DialogContent>
-      </Dialog>
-    )
-  }
-
-  const ButtonApprove = ({ isApproved, _id }: { isApproved: boolean; _id: string }) => {
-    return !isApproved ? (
-      <Grid item xs={12}>
-        <Grid container justifyContent={'right'}>
-          <Grid item>
-            <Button
-              variant='contained'
-              color='primary'
-              startIcon={<Icon icon='ph:clock-duotone' />}
-              onClick={() => handleApprove(_id, true)}
-            >
-              Approve
-            </Button>
-          </Grid>
-        </Grid>
-      </Grid>
-    ) : (
-      <Grid item xs={12}>
-        <Grid container justifyContent={'right'}>
-          <Grid item>
-            <Button variant='contained' color='success' startIcon={<Icon icon='icon-park-twotone:check-one' />}>
-              Approved
-            </Button>
-          </Grid>
-        </Grid>
-      </Grid>
-    )
-  }
 
   const userData = JSON.parse(localStorage.getItem('userData') || '{}')
   const idUser: string = userData._id
   const currentPath = useRouter().asPath
 
   return (
-    <>
-      {ability.can('read', 'member-page') && <Card sx={{ mb: '20px' }}>{children}</Card>}
-      <Card>
-        {posts.map(post => (
-          <Fragment key={post._id}>
-            <Grid id={post._id} container sx={{ padding: 3 }}>
-              <Grid
-                item
-                lg={1}
-                md={1.5}
-                xs={2}
-                sm={1}
-                sx={{
-                  display: 'grid',
-                  placeItems: 'center',
-                  alignContent: 'space-between',
-                  marginTop: 2
-                }}
-              >
-                {userAvatar(post.userId)}
-              </Grid>
-              <Grid item lg={11} md={10} xs={10} sm={11}>
-                <Grid container spacing={2}>
-                  <Grid
-                    item
-                    xs={12}
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      marginBottom: '-6px',
-                      ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
-                    }}
-                  >
-                    {RenderUser(post.userId, post.createdAt, post.isShow, post.isApproved)}
-                    {ability.can('read', 'member-page') && (
-                      <>
-                        <IconButton onClick={event => handleMoreOptions(event, post._id)} size='small'>
-                          <Icon icon='ri:more-fill' />
-                        </IconButton>
-                        <Menu
-                          PaperProps={{
-                            sx: { width: '200px' }
-                          }}
-                          anchorEl={anchorEl}
-                          open={Boolean(anchorEl) && selectedPostId === post._id}
-                          onClose={handleCloseOptions}
-                          anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'right'
-                          }}
-                          transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right'
-                          }}
-                        >
-                          {/* Favorite */}
-                          {currentPath.includes('favorite') ? (
-                            <MenuItem
-                              onClick={() => {
-                                handleDeleteFavorite(post._id)
-                                handleCloseOptions()
-                              }}
-                            >
-                              <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                                <Typography variant='body1'>Unfavored</Typography>
-                                <Icon icon='mdi:star' color='yellow' />
-                              </Box>
-                            </MenuItem>
-                          ) : (
-                            <MenuItem
-                              onClick={() => {
-                                handleAddPostToFavorite(post._id)
-                                handleCloseOptions()
-                              }}
-                            >
-                              <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                                <Typography variant='body1'>Favorite</Typography>
-                                <Icon icon='mdi:star' color='yellow' />
-                              </Box>
-                            </MenuItem>
-                          )}
-                          {post.userId._id !== idUser && (
-                            <MenuItem
-                              onClick={() => {
-                                handleOpenReportModal(post._id)
-                                handleCloseOptions()
-                              }}
-                            >
-                              <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                                <Typography variant='body1'>Report</Typography>
-                                <Icon icon='fxemoji:loudspeaker' />
-                              </Box>
-                            </MenuItem>
-                          )}
-                          {post.userId._id === idUser && (
-                            <>
-                              {/* Edit */}
-                              <MenuItem
-                                onClick={() => {
-                                  handleOpenEditPost(post)
-                                  handleCloseOptions()
-                                }}
-                              >
-                                <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                                  <Typography variant='body1'>Edit</Typography>
-                                  <Icon icon='eva:edit-2-fill' />
-                                </Box>
-                              </MenuItem>
-                              {/* Hide Post */}
-                              {post.isShow ? (
-                                <MenuItem
-                                  onClick={() =>
-                                    handleHidePost(post._id, {
-                                      isShow: false
-                                    })
-                                  }
-                                >
-                                  <Box
-                                    width={'100%'}
-                                    display='flex'
-                                    justifyContent='space-between'
-                                    alignItems={'center'}
-                                  >
-                                    <Typography variant='body1'>Hide Post</Typography>
-                                    <Icon icon='eva:eye-off-fill' />
-                                  </Box>
-                                </MenuItem>
-                              ) : (
-                                <MenuItem
-                                  onClick={() =>
-                                    handleHidePost(post._id, {
-                                      isShow: true
-                                    })
-                                  }
-                                >
-                                  <Box
-                                    width={'100%'}
-                                    display='flex'
-                                    justifyContent='space-between'
-                                    alignItems={'center'}
-                                  >
-                                    <Typography variant='body1'>Show Post</Typography>
-                                    <Icon icon='eva:eye-fill' />
-                                  </Box>
-                                </MenuItem>
-                              )}
-                              {/* Delete Post */}
-                              <MenuItem
-                                onClick={() => {
-                                  handleDeletePost(post._id)
-                                  handleCloseOptions()
-                                }}
-                              >
-                                <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
-                                  <Typography variant='body1'>Delete post</Typography>
-                                  <Icon icon='gg:trash' color='red' />
-                                </Box>
-                              </MenuItem>
-                            </>
-                          )}
-                        </Menu>
-                      </>
-                    )}
-                  </Grid>
-                  {ability.can('read', 'member-page') ? (
-                    <Grid
-                      item
-                      xs={12}
-                      sx={{
-                        paddingTop: '0px !important',
-                        ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
-                      }}
-                      onClick={() => handleClickNavigate(post)}
-                    >
-                      {renderContent(post.content)}
-                    </Grid>
-                  ) : (
-                    <Grid
-                      item
-                      xs={12}
-                      sx={{
-                        paddingTop: '0px !important'
-                      }}
-                    >
-                      {renderContent(post.content)}
-                    </Grid>
-                  )}
-                  <Grid
-                    item
-                    xs={12}
-                    sx={{
-                      paddingTop: '7px !important',
-                      ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
-                    }}
-                  >
-                    {post.postImage ? (
-                      <Box
-                        sx={{
-                          width: 'fit-content'
+    <Card>
+      {posts?.map(post => (
+        <Fragment key={post._id}>
+          <Grid id={post._id} container sx={{ padding: 3 }}>
+            <Grid
+              item
+              lg={1}
+              md={1.5}
+              xs={2}
+              sm={1}
+              sx={{
+                display: 'grid',
+                placeItems: 'center',
+                alignContent: 'space-between',
+                marginTop: 2
+              }}
+            >
+              {userAvatar(post.userId)}
+            </Grid>
+            <Grid item lg={11} md={10} xs={10} sm={11}>
+              <Grid container spacing={2}>
+                <Grid
+                  item
+                  xs={12}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginBottom: '-6px',
+                    ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
+                  }}
+                >
+                  {RenderUser(post.userId, post.createdAt, post.isShow, post.isApproved, post.status)}
+                  {ability.can('read', 'member-page') && (
+                    <>
+                      <IconButton onClick={event => handleMoreOptions(event, post._id)} size='small'>
+                        <Icon icon='ri:more-fill' />
+                      </IconButton>
+                      <Menu
+                        PaperProps={{
+                          sx: { width: '200px' }
+                        }}
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl) && selectedPostId === post._id}
+                        onClose={handleCloseOptions}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'right'
+                        }}
+                        transformOrigin={{
+                          vertical: 'top',
+                          horizontal: 'right'
                         }}
                       >
-                        <CardMedia
-                          sx={{
-                            width: '100%',
-                            maxHeight: '430px',
-                            objectFit: 'contain',
-                            objectPosition: 'left top',
-                            borderRadius: 1
-                          }}
-                          onClick={() => handleOpenImage(post._id)}
-                          component='img'
-                          image={post.postImage}
-                          alt='post image'
-                        />
-                      </Box>
-                    ) : null}
-                    {ImageDialog(post)}
+                        {currentPath.includes('favorite') ? (
+                          <MenuItem
+                            onClick={() => {
+                              handleDeleteFavorite(post._id)
+                              handleCloseOptions()
+                            }}
+                          >
+                            <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                              <Typography variant='body1'>Unfavored</Typography>
+                              <Icon icon='mdi:star' color='yellow' />
+                            </Box>
+                          </MenuItem>
+                        ) : (
+                          <MenuItem
+                            onClick={() => {
+                              handleAddPostToFavorite(post._id)
+                              handleCloseOptions()
+                            }}
+                          >
+                            <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                              <Typography variant='body1'>Favorite</Typography>
+                              <Icon icon='mdi:star' color='yellow' />
+                            </Box>
+                          </MenuItem>
+                        )}
+                        {post.userId._id !== idUser && (
+                          <MenuItem
+                            onClick={() => {
+                              handleOpenReportModal(post._id)
+                              handleCloseOptions()
+                            }}
+                          >
+                            <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                              <Typography variant='body1'>Report</Typography>
+                              <Icon icon='fxemoji:loudspeaker' />
+                            </Box>
+                          </MenuItem>
+                        )}
+                        {post.userId._id === idUser && (
+                          <>
+                            <MenuItem
+                              onClick={() => {
+                                handleOpenEditPost(post)
+                                handleCloseOptions()
+                              }}
+                            >
+                              <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                                <Typography variant='body1'>Edit</Typography>
+                                <Icon icon='eva:edit-2-fill' />
+                              </Box>
+                            </MenuItem>
+                            {post.isShow ? (
+                              <MenuItem
+                                onClick={() =>
+                                  handleHidePost(post._id, {
+                                    isShow: false
+                                  })
+                                }
+                              >
+                                <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                                  <Typography variant='body1'>Hide Post</Typography>
+                                  <Icon icon='eva:eye-off-fill' />
+                                </Box>
+                              </MenuItem>
+                            ) : (
+                              <MenuItem
+                                onClick={() =>
+                                  handleHidePost(post._id, {
+                                    isShow: true
+                                  })
+                                }
+                              >
+                                <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                                  <Typography variant='body1'>Show Post</Typography>
+                                  <Icon icon='eva:eye-fill' />
+                                </Box>
+                              </MenuItem>
+                            )}
+                            <MenuItem
+                              onClick={() => {
+                                handleDeletePost(post._id)
+                                handleCloseOptions()
+                              }}
+                            >
+                              <Box width={'100%'} display='flex' justifyContent='space-between' alignItems={'center'}>
+                                <Typography variant='body1'>Delete post</Typography>
+                                <Icon icon='gg:trash' color='red' />
+                              </Box>
+                            </MenuItem>
+                          </>
+                        )}
+                      </Menu>
+                    </>
+                  )}
+                </Grid>
+                {ability.can('read', 'member-page') ? (
+                  <Grid
+                    item
+                    xs={12}
+                    sx={{
+                      paddingTop: '0px !important',
+                      ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
+                    }}
+                    onClick={() => handleClickNavigate(post)}
+                  >
+                    {renderContent(post.content)}
                   </Grid>
-                  {ability.can('read', 'member-page') && (
-                    <Grid item sx={{ paddingLeft: '0px !important' }}>
-                      <RenderButtonReaction
-                        isLiked={post.userReaction.some(reaction => reaction.userId._id === idUser)}
-                        post={post}
+                ) : (
+                  <Grid
+                    item
+                    xs={12}
+                    sx={{
+                      paddingTop: '0px !important'
+                    }}
+                  >
+                    {renderContent(post.content)}
+                  </Grid>
+                )}
+                <Grid
+                  item
+                  xs={12}
+                  sx={{
+                    paddingTop: '7px !important',
+                    ...(ability.can('read', 'member-page') ? { cursor: 'pointer' } : {})
+                  }}
+                >
+                  {post.postImage ? (
+                    <Box
+                      sx={{
+                        width: 'fit-content'
+                      }}
+                    >
+                      <CardMedia
+                        sx={{
+                          width: '100%',
+                          maxHeight: '430px',
+                          objectFit: 'contain',
+                          objectPosition: 'left top',
+                          borderRadius: 1
+                        }}
+                        onClick={() => handleOpenImage(post._id)}
+                        component='img'
+                        loading='eager'
+                        image={post.postImage}
+                        alt='post image'
                       />
-                      <Button
-                        onClick={() => openCommentModalPost && openCommentModalPost(post)}
-                        color='inherit'
-                        sx={{ borderRadius: '40%' }}
-                        startIcon={<Icon icon='teenyicons:chat-outline' />}
-                      >
-                        {post.commentCount}
+                    </Box>
+                  ) : null}
+                  {ImageDialog(post, openImage, handleCloseImage)}
+                </Grid>
+                {ability.can('read', 'member-page') && (
+                  <Grid item sx={{ paddingLeft: '0px !important' }}>
+                    <RenderButtonReaction postId={post._id} />
+                    <Button
+                      onClick={() => openCommentModalPost && openCommentModalPost(post)}
+                      color='inherit'
+                      sx={{ borderRadius: '40%' }}
+                      startIcon={<Icon icon='teenyicons:chat-outline' />}
+                    >
+                      {post.commentCount}
+                    </Button>
+                  </Grid>
+                )}
+                {approvePost && post.status === 'rejected' && (
+                  <Grid item xs={12}>
+                    <Grid container justifyContent={'right'}>
+                      <Button variant='contained' startIcon={<Icon icon='fluent:text-change-reject-24-regular' />}>
+                        Rejected
                       </Button>
                     </Grid>
-                  )}
-                  {ability.can('approve', 'post') && <ButtonApprove isApproved={post.isApproved} _id={post._id} />}
-                </Grid>
+                  </Grid>
+                )}
+                {post.status !== 'rejected' && (
+                  <>
+                    {approvePost && (
+                      <Grid item container direction={'row'} justifyContent={'right'} spacing={2}>
+                        <ButtonApprove
+                          isApproved={post.isApproved}
+                          _id={post._id}
+                          handleApprove={() => handleApprove(post._id, true)}
+                        />
+                        {!post.isApproved && (
+                          <Grid item xs={2}>
+                            <Grid container justifyContent={'right'}>
+                              <Button
+                                variant='contained'
+                                startIcon={<Icon icon='fluent:text-change-reject-24-regular' />}
+                                onClick={() => rejectPost(post._id)}
+                              >
+                                Reject
+                              </Button>
+                            </Grid>
+                          </Grid>
+                        )}
+                      </Grid>
+                    )}
+                  </>
+                )}
               </Grid>
             </Grid>
-            <Divider />
-          </Fragment>
-        ))}
-      </Card>
-    </>
+          </Grid>
+          <Divider />
+        </Fragment>
+      ))}
+    </Card>
   )
 }
 

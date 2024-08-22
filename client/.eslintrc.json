@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended", "prettier"],
   "rules": {
     "react/display-name": "off",
@@ -61,4 +62,7 @@
       }
     }
   ]
+=======
+  "extends": ["next/babel", "next/core-web-vitals"]
+>>>>>>> f84caf0 (first commit)
 }

@@ -28,7 +28,10 @@ import CustomAvatar from 'src/@core/components/mui/avatar'
 import { getInitials } from 'src/@core/utils/get-initials'
 import { useTheme } from '@mui/material/styles'
 import { getComparator, stableSort } from 'src/utils/sort'
-import React, { ChangeEvent } from 'react'
+import React, { ChangeEvent, useEffect } from 'react'
+import reportService from 'src/service/report.service'
+import useSWR from 'swr'
+import { SkeletonReportList } from './skeleton'
 
 export default function TableReportList() {
   const {
@@ -37,6 +40,7 @@ export default function TableReportList() {
     noData,
     reportList,
     reportId,
+    setReportList,
     handleOpenBlockPostModal,
     handleOpenBlockUserModal,
     handleOpenReportModal,
@@ -54,6 +58,21 @@ export default function TableReportList() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [order, setOrder] = React.useState<'asc' | 'desc'>('desc')
   const [orderBy, setOrderBy] = React.useState<keyof ReportType>('createdAt')
+
+  const { data: reportListData, isLoading } = useSWR('GetAllReports', () => reportService.getReportList(), {
+    revalidateOnFocus: false,
+    revalidateIfStale: false,
+    keepPreviousData: true,
+    refreshInterval: 5000,
+    errorRetryCount: 3
+  })
+
+  useEffect(() => {
+    if (reportListData) {
+      setReportList(reportListData)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reportListData])
 
   const handleMoreOptions = (event: React.MouseEvent<HTMLElement>, _id: string) => {
     setAnchorEl(event.currentTarget)
@@ -136,8 +155,6 @@ export default function TableReportList() {
   const FilterType = () => {
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = event.target.value
-      console.log('value', value)
-
       setSelectedType(value)
       handleFilterReportType(value)
     }
@@ -157,8 +174,8 @@ export default function TableReportList() {
     // Step 1: Create a unique list of names
     const uniqueNames = Array.from(
       new Set(
-        reportList.map(report => {
-          const fullName = report.postId.userId.firstname + ' ' + report.postId.userId.lastname
+        reportList?.map(report => {
+          const fullName = report.postId?.userId.firstname + ' ' + report.postId?.userId.lastname
 
           return fullName
         })
@@ -187,7 +204,7 @@ export default function TableReportList() {
   const NoDataLoGo = () => {
     return (
       <TableRow>
-        <TableCell colSpan={mobile ? 1 : 5}>
+        <TableCell colSpan={mobile ? 1 : 6}>
           <Box display='flex' flexDirection='column' justifyContent='center' alignItems='center' p={5}>
             <Typography variant='h6'>No Data</Typography>
             <CardMedia
@@ -208,7 +225,7 @@ export default function TableReportList() {
   }
 
   const reportSort = stableSort(reportList, getComparator(order, orderBy))
-  const paginatedReports = reportSort.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+  const paginatedReports = reportSort?.slice((page - 1) * rowsPerPage, page * rowsPerPage)
   console.log('paginatedReports', paginatedReports)
 
   return (
@@ -299,8 +316,13 @@ export default function TableReportList() {
             )}
           </TableHead>
           <TableBody>
+            {isLoading && (
+              <TableCell colSpan={mobile ? 1 : 6}>
+                <SkeletonReportList />
+              </TableCell>
+            )}
             {noData && <NoDataLoGo />}
-            {paginatedReports.map(report =>
+            {paginatedReports?.map(report =>
               !mobile ? (
                 <TableRow key={report._id}>
                   <TableCell>
@@ -341,7 +363,7 @@ export default function TableReportList() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Typography>{report.postId.userId.firstname + ' ' + report.postId.userId.lastname}</Typography>
+                    <Typography>{report.postId?.userId.firstname + ' ' + report.postId?.userId.lastname}</Typography>
                   </TableCell>
                   <TableCell align='right'>
                     <Chip
@@ -384,7 +406,7 @@ export default function TableReportList() {
                                   <Icon icon='weui:eyes-on-outlined' />
                                 </Box>
                               </MenuItem>
-                              {report.postId.userId.isBlock ? (
+                              {report.postId?.userId.isBlock ? (
                                 <MenuItem
                                   onClick={() => {
                                     handleOpenAlreadyBlockedUserModal()
@@ -419,7 +441,7 @@ export default function TableReportList() {
                                   </Box>
                                 </MenuItem>
                               )}
-                              {report.postId.status === 'blocked' ? (
+                              {report.postId?.status === 'blocked' ? (
                                 <MenuItem
                                   onClick={() => {
                                     handleOpenAlreadyBlockedPostModal()
@@ -577,7 +599,7 @@ export default function TableReportList() {
             </TextField>
           </Box>
           <Pagination
-            count={Math.ceil(reportList.length / rowsPerPage)}
+            count={Math.ceil(reportList?.length / rowsPerPage)}
             color='primary'
             page={page}
             onChange={handlePageChange}

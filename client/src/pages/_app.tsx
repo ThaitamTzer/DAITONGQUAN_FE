@@ -50,6 +50,8 @@ import ReactHotToast from 'src/@core/styles/libs/react-hot-toast'
 // ** Utils Imports
 import { createEmotionCache } from 'src/@core/utils/create-emotion-cache'
 
+
+
 // ** Prismjs Styles
 import 'prismjs'
 import 'prismjs/themes/prism-tomorrow.css'
@@ -63,7 +65,6 @@ import 'src/iconify-bundle/icons-bundle-react'
 
 // ** Global css styles
 import '../../styles/globals.css'
-import '../../../client/src/views/pages/categories/spends/css/colorpicker.css'
 
 // ** Extend App Props with Emotion
 type ExtendedAppProps = AppProps & {

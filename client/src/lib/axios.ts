@@ -25,57 +25,6 @@ axiosClient.interceptors.request.use(
   error => Promise.reject(error)
 )
 
-// axiosClient.interceptors.request.use(
-//   async config => {
-//     const refreshToken = localStorage.getItem(authConfig.onTokenExpiration)
-//     const access_token =
-//       localStorage.getItem(authConfig.storageTokenKeyName) ||
-//       sessionStorage.getItem(authConfig.storageTokenKeyName) ||
-//       ''
-
-//     // Check where the token is stored
-//     const isTokenInSessionStorage = sessionStorage.getItem(authConfig.storageTokenKeyName) !== null
-
-//     // Decode the token to get the expiration time
-//     const decodedToken = jwtDecode(access_token)
-
-//     // Check if the token is close to its expiration time
-//     const now = Math.floor(Date.now() / 1000) // Convert to seconds
-
-//     if (decodedToken.exp !== undefined && decodedToken.exp - now <= 15) {
-//       // 15 seconds
-//       try {
-//         const response = await axios.patch(
-//           BASE_URL + authConfig.refreshTokenEndpoint,
-//           { refreshToken },
-//           {
-//             headers: {
-//               'Content-Type': 'application/json',
-//               Authorization: `${authConfig.TOKEN_TYPE} ${access_token}`
-//             }
-//           }
-//         )
-
-//         if (response.status === 201) {
-//           localStorage.setItem(authConfig.onTokenExpiration, response.data.refreshToken)
-//           localStorage.setItem(authConfig.storageTokenKeyName, response.data.access_token)
-//           config.headers['Authorization'] = `${authConfig.TOKEN_TYPE} ${response.data.access_token}`
-//         }
-//       } catch (refreshError) {
-//         // If the token is in sessionStorage, clear all data from sessionStorage
-//         if (isTokenInSessionStorage) {
-//           sessionStorage.clear()
-//         }
-
-//         return Promise.reject(refreshError)
-//       }
-//     }
-
-//     return config
-//   },
-//   error => Promise.reject(error)
-// )
-
 axiosClient.interceptors.response.use(
   response => response.data,
   async error => {

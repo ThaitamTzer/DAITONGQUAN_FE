@@ -97,7 +97,7 @@ export type CalendarType = {
   calendarsColor: CalendarColors
   setCalendarApi: (val: any) => void
   handleLeftSidebarToggle: () => void
-  updateEvent: (event: EventTypes) => void
+  updateEvent: (event: EventType) => void
   handleAddEventSidebarToggle: () => void
   handleSelectEvent: (event: EventType) => void
 }

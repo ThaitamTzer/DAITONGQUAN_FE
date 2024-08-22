@@ -3,7 +3,6 @@ import {
   Button,
   Dialog,
   DialogActions,
-  DialogContent,
   Divider,
   Grid,
   IconButton,
@@ -19,10 +18,10 @@ import { useTheme } from '@mui/material/styles'
 import { Theme } from 'emoji-picker-react'
 import themeConfig from 'src/configs/themeConfig'
 import { useSettings } from 'src/@core/hooks/useSettings'
-import styled from '@emotion/styled'
 import { usePostStore } from 'src/store/apps/posts'
 import toast from 'react-hot-toast'
 import DialogWithCustomCloseButton from 'src/views/components/dialog/customDialog'
+import { VisuallyHiddenInput } from 'src/pages/components/upload'
 
 const AddPost = () => {
   const [openAddPostDialog, setOpenAddPostDialog] = useState<boolean>(false)
@@ -78,18 +77,6 @@ const AddPost = () => {
     }
   }
 
-  const VisuallyHiddenInput = styled('input')({
-    clip: 'rect(0 0 0 0)',
-    clipPath: 'inset(50%)',
-    height: 1,
-    overflow: 'hidden',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    whiteSpace: 'nowrap',
-    width: 1
-  })
-
   const handleAddPost = async () => {
     const data = {
       content: addPost,
@@ -104,7 +91,7 @@ const AddPost = () => {
   }
 
   return (
-    <Grid container xs={12} sx={{ padding: 3 }}>
+    <Grid container xs={12} display={'flex'} justifyContent={'space-between'} alignItems={'center'} sx={{ padding: 3 }}>
       <Grid container xs={10} sx={{ display: 'flex', alignItems: 'center' }}>
         <Grid
           item
@@ -295,21 +282,10 @@ const AddPost = () => {
           </Dialog>
         </Grid>
       </Grid>
-      <Grid
-        item
-        xs={2}
-        sx={{
-          display: 'grid',
-          placeItems: 'center',
-          alignContent: 'space-between',
-          marginTop: 2
-        }}
-      >
-        <Button fullWidth variant='outlined' onClick={openAddPostDialogHandler}>
-          <Typography variant='body2' sx={{ color: 'text.primary' }}>
-            Post
-          </Typography>
-        </Button>
+      <Grid item xs={1}>
+        <IconButton onClick={openAddPostDialogHandler}>
+          <Icon icon='material-symbols:post-add' />
+        </IconButton>
       </Grid>
     </Grid>
   )
